@@ -1,0 +1,50 @@
+* Tidal Cycles
+  You need to have [["https://tidalcycles.org/][tidalcyles]] installed, with [["http://supercollider.github.io/][SuperCollider]], to make use of this.
+
+  #+name: tidal-things
+  #+begin_src emacs-lisp :tangle yes
+    (use-package haskell-mode
+      :config
+      (use-package hindent)
+      (use-package company-ghc)
+      (use-package ghc)
+      (use-package shm)
+
+      (add-hook 'haskell-mode-hook #'hindent-mode)
+      (add-hook 'haskell-mode-hook 'structured-haskell-mode)
+      (define-key haskell-mode-map [f8] 'haskell-navigate-imports)
+      (add-to-list 'company-backends 'company-ghc)
+
+      (let ((my-cabal-path (expand-file-name "~/Library/Haskell/bin")))
+        (setenv "PATH" (concat my-cabal-path path-separator (getenv "PATH")))
+        (add-to-list 'exec-path my-cabal-path))
+      (custom-set-variables '(haskell-tags-on-save t))
+
+      (custom-set-variables
+       '(haskell-process-suggest-remove-import-lines t)
+       '(haskell-process-auto-import-loaded-modules t)
+       '(haskell-process-log t)
+       '(company-ghc-show-info t)
+       '(haskell-process-type 'cabal-repl))
+      (eval-after-load 'haskell-mode '(progn
+                                        (define-key haskell-mode-map (kbd "C-c C-l") 'haskell-process-load-or-reload)
+                                        (define-key haskell-mode-map (kbd "C-c C-z") 'haskell-interactive-switch)
+                                        (define-key haskell-mode-map (kbd "C-c C-n C-t") 'haskell-process-do-type)
+                                        (define-key haskell-mode-map (kbd "C-c C-n C-i") 'haskell-process-do-info)
+                                        (define-key haskell-mode-map (kbd "C-c C-n C-c") 'haskell-process-cabal-build)
+                                        (define-key haskell-mode-map (kbd "C-c C-n c") 'haskell-process-cabal)))
+      (eval-after-load 'haskell-cabal '(progn
+                                         (define-key haskell-cabal-mode-map (kbd "C-c C-z") 'haskell-interactive-switch)
+                                         (define-key haskell-cabal-mode-map (kbd "C-c C-k") 'haskell-interactive-mode-clear)
+                                         (define-key haskell-cabal-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
+                                         (define-key haskell-cabal-mode-map (kbd "C-c c") 'haskell-process-cabal)))
+      )
+
+    ;;    (setq load-path (cons "~/.emacs.d/private/packages/" load-path))
+    ;;    (require 'tidal)
+    (setq tidal-interpreter "/usr/local/bin/ghci")
+    (add-hook 'tidal-mode-hook
+              (lambda()
+                (transient-mark-mode nil)))
+
+  #+end_src

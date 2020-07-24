@@ -1,0 +1,24 @@
+* Ansible
+  Handy things for editing Ansible.
+  #+begin_src emacs-lisp :tangle yes
+    (use-package ansible
+      :defer t)
+    (use-package ansible-vault
+      :defer t)
+    (use-package company-ansible
+      :defer t)
+    (use-package yaml-mode
+      :defer t
+      :config
+      (add-hook 'yaml-mode-hook '(lambda () (ansible 1))))
+
+    ;; For Ansible Vault support...
+    ;; (setq ansible::vault-password-file "path/to/pwd/file")
+
+    ;; (global-set-key (kbd "C-c b") 'ansible::decrypt-buffer)
+    ;; (global-set-key (kbd "C-c g") 'ansible::encrypt-buffer)
+
+    ;; You can also set automatic {en,de}cryption by adding ansible::auto-decrypt-encrypt to ansible-hook:
+    ;; (add-hook 'ansible-hook 'ansible::auto-decrypt-encrypt)
+
+  #+end_src

@@ -1,0 +1,188 @@
+#+STARTUP: content
+
+* Magit
+  If you need one reasom to use Emacs, this is it.
+
+  https://magit.vc
+
+  If I happen upon any performance related problems, then this page has tips: https://magit.vc/manual/magit/Performance.html#Performance
+
+  #+name: magit-things
+  #+begin_src emacs-lisp :tangle yes
+    ;; Auto-commit org-mode files that have the necessary header. I.e.;
+    ;; -*- eval: (git-auto-commit-mode 1) -*-
+    (use-package git-auto-commit-mode)
+
+    (use-package magit
+      :config
+      ;; (use-package magit-lfs)
+      (use-package dash)
+
+      ;; Make Magit Great Again.
+      ;; Who am I kidding? It already is.
+      ;; Anyway, this makes it prettier, and adds some standard comment prefixes.
+      ;; From:
+      (defmacro pretty-magit (WORD ICON PROPS &optional NO-PROMPT?)
+        "Replace sanitized WORD with ICON, PROPS and by default add to prompts."
+        `(prog1
+             (add-to-list 'pretty-magit-alist
+             (list (rx bow (group ,WORD (eval (if ,NO-PROMPT? "" ":"))))
+                                                       ,ICON ',PROPS))
+           (unless ,NO-PROMPT?
+             (add-to-list 'pretty-magit-prompt (concat ,WORD ": ")))))
+
+      (setq pretty-magit-alist nil)
+      (setq pretty-magit-prompt nil)
+      (pretty-magit "Feature" ?  (:foreground "slate gray" :height 1.1))
+      (pretty-magit "Add"     ?  (:foreground "#375E97" :height 1.1))
+      (pretty-magit "Fix"     ? (:foreground "#FB6542" :height 1.1))
+      (pretty-magit "Clean"   ? (:foreground "#FFBB00" :height 1.1))
+      (pretty-magit "Docs"    ? (:foreground "#3F681C" :height 1.1))
+      (pretty-magit "Bump"    ? (:foreground "DarkGoldenrod3" :height 1.1))
+      (pretty-magit "Make"    ? (:foreground "DarkGoldenrod3" :height 1.1))
+      (pretty-magit "WIP"     ?  (:foreground "dark orange" :height 1.1))
+      (pretty-magit "master"  ? (:box t :height 1.2) t)
+      (pretty-magit "origin"  ? (:box t :height 1.2) t)
+
+      (defun add-magit-faces ()
+        "Add face properties and compose symbols for buffer from pretty-magit."
+        (interactive)
+        (with-silent-modifications
+          (--each pretty-magit-alist
+            (-let (((rgx icon props) it))
+              (save-excursion
+                (goto-char (point-min))
+                (while (search-forward-regexp rgx nil t)
+                  (compose-region
+                   (match-beginning 1) (match-end 1) icon)
+                  (when props
+                    (add-face-text-property
+                     (match-beginning 1) (match-end 1) props))))))))
+
+      (advice-add 'magit-status :after 'add-magit-faces)
+      (advice-add 'magit-refresh-buffer :after 'add-magit-faces)
+
+      ;; Make the prefixes selectable via Ivy
+      (setq use-magit-commit-prompt-p nil)
+      (defun use-magit-commit-prompt (&rest args)
+        (setq use-magit-commit-prompt-p t))
+
+      (defun magit-commit-prompt ()
+        "Magit prompt and insert commit header with faces."
+        (interactive)
+        (when use-magit-commit-prompt-p
+          (setq use-magit-commit-prompt-p nil)
+          (insert (ivy-read "Commit Type " pretty-magit-prompt
+                            :require-match t :sort t :preselect "Add: "))
+          ;; Or if you are using Helm...
+          ;; (insert (helm :sources (helm-build-sync-source "Commit Type "
+          ;;                          :candidates pretty-magit-prompt)
+          ;;               :buffer "*magit cmt prompt*"))
+          ;; I haven't tested this but should be simple to get the same behaior
+          (add-magit-faces)
+          ;; (evil-insert 1)  ; If you use evil
+          ))
+
+      (remove-hook 'git-commit-setup-hook 'with-editor-usage-message)
+      (add-hook 'git-commit-setup-hook 'magit-commit-prompt)
+      (advice-add 'magit-commit :after 'use-magit-commit-prompt)
+      )
+
+
+    (use-package gitconfig-mode)
+    (use-package gitignore-mode)
+    (use-package gitattributes-mode)
+    (use-package git-timemachine
+      :commands git-timemachine
+      :config
+      (progn
+        (bind-keys :map git-timemachine-mode
+                   ("c" . git-timemachine-show-current-revision)
+                   ("b" . git-timemachine-switch-branch))
+        (when (package-installed-p 'hydra)
+          (bind-keys :map git-timemachine-mode
+                     ("\\" . hydra-timemachine/body))
+          (defhydra hydra-timemachine (:hint nil :color blue)
+            "
+                                                                            ╭──────────────────┐
+                  Rev.   Do                                                 │ Git time-machine │
+                ╭───────────────────────────────────────────────────────────┴──────────────────╯
+                  _n_      [_w_] abbrv hash
+                  ^↑^      [_W_] full hash
+                  ^|^      [_g_] go to revision
+                  ^↓^      [_c_] show current
+                  _p_      [_b_] switch branch
+                  ^ ^      [_q_] quit
+                --------------------------------------------------------------------------------
+                    "
+            ("\\" hydra-master/body "back")
+            ("<ESC>" nil "quit")
+            ("q"       git-timemachine-quit)
+            ("n"       git-timemachine-show-next-revision)
+            ("p"       git-timemachine-show-previous-revision)
+            ("g"       git-timemachine-show-nth-revision)
+            ("c"       git-timemachine-show-current-revision)
+            ("w"       git-timemachine-kill-abbreviated-revision)
+            ("W"       git-timemachine-kill-revision)
+            ("b"       git-timemachine-switch-branch)))
+        (defadvice git-timemachine-mode (after toggle-evil activate)
+          "Turn off `evil-local-mode' when enabling `git-timemachine-mode',
+          and turn it back on when disabling `git-timemachine-mode'."
+          (evil-local-mode (if git-timemachine-mode -1 1)))))
+
+    (global-set-key (kbd "C-c g") 'magit-status)
+    (global-set-key (kbd "H-g") 'magit-status)
+
+    ;; Disable Emacs' default version control stuff for git. It's not
+    ;; necessary when Magit is doing the necessary.
+    (setq vc-handled-backends (delq 'Git vc-handled-backends))
+
+    ;; Tidy up Magit buffers when quitting the main buffer
+    ;; From: [["http://manuel-uberti.github.io/emacs/2018/02/17/magit-bury-buffer/][Exterminate Magit buffers – manu.el"]]
+    ;; (defun mu-magit-kill-buffers ()
+    ;;   "Restore window configuration and kill all Magit buffers."
+    ;;   (interactive)
+    ;;   (let ((buffers (magit-mode-get-buffers)))
+    ;;     (magit-restore-window-configuration)
+    ;;     (mapc #'kill-buffer buffers)))
+
+    ;; (bind-key "q" #'mu-magit-kill-buffers magit-status-mode-map)
+
+  #+end_src
+
+** Git-gutter
+   #+name: magit-things
+   #+begin_src emacs-lisp :tangle yes
+   (use-package git-gutter
+     :config
+     (when (window-system)
+       (use-package git-gutter-fringe))
+     (git-gutter:linum-setup)
+     (global-git-gutter-mode +1)
+
+     (setq-default indicate-buffer-boundaries 'left)
+     (setq-default indicate-empty-lines +1)
+
+     (global-set-key (kbd "C-x C-g") 'git-gutter)
+     (global-set-key (kbd "C-x v =") 'git-gutter:popup-hunk)
+
+     ;; Jump to next/previous hunk
+     (global-set-key (kbd "C-x p") 'git-gutter:previous-hunk)
+     (global-set-key (kbd "C-x n") 'git-gutter:next-hunk)
+
+     ;; Stage current hunk
+     (global-set-key (kbd "C-x v s") 'git-gutter:stage-hunk)
+
+     ;; Revert current hunk
+     (global-set-key (kbd "C-x v r") 'git-gutter:revert-hunk)
+
+     ;; Mark current hunk
+     (global-set-key (kbd "C-x v SPC") #'git-gutter:mark-hunk)
+     )
+
+   #+end_src
+** GitX integration
+   Gitlab and Github integration
+   #+begin_src emacs-lisp :tangle yes
+     (use-package ghub)
+   #+end_src

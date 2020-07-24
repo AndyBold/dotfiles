@@ -1,0 +1,209 @@
+#+OPTIONS: toc:4 h:4
+#+STARTUP: showeverything
+
+* Editing preferences
+** Editorconfig
+   #+begin_src emacs-lisp :tangle yes
+     (use-package editorconfig
+       :config
+       (editorconfig-mode 1))
+   #+end_src
+** Miscellaneous
+   Save and restore open documents between sessions.
+   #+name: editing-things
+   #+begin_src emacs-lisp :tangle yes
+   (desktop-save-mode 1)
+   #+end_src
+
+   Use spaces instead of tabs, because we're not barbarians.
+   #+name: editing-things
+   #+begin_src emacs-lisp :tangle yes
+   (setq-default indent-tabs-mode nil)
+   (setq-default tab-width 2)
+   (setq-default tab-stop-list (number-sequence 2 120 2))
+   #+end_src
+
+  Sentences end with a single space.
+  #+begin_src emacs-lisp :tangle yes
+  (setq sentence-end-double-space nil)
+  #+end_src
+
+   Sensible scrolling.
+   #+name: editing-things
+   #+begin_src emacs-lisp :tangle yes
+   (setq scroll-step            1
+         scroll-conservatively  10000)
+   #+end_src
+
+   Highlight the current line.
+   #+name: editing-things
+   #+begin_src emacs-lisp :tangle yes
+   (global-hl-line-mode 0)
+   (make-variable-buffer-local 'global-hl-line-mode)
+   #+end_src
+
+   Highlight indentation.
+   #+name: editing-things
+    #+begin_src emacs-lisp :tangle yes
+     (use-package highlight-indent-guides)
+    #+end_src
+
+   Shorter yes or no answers.
+   #+name: editing-things
+   #+begin_src emacs-lisp :tangle yes
+   (defalias 'yes-or-no-p 'y-or-n-p)
+   #+end_src
+
+   Turn off auto revert messages.
+   #+name: editing-things
+   #+begin_src emacs-lisp :tangle yes
+   (setq auto-revert-verbose nil)
+   #+end_src
+
+   Enable auto-complete with company.
+   #+name: editing-things
+   #+begin_src emacs-lisp :tangle yes
+     (use-package company)
+   #+end_src
+** Line wrapping
+   We don't need to hard wrap. The editor can soft wrap for us.
+   #+name: editing-things
+   #+begin_src emacs-lisp :tangle yes
+       (remove-hook 'text-mode-hook 'turn-on-auto-fill)
+       (add-hook 'text-mode-hook 'visual-line-mode 1)
+       (add-hook 'prog-mode-hook
+                 (lambda()
+                   (toggle-truncate-lines t)
+                   (outline-minor-mode t)))
+
+
+       ;; Indicate visual-line-mode wrap.
+       (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
+       (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
+
+       ;; but be gentle
+       (defface visual-line-wrap-face
+         '((t (:foreground "gray")))
+         "Face for visual line indicators.")
+       (set-fringe-bitmap-face 'left-curly-arrow 'visual-line-wrap-face)
+       (set-fringe-bitmap-face 'right-curly-arrow 'visual-line-wrap-face)
+   #+end_src
+** Parenthesis
+   A first class character, in Emacs.
+*** Smartparens
+    #+begin_src emacs-lisp :tangle yes
+      (use-package smartparens
+        :config
+        (require 'smartparens-config)
+        (smartparens-global-mode))
+    #+end_src
+*** Paredit
+    #+name: editing-things
+    #+begin_src emacs-lisp :tangle yes
+      (use-package paredit
+        :config
+        (use-package paredit-menu))
+    #+end_src
+*** Rainbow delimiters
+    #+name: editing-things
+    #+begin_src emacs-lisp :tangle yes
+      (use-package rainbow-delimiters
+        :config
+        (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
+
+        ;; Pastels...
+        (set-face-attribute 'rainbow-delimiters-depth-1-face nil
+                            :foreground "#78c5d6")
+        (set-face-attribute 'rainbow-delimiters-depth-2-face nil
+                            :foreground "#bf62a6")
+        (set-face-attribute 'rainbow-delimiters-depth-3-face nil
+                            :foreground "#459ba8")
+        (set-face-attribute 'rainbow-delimiters-depth-4-face nil
+                            :foreground "#e868a2")
+        (set-face-attribute 'rainbow-delimiters-depth-5-face nil
+                            :foreground "#79c267")
+        (set-face-attribute 'rainbow-delimiters-depth-6-face nil
+                            :foreground "#f28c33")
+        (set-face-attribute 'rainbow-delimiters-depth-7-face nil
+                            :foreground "#c5d647")
+        (set-face-attribute 'rainbow-delimiters-depth-8-face nil
+                            :foreground "#f5d63d")
+        (set-face-attribute 'rainbow-delimiters-depth-9-face nil
+                            :foreground "#78c5d6")
+
+        ;; Make unmatched parens stand out more
+        (set-face-attribute 'rainbow-delimiters-unmatched-face nil
+                            :foreground 'unspecified
+                            :inherit 'show-paren-mismatch
+                            :strike-through t)
+
+        ;; Automagically add closing parens
+        (electric-pair-mode 1)
+
+        )
+  #+end_src
+
+** Move to beginning of the line
+   A much better way of moving to the start of the line.
+
+   From: [[http://emacsredux.com/blog/2013/05/22/smarter-navigation-to-the-beginning-of-a-line/][Smarter navigation to the beginning of a line - Emacs Redux]]
+
+   #+begin_src emacs-lisp :tangle yes
+     (defun ab/smarter-move-beginning-of-line (arg)
+       "Move point back to indentation of beginning of line.
+
+     Move point to the first non-whitespace character on this line.
+     If point is already there, move to the beginning of the line.
+     Effectively toggle between the first non-whitespace character and
+     the beginning of the line.
+
+     If ARG is not nil or 1, move forward ARG - 1 lines first.  If
+     point reaches the beginning or end of the buffer, stop there."
+       (interactive "^p")
+       (setq arg (or arg 1))
+
+       ;; Move lines first
+       (when (/= arg 1)
+         (let ((line-move-visual nil))
+           (forward-line (1- arg))))
+
+       (let ((orig-point (point)))
+         (back-to-indentation)
+         (when (= orig-point (point))
+           (move-beginning-of-line 1))))
+
+     ;; remap C-a to `smarter-move-beginning-of-line'
+     (global-set-key [remap move-beginning-of-line]
+                     'ab/smarter-move-beginning-of-line)
+   #+end_src
+*** TODO Get this working in orgmode. Orgmode seems to reimplement it's own =C-a= behaviour.
+** Multiple Cursors
+   This promises to be similar to Sublime Text's multiple-select-and-edit feature. I need to practice using it.
+
+   #+begin_src emacs-lisp :tangle yes
+     (use-package multiple-cursors
+       :bind
+       (("C-c m t" . mc/mark-all-like-this)
+        ("C-c m m" . mc/mark-all-like-this-dwim)
+        ("C-c m l" . mc/edit-lines)
+        ("C-c m e" . mc/edit-ends-of-lines)
+        ("C-c m a" . mc/edit-beginnings-of-lines)
+        ("C-c m n" . mc/mark-next-like-this)
+        ("C-c m p" . mc/mark-previous-like-this)
+        ("C-c m s" . mc/mark-sgml-tag-pair)
+        ("C-c m d" . mc/mark-all-like-this-in-defun)))
+     (use-package phi-search)
+     (use-package phi-search-mc
+       :config (phi-search-mc/setup-keys))
+     (use-package mc-extras
+       :config (define-key mc/keymap (kbd "C-. =") 'mc/compare-chars))
+   #+end_src
+* Programming
+  Some things that are specifically related to programming. Coding. Writing words that make computers do things.
+** SmartScan
+   Use =M-n= and =M-p= to move to the next or previous occurrence of the symbol under the cursor.
+
+   #+begin_src emacs-lisp :tangle yes
+     (use-package smartscan
+       :config (global-smartscan-mode t))
+   #+end_src

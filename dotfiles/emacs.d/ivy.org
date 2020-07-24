@@ -1,0 +1,101 @@
+#+OPTIONS: toc:4 h:4
+#+STARTUP: showeverything
+
+* Ivy
+** The core.
+   Install and configure core Ivy things.
+
+   #+name: ivy-things
+   #+begin_src emacs-lisp :tangle yes
+   (use-package ivy
+     :diminish (ivy-mode . "")
+     :bind
+       (:map ivy-mode-map
+       ("C-'" . ivy-avy))
+     :config
+       (ivy-mode 1)
+       ;; add ‘recentf-mode’ and bookmarks to ‘ivy-switch-buffer’.
+       (setq ivy-use-virtual-buffers t)
+       (setq enable-recursive-minibuffers t)
+
+       ;; number of result lines to display
+       (setq ivy-height 10)
+
+       ;; Count candidates
+       (setq ivy-count-format "(%d/%d) ")
+
+       ;; no regexp by default
+       (setq ivy-initial-inputs-alist nil)
+
+       ;; configure regexp engine.
+       (setq ivy-re-builders-alist
+ 	       ;; allow input not in order
+         '((t   . ivy--regex-ignore-order)))
+
+       (global-set-key (kbd "C-c C-r") 'ivy-resume)
+
+       ;; Allow virtual buffers when saving window layouts
+       (setq ivy-use-virtual-buffers t)
+
+       ;; Set up a shortcut to call layout saving
+       (global-set-key (kbd "C-c C-w") 'ivy-push-view)
+
+       ;; New in 0.10.0: Use C-p to choose your input. I.e., if creating file `foo`, override the selcted `foobar`.
+       (setq ivy-use-selectable-prompt t)
+       )
+  #+end_src
+
+** Icons
+   Next, make things pretty. all-the-icons enables UTF graphics in various useful places. Ivy builds on this to embed icons in places like file listings.
+
+   If things look funky, or icons don't display at all, then it's probably because the necessary fonts are missing. Try =M-x all-the-icons-install-fonts= to fix that.
+
+   #+name: ivy-things
+   #+begin_src emacs-lisp :tangle yes
+   (use-package all-the-icons-ivy
+     :config
+     (all-the-icons-ivy-setup))
+   #+end_src
+
+** Better basics
+   Counsel replaces some core Emacs functions with Ivy based alternatives. They're better, so they're here.
+
+   #+name: ivy-things
+   #+begin_src emacs-lisp :tangle yes
+   (use-package counsel
+     :config
+     (use-package counsel-bbdb)
+     (use-package counsel-projectile)
+     (global-set-key (kbd "M-x")      'counsel-M-x)
+     (global-set-key (kbd "C-x C-f")  'counsel-find-file)
+     (global-set-key (kbd "<f1> f")   'counsel-describe-function)
+     (global-set-key (kbd "<f1> v")   'counsel-describe-variable)
+     (global-set-key (kbd "<f1> l")   'counsel-find-library)
+     (global-set-key (kbd "<f2> i")   'counsel-info-lookup-symbol)
+     (global-set-key (kbd "<f2> u")   'counsel-unicode-char)
+
+     (projectile-mode)
+     ;; (counsel-projectile-on)
+     (setq projectile-completion-system 'ivy)
+     )
+   #+end_src
+
+** Swiper
+   Swiper replaces isearch. It's nicer.
+
+   #+name: ivy-things
+   #+begin_src emacs-lisp :tangle yes
+   (use-package swiper
+     :config
+     (global-set-key "\C-s" 'swiper))
+   #+end_src
+
+** org-clock-counsel
+   This library provides the following two commands via Ivy interface:
+
+    - `counsel-org-clock-context' displays the currently clocked task as well as its ancestors and descendants. If there is no currently running clock, this function behaves the same as `counsel-org-clock-history'.
+    - `counsel-org-clock-history' displays entries in `org-clock-history' variable.
+
+   #+begin_src emacs-lisp :tangle yes
+   (use-package counsel-org-clock)
+   #+end_src

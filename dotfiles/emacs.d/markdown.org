@@ -1,0 +1,17 @@
+* Markdown
+  Markdown related settings
+  #+begin_src emacs-lisp :tangle yes
+    (use-package markdown-mode
+      :config
+      (use-package markdown-mode+
+        :defer t)
+      (use-package markdown-toc
+        :defer t)
+
+      (add-to-list 'auto-mode-alist '("\\.markdown\\'"  . markdown-mode))
+      (add-to-list 'auto-mode-alist '("\\.md\\'"        . markdown-mode))
+      (add-hook 'markdown-mode-hook (lambda () (auto-fill-mode t)))
+      (add-hook 'markdown-mode-hook 'flyspell-mode)
+      )
+
+  #+end_src

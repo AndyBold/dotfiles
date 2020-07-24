@@ -1,0 +1,489 @@
+#+TITLE: Andy Bold's Emacs configuration
+#+OPTIONS: toc:4 h:4
+#+STARTUP: showeverything
+
+* Startup Config
+Do some things that we want to happen before everything else.
+** Disable noisy startup things
+   Disable startup messages, the splash screen, and the scratch message.
+
+    #+name: disable-annoyances
+    #+begin_src emacs-lisp :tangle yes
+    (setq inhibit-startup-message t)
+    (setq inhibit-splash-screen t)
+    (setq initial-scratch-message nil)
+    (setq initial-buffer-choice "~/")
+    #+end_src
+** [[crypto.org][Crypto]]
+   Configure crypto things early so they're ready to use.
+   #+name: crypto-things
+   #+begin_src emacs-lisp :tangle yes
+   (org-babel-load-file
+     (expand-file-name "crypto.org"
+                       user-emacs-directory))
+   #+end_src
+
+** Custom settings location
+   By default, these go into `init.el`. I'd rather keep them somewhere else to avoid overloading `init.el`.
+   #+begin_src emacs-lisp :tangle yes
+   (setq custom-file "~/.emacs.d/custom-settings.el")
+   #+end_src
+
+** Personal info
+   (setq user-full-name "Andy Bold"
+      user-mail-address "andy@120technology.co.uk")
+
+** Always install packages if they aren't already installed.
+  Or, in other words, if you start with nothing but `init.el` and the `.org` files, the various `use-package` calls will bootstrap the environment for you. (Subject to any caveats noted in [[../README.md][README.md]])
+   #+name: package-management
+   #+begin_src emacs-lisp :tangle yes
+   (setq use-package-always-ensure t)
+   #+end_src
+
+** Security
+*** Check TLS
+     This block /should/ confirm that SSL is configured correctly, but security things is OSX (Sierra and later) /may/ be breaking them. (I think the Keychain certificate store is Doing Something.) So, for now, this is disabled until some future wet and windy Sunday afternoon.
+     #+name: check-tls
+     #+begin_src emacs-lisp :tangle yes
+     ;; ;; Configure Emacs to check TLS certs properly against our root certs file
+     ;; (defvar tls-checktrust)
+     ;; (defvar gnutls-verify-error)
+     ;; (setq tls-checktrust 'nil)
+     ;; (setq gnutls-verify-error t)
+
+     ;; ;; Override tls-program to do something that works
+     ;; (let ((trustfile "/etc/ssl/cert.pem"))
+     ;;   (defvar tls-program)
+     ;;   (defvar gnutls-trustfiles)
+     ;;   (setq tls-program
+     ;;         `(,(format "gnutls-cli --x509cafile %s -p %%p %%h" trustfile)
+     ;;           ,(format "openssl s_client -connect %%h:%%p -CAfile %s -no_ssl2 -ign_eof" trustfile)))
+     ;;   (setq gnutls-trustfiles (list trustfile)))
+
+     ;; ;; Check if we have any bad root certs defined
+     ;; (let ((bad-hosts
+     ;;        (loop for band
+     ;;              in `("https://wrong.host.badssl.com/"
+     ;;                   "https://self-signed.badssl.com/")
+     ;;              if (condition-case e
+     ;;                     (url-retrieve
+     ;;                      bad (lambda (retrieved) t))
+     ;;                   (error nil))
+     ;;              collect bad)))
+     ;;   (if bad-hosts
+     ;;       (error (format "tls misconfigured; retrieved %s ok"
+     ;;                      bad-hosts))
+     ;;     (url-retrieve "https://badssl.com"
+     ;;                   (lambda (retrieved) t))))
+     #+end_src
+*** Load secrets
+    This file is encrypted with my GPG key and holds various things that I do not want in a publicly accessible git repo.
+    #+name: load-secrets
+    #+begin_src emacs-lisp :tangle yes
+    (org-babel-load-file "~/.emacs.d/secrets.org.gpg")
+    #+end_src
+
+    If you want to create your own, then the contents will look something like this:
+
+    #+BEGIN_EXAMPLE
+    # -*- mode:org; epa-file-encrypt-to: ("your_unique@gpg.email.address"); eval: (git-auto-commit-mode 1) -*-
+
+    #+begin_src emacs-lisp :tangle yes
+    (setq ab/secret-thing "my_seekrit")
+    #+end_src
+    #+END_EXAMPLE
+** Paradox package manaager
+   Paradox is much nicer than the standard package manager. Launch it with =paradox-list-packages=. It can automatically star Github repos for packages that you download. To do that it uses your Github token. You should probably keep that in some kind of GPG encrypted org file. /coughs and points up to the previous section./
+   #+name: enable-paradox
+   #+begin_src emacs-lisp :tangle yes
+     (use-package paradox
+       :defer t)
+     (setq paradox-github-token ab/paradox-github-token)
+   #+end_src
+** Fix PATH issues
+   #+begin_src emacs-lisp :tangle yes
+     (use-package exec-path-from-shell
+       :config
+       (when (memq window-system '(mac ns x))
+         (setq exec-path-from-shell-check-startup-files nil)
+         (exec-path-from-shell-initialize))
+       (exec-path-from-shell-copy-env "SSH_AGENT_PID")
+       (exec-path-from-shell-copy-env "SSH_AUTH_SOCK")
+     )
+   #+end_src
+** UTF
+   We like UTF. So much better than the old days, when it were all 127 characters of pure ASCII. 눈_눈
+
+   We do this this fairly early in that start up so that it's good and ready before Other Stuff Happens.
+
+   Sourced from [[https://zhangda.wordpress.com/2016/02/15/configurations-for-beautifying-emacs-org-mode/]]
+
+   #+name: do-utf-things
+   #+begin_src emacs-lisp :tangle yes
+
+   ;; disable CJK coding/encoding (Chinese/Japanese/Korean characters)
+   (setq utf-translate-cjk-mode nil)
+
+   (set-language-environment 'utf-8)
+   (setq locale-coding-system 'utf-8)
+
+   ;; set the default encoding system
+   (prefer-coding-system 'utf-8)
+   (setq default-file-name-coding-system 'utf-8)
+   (set-default-coding-systems 'utf-8)
+   (set-terminal-coding-system 'utf-8)
+   (set-keyboard-coding-system 'utf-8)
+   ;; backwards compatibility as default-buffer-file-coding-system
+   ;; is deprecated in 23.2.
+   (if (boundp buffer-file-coding-system)
+     (setq buffer-file-coding-system 'utf-8)
+     (setq buffer-file-coding-system 'utf-8))
+
+   ;; Treat clipboard input as UTF-8 string first; compound text next, etc.
+   (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
+
+   #+end_src
+** Compilation things
+   elc. No, not a 90s band, compiled lisp. It can be nice. It can also be nasty. The auto-compile package makes sure that .el is compiled to .elc in all the right places.
+   #+begin_src emacs-lisp :tangle yes
+     (use-package auto-compile
+       :defer t
+       :config
+       (require 'auto-compile)
+       (auto-compile-on-load-mode)
+       (auto-compile-on-save-mode)
+       )
+   #+end_src
+** Better Defaults
+   Last, and far from least, for this section is to fire up [[https://github.com/technomancy/better-defaults][better-defaults]]. Why these things are not default config in emacs is beyond me.
+   #+begin_src emacs-lisp :tangle yes
+     (use-package better-defaults
+       :defer t)
+     (require 'better-defaults)
+   #+end_src
+** Which-key
+   This is great. Hit the first sequence in a chord, like C-x, and all the things that you can do next are listed in the minibuffer if you pause for a short while.
+   #+begin_src emacs-lisp :tangle yes
+     (use-package which-key
+       :defer t
+       :config
+       (which-key-mode))
+   #+end_src
+** [[file.org][File handling]]
+   Tweak how we interact with files. Define a central place for backups and autosaves. etc.
+   #+name: file-things
+   #+begin_src emacs-lisp :tangle yes
+   (org-babel-load-file
+     (expand-file-name "file.org"
+                       user-emacs-directory))
+
+   #+end_src
+** [[search.org][File searching]]
+   #+name: file-things
+   #+begin_src emacs-lisp :tangle yes
+   (org-babel-load-file
+     (expand-file-name "search.org"
+                       user-emacs-directory))
+   #+end_src
+** [[file:treemacs.org][Treemacs]]
+    #+begin_src emacs-lisp :tangle yes
+   (org-babel-load-file
+     (expand-file-name "treemacs.org"
+                       user-emacs-directory))
+   #+end_src
+** Window and workspace management
+   Use Winum to enable window-switching-by-numbers.
+
+   #+begin_src emacs-lisp :tangle yes
+     (use-package winum
+       :defer t
+       :init
+       (setq winum-keymap
+             (let ((map (make-sparse-keymap)))
+               (define-key map (kbd "C-`") 'winum-select-window-by-number)
+               (define-key map (kbd "M-0") 'winum-select-window-0-or-10)
+               (define-key map (kbd "M-1") 'winum-select-window-1)
+               (define-key map (kbd "M-2") 'winum-select-window-2)
+               (define-key map (kbd "M-3") 'winum-select-window-3)
+               (define-key map (kbd "M-4") 'winum-select-window-4)
+               (define-key map (kbd "M-5") 'winum-select-window-5)
+               (define-key map (kbd "M-6") 'winum-select-window-6)
+               (define-key map (kbd "M-7") 'winum-select-window-7)
+               (define-key map (kbd "M-8") 'winum-select-window-8)
+               map))
+       :config
+       (require 'winum)
+
+       (winum-mode)
+       )
+   #+end_src
+
+   And enable winner mode, so enable window configuration history. So hitting `C-c <Left>` would go to previous window settings. Handy when I mix up my horizontals and my verticals, or if Emacs default split doesn't work for me.
+
+   #+begin_src emacs-lisp :tangle yes
+         ;; Enable winner-mode for better window management
+         (winner-mode)
+
+   #+end_src
+
+   Use eyebrowse mode to save and switch between window arrangements. I need to use this more than I currently do.
+
+   #+begin_src emacs-lisp :tangle yes
+     ;; Install and use eyebrowse for workspace management
+     (use-package eyebrowse
+       :defer t
+       :diminish eyebrowse-mode
+       :config (progn
+                 (dotimes (n 10)
+                   (global-unset-key (kbd (format "C-%d" n)))
+                   )
+                 (define-key eyebrowse-mode-map (kbd "C-1") 'eyebrowse-switch-to-window-config-1)
+                 (define-key eyebrowse-mode-map (kbd "C-2") 'eyebrowse-switch-to-window-config-2)
+                 (define-key eyebrowse-mode-map (kbd "C-3") 'eyebrowse-switch-to-window-config-3)
+                 (define-key eyebrowse-mode-map (kbd "C-4") 'eyebrowse-switch-to-window-config-4)
+                 (setq eyebrowse-new-workspace t)))
+
+   #+end_src
+** [[osx.org][OSX settings]]
+   #+begin_src emacs-lisp :tangle yes
+     (org-babel-load-file
+      (expand-file-name "osx.org"
+                        user-emacs-directory))
+
+   #+end_src
+* Package configuration
+  Now to the meat and bones.
+** [[ivy.org][Ivy]]
+   [[https://github.com/abo-abo][abo-abo]] makes some amazing tools for Emacs. Ivy is a generic completion backend for Emacs, and it forms the base for Swiper, a fabulous search tool that pops up in all kinds of places. It also supports Counsel, a set of Ivy-enhanced replacements for common Emacs commands.
+   #+name: ivy-things
+   #+begin_src emacs-lisp :tangle yes
+   (org-babel-load-file
+     (expand-file-name "ivy.org"
+                       user-emacs-directory))
+   #+end_src
+** [[org.org][Orgmode]]
+   This is the tool that made me learn Emacs about a decade ago. It's changed a lot, for the better.
+   #+name: org-things
+   #+begin_src emacs-lisp :tangle yes
+   (org-babel-load-file
+     (expand-file-name "org.org"
+                       user-emacs-directory))
+   #+end_src
+
+** Taskpaper
+   #+begin_src emacs-lisp :tangle yes
+   (org-babel-load-file
+     (expand-file-name "taskpaper.org"
+                       user-emacs-directory))
+   #+end_src
+** [[hyperbole.org][Hyperbole]]
+   #+name: hyperbole-things
+   #+begin_src emacs-lisp :tangle yes
+   (org-babel-load-file
+     (expand-file-name "hyperbole.org"
+                       user-emacs-directory))
+   #+end_src
+** [[magit.org][Magit]]
+   #+name: magit-things
+   #+begin_src emacs-lisp :tangle yes
+   (org-babel-load-file
+     (expand-file-name "magit.org"
+                       user-emacs-directory))
+   #+end_src
+** [[dired.org][Dired]]
+   #+name: dired-things
+   #+begin_src emacs-lisp :tangle yes
+   (org-babel-load-file
+     (expand-file-name "dired.org"
+                       user-emacs-directory))
+   #+end_src
+** [[tidal.org][Tidal]]
+   Tidal cycles is a live coding environment for sound production, and great for noodling around with.
+   #+name: tidal-things
+   #+begin_src emacs-lisp :tangle yes
+   (org-babel-load-file
+     (expand-file-name "tidal.org"
+                       user-emacs-directory))
+   #+end_src
+** [[undo.org][Undo]]
+   Mostly installing undo-tree. OK. Only installing undo-tree.
+   #+name: undo-things
+   #+begin_src emacs-lisp :tangle yes
+   (org-babel-load-file
+     (expand-file-name "undo.org"
+                       user-emacs-directory))
+   #+end_src
+** [[jira.org][Jira]]
+   Everywhere I go, Jira is there waiting for me. Might as well make it easy to use.
+   #+begin_src emacs-lisp :tangle yes
+     (org-babel-load-file
+      (expand-file-name "jira.org"
+                        user-emacs-directory))
+
+   #+end_src
+** [[file+sys:mu4e.org][Mu4e]]
+   Not using, so disabled.
+   #+begin_src emacs-lisp :tangle no
+     (org-babel-load-file
+      (expand-file-name "mu4e.org"
+                        user-emacs-directory))
+
+   #+end_src
+
+** [[theme.org][Look and feel]]
+   #+begin_src emacs-lisp :tangle yes
+     (org-babel-load-file
+      (expand-file-name "theme.org"
+                        user-emacs-directory))
+
+   #+end_src
+** Editing
+*** [[editing.org][Core editing tweaks]]
+    This is a collection of various general editing things. Some of them probably sit better in other places but, for now, they're here.
+    #+begin_src emacs-lisp :tangle yes
+      (org-babel-load-file
+       (expand-file-name "editing.org"
+                         user-emacs-directory))
+    #+end_src
+*** [[flyspell.org][Flyspell]]
+    #+begin_src emacs-lisp :tangle yes
+      (org-babel-load-file
+       (expand-file-name "flyspell.org"
+                         user-emacs-directory))
+    #+end_src
+*** [[snippets.org][Snippets]]
+    Shortcuts. Who doesn't love 'em?
+    #+name: editing-things
+    #+begin_src emacs-lisp :tangle yes
+    (org-babel-load-file
+      (expand-file-name "snippets.org"
+                        user-emacs-directory))
+    #+end_src
+*** [[markdown.org][Markdown]]
+    #+begin_src emacs-lisp :tangle yes
+      (org-babel-load-file
+       (expand-file-name "markdown.org"
+                         user-emacs-directory))
+    #+end_src
+*** [[blog.org][Blogging]]
+    #+begin_src emacs-lisp :tangle yes
+      (org-babel-load-file
+       (expand-file-name "blog.org"
+                         user-emacs-directory))
+    #+end_src
+** Programming
+*** [[flycheck.org][Flycheck]]
+    The syntax checking engine.
+    #+begin_src emacs-lisp :tangle yes
+    (org-babel-load-file
+    (expand-file-name "flycheck.org"
+    user-emacs-directory))
+    #+end_src
+*** [[ansible.org][Ansible]]
+    #+begin_src emacs-lisp :tangle yes
+      (org-babel-load-file
+       (expand-file-name "ansible.org"
+                         user-emacs-directory))
+    #+end_src
+*** [[cmake.org][Cmake]]
+    #+begin_src emacs-lisp :tangle yes
+      (org-babel-load-file
+       (expand-file-name "cmake.org"
+                         user-emacs-directory))
+    #+end_src
+*** [[python.org][Python]]
+    #+begin_src emacs-lisp :tangle yes
+      (org-babel-load-file
+       (expand-file-name "python.org"
+                         user-emacs-directory))
+    #+end_src
+*** [[lua.org][Lua]]
+    #+begin_src emacs-lisp :tangle yes
+      (org-babel-load-file
+       (expand-file-name "lua.org"
+                         user-emacs-directory))
+    #+end_src
+*** [[pho.org][PHP]]
+    #+begin_src emacs-lisp :tangle yes
+      (org-babel-load-file
+       (expand-file-name "php.org"
+                         user-emacs-directory))
+    #+end_src
+*** [[restclient.org][Restclient]]
+    #+begin_src emacs-lisp :tangle yes
+      (org-babel-load-file
+       (expand-file-name "restclient.org"
+                         user-emacs-directory))
+    #+end_src
+*** [[web.org][Web]]
+    #+begin_src emacs-lisp :tangle yes
+      (org-babel-load-file
+       (expand-file-name "web.org"
+                         user-emacs-directory))
+    #+end_src
+*** [[ruby.org][Ruby]]
+    #+begin_src emacs-lisp :tangle yes
+      (org-babel-load-file
+       (expand-file-name "ruby.org"
+                         user-emacs-directory))
+    #+end_src
+*** [[groovy.org][Groovy]]
+    Or not.
+    #+begin_src emacs-lisp :tangle yes
+      (org-babel-load-file
+       (expand-file-name "groovy.org"
+                         user-emacs-directory))
+
+    #+end_src
+*** [[hashicorp.org][Hashicorp]]
+    #+begin_src emacs-lisp :tangle yes
+      (org-babel-load-file
+       (expand-file-name "hashicorp.org"
+                         user-emacs-directory))
+
+    #+end_src
+*** [[json.org][Json]]
+    #+begin_src emacs-lisp :tangle yes
+      (org-babel-load-file
+       (expand-file-name "json.org"
+                         user-emacs-directory))
+
+    #+end_src
+** [[shell.org][Shell]]
+   A step too far for me. I like my shells z-shaped.
+   #+begin_src emacs-lisp :tangle yes
+     (org-babel-load-file
+      (expand-file-name "shell.org"
+                        user-emacs-directory))
+
+   #+end_src
+** [[diagrams.org][Diagramming]]
+   #+begin_src emacs-lisp :tangle yes
+   (org-babel-load-file
+   (expand-file-name "diagrams.org"
+   user-emacs-directory))
+
+   #+end_src
+** Utilities
+*** [[docker.org][Docker]]
+    #+begin_src emacs-lisp :tangle yes
+      (org-babel-load-file
+       (expand-file-name "docker.org"
+                         user-emacs-directory))
+    #+end_src
+*** [[vagrant.org][Vagrant]]
+    #+begin_src emacs-lisp :tangle yes
+      (org-babel-load-file
+       (expand-file-name "vagrant.org"
+                         user-emacs-directory))
+
+    #+end_src
+** [[keybindings.org][Key bindings]]
+   Call this at the end, in case we're referring to something that we're loading elsewhere.
+   #+begin_src emacs-lisp :tangle yes
+     (org-babel-load-file
+      (expand-file-name "keybindings.org"
+                        user-emacs-directory))
+
+   #+end_src
+** [[hydra.org][Hydra]]

@@ -1,0 +1,6 @@
+[default]
+region = eu-west-1
+output = json
+
+[profile {{@@ env['one20tech_aws_profile_name'] @@}}]
+region = eu-west-1

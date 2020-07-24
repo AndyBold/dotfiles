@@ -1,0 +1,117 @@
+# Ignore files that don't translate well across different devices.
+*~
+*.elc
+recentf
+persp-confs/persp-auto-save
+persp-auto-save
+smex-items
+persp-confs/*
+elfeed/*
+*/projectile-bookmarks.eld
+./ido.last
+
+# Standard things that Emacs installs that we don't want
+tutorial
+url
+../../RSS/
+
+
+# More things that don't work well when shared across devices
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+auto-save-list
+tramp
+.\#*
+
+
+## More temporary interstitial things copied from https://www.gitignore.io/api/emacs
+# Org-mode
+.org-id-locations
+
+# flymake-mode
+*_flymake.*
+
+# eshell files
+/eshell/history
+/eshell/lastdir
+
+# elpa packages
+/elpa/
+
+# reftex files
+*.rel
+
+# AUCTeX auto folder
+/auto/
+
+# cask packages
+.cask/
+dist/
+
+# Flycheck
+flycheck_*.el
+
+# server auth directory
+/server/
+
+# projectiles files
+.projectile
+projectile-bookmarks.eld
+
+# directory configuration
+.dir-locals.el
+
+
+## Orgmode config customisations.
+
+# secrets.org.el is generated from secrets.org.gpg, and is not a file that I want
+# to be in any repository.
+secrets.org.el
+
+# We don't need the .el versions of the .org file
+/ansible.el
+/blog.el
+/cmake.el
+/crypto.el
+/diagrams.el
+/dired.el
+/docker.el
+/editing.el
+/file.el
+/flycheck.el
+/flyspell.el
+/groovy.el
+/hashicorp.el
+/history
+/hyperbole.el
+/ivy.el
+/jira.el
+/json.el
+/keybindings.el
+/lua.el
+/magit.el
+/markdown.el
+/org.el
+/osx.el
+/php.el
+/python.el
+/restclient.el
+/ruby.el
+/settings.el
+/shell.el
+/snippets.el
+/theme.el
+/tidal.el
+/undo.el
+/vagrant.el
+/web.el
+/search.el
+/bookmarks
+/network-security.data
+/.mc-lists.el
+/request/curl-cookie-jar
+/org-clock-save.el
+*.dotdropbak
+/custom-settings.el
+/ac-comphist.dat

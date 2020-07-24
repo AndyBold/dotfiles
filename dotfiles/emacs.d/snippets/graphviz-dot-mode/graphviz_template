@@ -1,0 +1,18 @@
+# key: graphviz_template
+# name: graphviz_template
+# --
+
+digraph G {
+    graph [	fontname = "Helvetica-Oblique",
+    		fontsize = 36,
+		    label = "\n\n\n\nCreated: `(format-time-string "%Y-%m-%d %A")`",
+        size = "6,6" ];
+
+    node [ shape = rect,
+           color = white,
+           style = filledm
+           fontname = "Helvetica"];
+
+
+    $0
+}

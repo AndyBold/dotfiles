@@ -1,0 +1,166 @@
+#+STARTUP: content
+
+* Theming and other look-and-feel preferences
+** Theme
+*** Monokai
+    One Theme To Rule Them All. I like Monokai.
+
+    (Trying out other themes so this is not currently tangled.)
+    #+begin_src emacs-lisp :tangle no
+      (use-package monokai-theme
+        :init
+
+        :config
+
+        ;; My hand-rolled dimmed-Monokai.
+        (setq ;; foreground and background
+         monokai-foreground     "#C5C8C6"
+         monokai-background     "#292929"
+         ;; highlights and comments
+         monokai-comments       "#6D6G66"
+         monokai-emphasis       "#CC555A"
+         monokai-highlight      "#666666"
+         monokai-highlight-alt  "#398280"
+         monokai-highlight-line "#333333"
+         monokai-line-number    "#9A9B99"
+
+         ;; colours
+         monokai-blue           "#60bAB1"
+         monokai-cyan           "#68A0B3"
+         monokai-green          "#98A84B"
+         monokai-gray           "#9A9B99"
+         monokai-violet         "#FF2C7A"
+         monokai-red            "#CC555A"
+         monokai-orange         "#D08442"
+         monokai-yellow         "#D0B344"))
+      #+end_src
+
+*** Zenburn
+    #+begin_src emacs-lisp :tangle no
+      (use-package zenburn-theme)
+    #+end_src
+*** Doom themes
+    #+begin_src emacs-lisp :tangle no
+      (use-package doom-themes
+        :config
+        (doom-themes-neotree-config)
+        (doom-themes-org-config))
+    #+end_src
+*** Nord
+    #+begin_src emacs-lisp :tangle yes
+    (use-package nord-theme)
+    #+end_src
+** Set the typeface
+   #+begin_src emacs-lisp :tangle yes
+     ;; Set the default font/typeface
+     (cond ((or (string-equal (system-name) "iMac\.local")
+                (string-equal (system-name) "Aurelius")
+                (string-equal (system-name) "Chandelier")
+                (string-equal (system-name) "Groot\.local"))
+            (set-face-attribute 'default nil :font "Iosevka" :height 130)
+            (set-face-attribute 'fixed-pitch nil :family "Iosevka")            ))
+   #+end_src
+** Load the theme du jour
+   #+begin_src emacs-lisp :tangle yes
+      ;; (load-theme 'zenburn t)
+      (load-theme 'nord t)
+      ;; (load-theme 'monokai t)
+      ;; (load-theme 'leuven t)      ;; Probably the best orgmode theme, but too light for me
+      ;; (load-theme 'adwaita t)     ;; A very nice dark theme with blue accents
+      ;; (load-theme 'misterioso t)  ;; Another very nice dark theme with a minty flavour
+
+     ;; (custom-theme-set-faces
+     ;;  'leuven
+     ;;  `(org-block-begin-line ((t (:underline "#A7A6AA" :height 0.8))))
+     ;;  `(org-block-end-line ((t (:overline "#A7A6AA" :height 0.8))))
+     ;; )
+
+     ;; Poet theme
+
+     ;; Enable variable pitch mode
+;;     (add-hook 'text-mode-hook
+;;               (lambda ()
+;;                 (variable-pitch-mode 1)))
+
+;;     (set-face-attribute 'default nil :family "Iosevka" :height 150)
+;;     (set-face-attribute 'fixed-pitch nil :family "Iosevka" :height 0.9)
+
+;;     (use-package olivetti
+;;       :config
+;;       (setq olivetti-body-width 120)
+;;       (olivetti-mode 1))
+;;     (use-package poet-theme)
+  #+end_src
+** All-the-icons
+   [[https://github.com/domtronn/all-the-icons.el][GitHub - domtronn/all-the-icons.el: A utility package to collect various Icon Fonts and propertize them within Emacs.]]
+
+   We also configure spaceline to use icons for a few things too.
+
+   #+begin_src emacs-lisp :tangle yes
+     (use-package all-the-icons
+       :config
+       (use-package all-the-icons-dired)
+       )
+
+     (use-package spaceline-all-the-icons
+       :after spaceline
+       :config
+       (spaceline-all-the-icons-theme)
+       ;; (spaceline-toggle-version-control-on)
+       ;; (spaceline-toggle-process-on)
+       ;; (spaceline-toggle-selection-info-on)
+       ;; (spaceline-all-the-icons--setup-anzu)            ;; Enable anzu searching
+       ;; (spaceline-all-the-icons--setup-package-updates) ;; Enable package update indicator
+       ;; (spaceline-all-the-icons--setup-paradox)         ;; Enable Paradox mode line
+       ;; (spaceline-all-the-icons--setup-neotreekbd)         ;; Enable Neotree mode line
+       )
+   #+end_src
+
+** Modeline
+   Spaceline, based on the Spacemacs modeline, is very handy.
+   #+begin_src emacs-lisp :tangle yes
+     (use-package spaceline)
+     (require 'spaceline-config)
+     (spaceline-spacemacs-theme)
+   #+end_src
+
+   Use =diminish= to keep the modeline sensible. I could also do this via various =use-package= and =:diminish= declarations,
+   but these all ended up here during a general tidy-up.
+   #+begin_src emacs-lisp :tangle yes
+     (use-package diminish
+       :config
+       (diminish 'org-fancy-priorities-mode "OrgFP")
+       (diminish 'editorconfig-mode)
+       (diminish 'buffer-face-mode)
+       (diminish 'undo-tree-mode "UT")
+       (diminish 'git-gutter-mode "GG")
+       (diminish 'ivy-mode)
+       (diminish 'org-autolist-mode)
+       (diminish 'visual-line-mode "VL"))
+   #+end_src
+
+   Use =minions= to make modeline modes clickable.
+   #+begin_src emacs-lisp :tangle yes
+     (use-package minions
+       :config
+       (minions-mode 1)
+       (spaceline-define-segment minor-modes
+         (if (bound-and-true-p minions-mode)
+             (format-mode-line minions-mode-line-modes)
+           (spaceline-minor-modes-default))))
+   #+end_src
+** Dashboard
+   Use the [[https://github.com/rakanalh/emacs-dashboard][Dashboard package]] extracted from Spacemacs.
+   #+begin_src emacs-lisp :tangle yes
+     (use-package dashboard
+       :config
+       (dashboard-setup-startup-hook)
+       (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
+       (setq dashboard-startup-banner 'logo)
+       (setq dashboard-items '((recents   . 5)
+                               (bookmarks . 5)
+                               (projects  . 5)
+                               (agenda    . 5)
+                               (registers . 5)))
+       )
+   #+end_src

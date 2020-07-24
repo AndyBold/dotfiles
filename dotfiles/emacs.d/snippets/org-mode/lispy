@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: lispy
+# key: lispy
+# --
+emacs-lisp :tangle yes
+   (org-babel-load-file
+     (expand-file-name "$0"
+                       user-emacs-directory))

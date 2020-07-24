@@ -1,0 +1,8 @@
+#+STARTUP: content
+
+* Searching
+  Various things to do with searching for things.
+** Configure Ivy to use 'ag', the Silver Searcher.
+   #+begin_src emacs-lisp :tangle yes
+     (global-set-key (kbd "C-c s") 'counsel-ag)
+   #+end_src

@@ -1,0 +1,6 @@
+* Ruby
+  Ruby support is built in, so we're just adding Puppet support here.
+  #+begin_src emacs-lisp :tangle yes
+    (use-package puppet-mode
+      :defer t)
+  #+end_src

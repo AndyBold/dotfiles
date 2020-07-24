@@ -1,0 +1,243 @@
+#+STARTUP: content
+
+* Mu4e
+  mu for Emacs. A port of an old bit of config mostly stolen from https://vxlabs.com/2017/02/07/mu4e-0-9-18-e-mailing-with-emacs-now-even-better/
+
+** Initialisation
+   I get `mu4e` with `mu` via Homebrew with:
+   #+begin_src shell :tangle no
+   brew install mu --with-emacs
+   #+end_src
+
+  #+begin_src emacs-lisp :tangle yes
+    (add-to-list 'load-path "/usr/local/share/emacs/site-lisp/mu4e")
+    (require 'mu4e)
+
+    (setq mu4e-mu-binary "/usr/local/bin/mu")
+
+    ;; path to our Maildir directory
+    (setq mu4e-maildir "~/mbsync")
+
+  #+end_src
+
+** Formatting
+
+
+   I want my format=flowed thank you very much mu4e sets up visual-line-mode and also fill (M-q) to do the right thing each paragraph is a single long line; at sending, emacs will add the special line continuation characters.
+
+   #+begin_src emacs-lisp :tangle yes
+     (setq mu4e-compose-format-flowed t)
+   #+end_src
+
+   Every new email composition gets its own frame (window)
+   #+begin_src emacs-lisp :tangle yes
+     (setq mu4e-compose-in-new-frame t)
+   #+end_src
+
+   Give me ISO(ish) format date-time stamps in the header list
+   #+begin_src emacs-lisp :tangle yes
+     (setq mu4e-headers-date-format "%Y-%m-%d %H:%M")
+   #+end_src
+
+   Show full addresses in view message (instead of just names). Toggle per name with M-RET.
+   #+begin_src emacs-lisp :tangle yes
+     (setq mu4e-view-show-addresses 't)
+   #+end_src
+
+   The headers to show in the headers list -- a pair of a field and its width, with `nil' meaning 'unlimited'. (Better only use that for the last field.)
+
+   These are the defaults:
+   #+begin_src emacs-lisp :tangle yes
+     (setq mu4e-headers-fields
+           '( (:date          .  25)    ;; alternatively, use :human-date
+              (:flags         .   6)
+              (:from          .  22)
+              (:subject       .  nil))) ;; alternatively, use :thread-subject
+   #+end_src
+
+** My email addresses
+   #+begin_src emacs-lisp :tangle yes
+     (setq mu4e-user-mail-address-list '( "{{@@ env['mbsync_user1'] @@}}"
+                                          "{{@@ env['mbsync_user2'] @@}}"
+                                          "{{@@ env['mbsync_user3'] @@}}"))
+
+   #+end_src
+
+** IMAP syncing
+
+   Program to get mail; alternatives are 'fetchmail', 'getmail', isync or your own shellscript. Called when 'U' is pressed in main view.
+
+  If you get your mail without an explicit command, use "true" for the command (this is the default). When I press U in the main view, or C-c C-u elsewhere, this command is called, followed by the mu indexer.
+
+  #+begin_src emacs-lisp :tangle yes
+    (setq mu4e-get-mail-command "/usr/local/bin/mbsync -a")
+  #+end_src
+
+** Mail sending
+
+   Choose account label to feed msmtp -a option based on From header in Message buffer; This function must be added to message-send-mail-hook for on-the-fly change of From address before sending message since message-send-mail-hook is processed right before sending message.
+
+   #+begin_src emacs-lisp :tangle yes
+     (defun choose-msmtp-account ()
+       (if (message-mail-p)
+           (save-excursion
+             (let*
+                 ((from (save-restriction
+                          (message-narrow-to-headers)
+                          (message-fetch-field "from")))
+                  (account
+                   (cond
+                    ((string-match "{{@@ env['mbsync_user1'] @@}}" from) "{{@@ env['mbsync_account_name1'] @@}}")
+                    ((string-match "{{@@ env['mbsync_user2'] @@}}" from) "{{@@ env['mbsync_account_name2'] @@}}")
+                    ((string-match "{{@@ env['mbsync_user3'] @@}}" from) "{{@@ env['mbsync_account_name3'] @@}}"))))
+               (setq message-sendmail-extra-arguments (list '"-a" account))))))
+
+     (setq message-send-mail-function 'message-send-mail-with-sendmail
+           sendmail-program "/usr/local/bin/msmtp")
+
+   #+end_src
+
+   Use the correct account context when sending mail based on the from header.
+
+   #+begin_src emacs-lisp :tangle yes
+     (setq message-sendmail-envelope-from 'header)
+
+     (add-hook 'message-send-mail-hook 'choose-msmtp-account)
+   #+end_src
+
+** Behaviours
+  Don't keep message buffers around.
+  #+begin_src emacs-lisp :tangle yes
+    (setq message-kill-buffer-on-exit t)
+  #+end_src
+
+  Don't confirm on quit.
+  #+begin_src emacs-lisp :tangle yes
+    (setq mu4e-confirm-quit nil)
+  #+end_src
+
+  # Stop mu4e making things inconsistent for mbsync
+  #+begin_src emacs-lisp :tangle yes
+    (setq mu4e-change-filenames-when-moving t)
+  #+end_src
+** Contexts
+
+   #+begin_src emacs-lisp :tangle yes
+     (setq mu4e-contexts
+
+           `(
+{%@@ if profile == "Titan" @@%}
+             ,(make-mu4e-context
+                :name "h {{@@ env['mbsync_account_name1'] @@}}"
+                :enter-func (lambda () (mu4e-message "Enter {{@@ env['mbsync_user1'] @@}} context"))
+                :leave-func (lambda () (mu4e-message "Leave {{@@ env['mbsync_user1'] @@}} context"))
+                ;; we match based on the contact-fields of the message (that we are replying to)
+                ;; https://www.djcbsoftware.nl/code/mu/mu4e/What-are-contexts.html#What-are-contexts
+                :match-func (lambda (msg)
+                              (when msg
+                                (mu4e-message-contact-field-matches msg
+                                                                    :to "{{@@ env['mbsync_user1'] @@}}")))
+                :vars '( (user-mail-address      . "{{@@ env['mbsync_user1'] @@}}" )
+                         (user-full-name         . "{{@@ env['mbsync_fullname1'] @@}}" )
+                         (mu4e-sent-folder       . "/{{@@ env['mbsync_account_name1'] @@}}/Sent Messages")
+                         (mu4e-drafts-folder     . "/{{@@ env['mbsync_account_name1'] @@}}/Drafts")
+                         (mu4e-trash-folder      . "/{{@@ env['mbsync_account_name1'] @@}}/Deleted Messages")
+                         (mu4e-refile-folder     . "/{{@@ env['mbsync_account_name1'] @@}}/Archive")
+                         (mu4e-maildir-shortcuts .
+                                                 (("/{{@@ env['mbsync_account_name1'] @@}}/Archive"       . ?a)
+                                                  ("/{{@@ env['mbsync_account_name1'] @@}}/INBOX"         . ?i)
+                                                  ("/{{@@ env['mbsync_account_name1'] @@}}/Sent Messages" . ?s)))
+                         (mu4e-compose-signature .
+                                                 (concat
+                                                  "--\n"
+                                                  "{{@@ env['mbsync_fullname1'] @@}}\n"
+                                                  ))))
+              ,(make-mu4e-context
+                :name "o {{@@ env['mbsync_account_name2'] @@}}"
+                :enter-func (lambda () (mu4e-message "Enter {{@@ env['mbsync_user2'] @@}} context"))
+                ;; no leave-func
+                ;; we match based on the contact-fields of the message
+                :match-func (lambda (msg)
+                              (when msg
+                                (mu4e-message-contact-field-matches msg
+                                                                    :to "{{@@ env['mbsync_user2'] @@}}")))
+                :vars '( (user-mail-address       . "{{@@ env['mbsync_user2'] @@}}" )
+                         (user-full-name          . "{{@@ env['mbsync_fullname2'] @@}}" )
+                         (mu4e-sent-folder        . "/{{@@ env['mbsync_account_name2'] @@}}/Sent Items")
+                         (mu4e-drafts-folder      . "/{{@@ env['mbsync_account_name2'] @@}}/Drafts")
+                         (mu4e-trash-folder       . "/{{@@ env['mbsync_account_name2'] @@}}/Deleted Items")
+                         (mu4e-refile-folder      . "/{{@@ env['mbsync_account_name2'] @@}}/Archive")
+                         (mu4e-maildir-shortcuts  .
+                                                  (("/{{@@ env['mbsync_account_name2'] @@}}/Archive"     . ?a)
+                                                   ("/{{@@ env['mbsync_account_name2'] @@}}/INBOX"       . ?i)
+                                                   ("/{{@@ env['mbsync_account_name2'] @@}}/Sent Items"  . ?s)))
+                         (mu4e-compose-signature  .
+                                                  (concat
+                                                   "--\n"
+                                                   "{{@@ env['mbsync_fullname2'] @@}}\n"
+                                                   "{{@@ env['business_name'] @@}}\n"
+                                                   "{{@@ env['my_mobile'] @@}}\n"
+                                                   "{{@@ env['business_website'] @@}}\n\n"
+                                                   "{{@@ env['business_name'] @@}} is registered in England and Wales reference: {{@@ env['business_company_number'] @@}}\n\n"
+                                                   "{{@@ env['business_name'] @@}}, {{@@ env['business_address_line1'] @@}}, {{@@ env['business_address_line2'] @@}}, {{@@ env['business_address_line3'] @@}}, {{@@ env['business_address_line4'] @@}}, {{@@ env['business_postcode'] @@}} \n"
+                                                   ))))
+
+{%@@ endif @@%}
+
+              ,(make-mu4e-context
+                :name "w {{@@ env['mbsync_account_name3'] @@}}"
+                :enter-func (lambda () (mu4e-message "Enter {{@@ env['mbsync_user3'] @@}} context"))
+                ;; no leave-func
+                ;; we match based on the contact-fields of the message
+                :match-func (lambda (msg)
+                              (when msg
+                                (mu4e-message-contact-field-matches msg
+                                                                    :to "{{@@ env['mbsync_user3'] @@}}")))
+                :vars '( (user-mail-address       . "{{@@ env['mbsync_user3'] @@}}" )
+                         (user-full-name          . "{{@@ env['mbsync_fullname3'] @@}}" )
+                         (mu4e-sent-folder        . "/{{@@ env['mbsync_account_name3'] @@}}/[Gmail]/Sent Mail")
+                         (mu4e-drafts-folder      . "/{{@@ env['mbsync_account_name3'] @@}}/[Gmail]/Drafts")
+                         (mu4e-trash-folder       . "/{{@@ env['mbsync_account_name3'] @@}}/[Gmail]/Trash")
+                         (mu4e-refile-folder      . "/{{@@ env['mbsync_account_name3'] @@}}/[Gmail]/All Mail")
+                         (mu4e-maildir-shortcuts  .
+                                                  (("/{{@@ env['mbsync_account_name3'] @@}}/[Gmail]/All Mail"     . ?a)
+                                                   ("/{{@@ env['mbsync_account_name3'] @@}}/INBOX"                . ?i)
+                                                   ("/{{@@ env['mbsync_account_name3'] @@}}/[Gmail]/Sent Mail"    . ?s)))
+                         (mu4e-compose-signature  .
+                                                  (concat
+                                                   "--\n"
+                                                   "{{@@ env['my_formal_name'] @@}}\n"
+                                                   "{{@@ env['my_mobile'] @@}}\n"
+                                                   ))))
+              ))
+
+
+     ;; Start with the first (default) context;
+     (setq mu4e-context-policy 'pick-first)
+
+     ;; compose with the current context if no context matches;
+     (setq mu4e-compose-context-policy nil)
+
+   #+end_src
+
+** Search Bookmarks
+  These are the standard mu4e search bookmarks. I've only added the fourth one to pull up flagged emails in my inbox. I sometimes use this to shortlist emails I need to get around to ASAP.
+  #+begin_src emacs-lisp :tangle yes
+    (setq mu4e-bookmarks
+          `( ,(make-mu4e-bookmark
+               :name  "Unread messages"
+               :query "flag:unread AND NOT flag:trashed"
+               :key ?u)
+             ,(make-mu4e-bookmark
+               :name "Today's messages"
+               :query "date:today..now"
+               :key ?t)
+             ,(make-mu4e-bookmark
+               :name "Last 7 days"
+               :query "date:7d..now"
+               :key ?w)
+             ,(make-mu4e-bookmark
+               :name "Flagged in INBOX"
+               :query "maildir:\"/INBOX\" and flag:flagged"
+               :key ?f)))
+  #+end_src

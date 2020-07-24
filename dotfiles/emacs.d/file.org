@@ -1,0 +1,96 @@
+#+OPTIONS: toc:4 h:4
+#+STARTUP: showeverything
+
+* Files
+** Auto-revert
+  Automatically revert buffers that are updated outside Emacs. e.g., org files updated by git pull.
+
+  #+begin_src emacs-lisp :tangle yes
+  (global-auto-revert-mode t)
+  #+end_src
+
+** Whitespace
+  Remove trailing whitespace when saving.
+
+  #+begin_src emacs-lisp :tangle yes
+  (add-hook 'before-save-hook 'delete-trailing-whitespace)
+  #+end_src
+
+** File locations
+*** Backup files
+   Put backup files in a consistent place.
+   - Makes it easier to find them after a mid-edit crash
+   - Stops them from crudding up git directories
+
+   #+begin_src emacs-lisp :tangle yes
+   (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
+   #+end_src
+
+*** Auto-saves
+   And the same for autosaves.
+
+   #+begin_src emacs-lisp :tangle yes
+   (defvar autosave-dir (expand-file-name "~/.emacs.d/autosave/"))
+   (setq auto-save-list-file-prefix autosave-dir)
+   (setq auto-save-file-name-transforms `((".*" ,autosave-dir t)))
+   #+end_src
+
+*** Tramp
+   And, in case I get round to using it, configure tramp to use the same
+
+   #+begin_src emacs-lisp :tangle yes
+   (setq tramp-backup-directory-alist backup-directory-alist)
+   (setq tramp-auto-save-directory autosave-dir)
+   (setq tramp-default-method "ssh")
+   #+end_src
+
+** Use registers to quickly jump to common files
+  From: [[http://pages.sachachua.com/.emacs.d/Sacha.html#org332b2fd][Sacha Chua's Emacs configuration]]
+
+  Jump to a register using =C-x r j= followed by the letter.
+
+  #+begin_src emacs-lisp :tangle yes
+    (defvar ab/refile-map (make-sparse-keymap))
+
+    (defmacro ab/defshortcut (key file)
+      `(progn
+         (set-register ,key (cons 'file ,file))
+         (define-key ab/refile-map
+           (char-to-string ,key)
+           (lambda (prefix)
+             (interactive "p")
+             (let ((org-refile-targets '(((,file) :maxlevel . 6)))
+                   (current-prefix-arg (or current-prefix-arg '(4))))
+               (call-interactively 'org-refile))))))
+
+
+    (define-key ab/refile-map "," 'ab/org-refile-to-previous-in-file)
+
+    (ab/defshortcut ?i "~/.emacs.d/settings.org")
+    (ab/defshortcut ?p "~/Dropbox/org/personal.org")
+    (ab/defshortcut ?w "~/Dropbox/org/120technology.org")
+    (ab/defshortcut ?c "~/Dropbox/org/clients")
+    (ab/defshortcut ?r "~/Dropbox/org/refile.org")
+    (ab/defshortcut ?t "~/Dropbox/org/techtips.org")
+    (ab/defshortcut ?e "~/Dropbox/org/essential-tools.org")
+    (ab/defshortcut ?s "~/src")
+
+  #+end_src
+
+** File templates
+*** Post Mortem templates
+    #+begin_src emacs-lisp :tangle yes
+      (add-hook 'text-mode-hook (lambda ()
+                                  (when (and
+                                         (string-prefix-p "postmortem-" (buffer-name))
+                                         (= (point-max) (point-min)))
+                                    (insert-file-contents "~/Documents/Main Brain/Files/org/templates/postmortem-templates/templates/postmortem-template-michael.kehoe.md"))))
+    #+end_src
+*** Standard .org files
+    #+begin_src emacs-lisp :tangle yes
+      (add-hook 'text-mode-hook (lambda ()
+                                  (when (and
+                                         (string-suffix-p ".org" (buffer-name))
+                                         (= (point-max) (point-min)))
+                                    (insert-file-contents "~/Documents/Main Brain/Files/org/templates/plainorg.org"))))
+    #+end_src

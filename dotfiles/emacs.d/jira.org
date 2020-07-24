@@ -1,0 +1,26 @@
+#+STARTUP: content
+
+* Jira
+  Updated to use [[https://github.com/nyyManni/ejira][ejira: Emacs JIRA integration]]. It isn't in Melpa yet so you need to check out the code, and update `load-path` below to look at it.
+#+begin_src emacs-lisp :tangle yes
+  (use-package language-detection)
+  (use-package ox-jira)
+  (use-package request)
+  (use-package ejira
+    :load-path "~/src/ejira"
+    :ensure    nil
+    :init
+    (setq jiralib2-user-login-name "andrew.bold"
+          ejira-projects           '("NHSO")
+          ejira-main-project       "NHSO"
+          ejira-my-org-directory   "/Users/andrewbol/org"
+          ejira-done-states        '("Done")
+          ejira-in-progress-states '("In Progress" "In Review" "In Test" "Ready For Test" "Ready for Sign-Off" "Ready For Review")
+          ejira-high-priorities    '("High" "Highest")
+          ejira-low-priorities     '("Low" "Lowest")
+
+          ;; Customize these based on your JIRA server configuration
+          ejira-sprint-field                     'customfield_10001
+          ejira-epic-field                       'customfield_10004
+          ejira-epic-summary-field               'customfield_10002))
+#+end_src

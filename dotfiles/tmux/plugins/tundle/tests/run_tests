@@ -1,0 +1,39 @@
+#!/bin/sh
+
+CURRENT_DIR="$(cd "$(dirname "${0}" )" && pwd)"
+tests_exit_value="0"
+
+_run_tests() {
+    rm -rf ~/.tundle.tests.backup && mkdir ~/.tundle.tests.backup
+    mv     ~/.tmux* ~/.tundle.tests.backup 2>/dev/null
+
+    if [ -z "${1}" ]; then
+        for _rtests__test in "${CURRENT_DIR}"/test*; do
+            [ -f "${_rtests__test}" ] || continue
+            printf "%s\\n" "Running test: ${_rtests__test##*/}"
+            "${_rtests__test}"
+
+            if [ "${?}" != "0" ]; then
+                tests_exit_value="1"
+            fi
+        done
+    else
+        for _rtests__test; do #run only requested tests
+            [ -f "${CURRENT_DIR}/../${_rtests__test}" ] || continue
+            printf "%s\\n" "Running test: ${_rtests__test##*/}"
+            "${CURRENT_DIR}/../${_rtests__test}"
+
+            if [ "${?}" != "0" ]; then
+                tests_exit_value="1"
+            fi
+        done
+    fi
+
+    rm -rf ~/.tmux* && mv ~/.tundle.tests.backup/* ~/ 2>/dev/null
+    rm -rf ~/.tundle.tests.backup
+}
+
+_run_tests "${@}"
+exit "${tests_exit_value}"
+
+# vim: set ts=8 sw=4 tw=0 ft=sh :

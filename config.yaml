@@ -1,0 +1,190 @@
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+dotfiles:
+  d_aws:
+    dst: ~/.aws
+    src: aws
+  f_emacs:
+    dst: ~/.emacs
+    src: emacs
+  f_emacsprofiles:
+    dst: ~/.emacs-profiles.el
+    src: emacs-profiles.el
+  d_emacsprelude:
+    dst: ~/prelude-emacs/personal
+    src: prelude-personal
+  d_emacs.d:
+    dst: ~/.emacs.d
+    src: emacs.d
+  d_doom_emacs.d:
+    dst: ~/.doom.d
+    src: doom
+  d_gnupg:
+    dst: ~/.gnupg
+    src: gnupg
+  d_irssi:
+    dst: ~/.irssi
+    src: irssi
+  d_mbsync:
+    dst: ~/mbsync
+    src: mbsync
+  f_gitconfig:
+    dst: ~/.gitconfig
+    src: gitconfig
+  f_gitignore:
+    dst: ~/.gitignore
+    src: gitignore
+  f_precommit:
+    dst: ~/.pre-commit-config.yaml
+    src: pre-commit-config.yaml
+  f_mbsyncrc:
+    dst: ~/.mbsyncrc
+    src: mbsyncrc
+  f_editorconfig:
+    dst: ~/.editorconfig
+    src: editorconfig
+  f_msmtprc:
+    dst: ~/.msmtprc
+    src: msmtprc
+  f_nethackrc:
+    dst: ~/.nethackrc
+    src: nethackrc
+  f_screenrc:
+    dst: ~/.screenrc
+    src: screenrc
+  f_ssh_config:
+    dst: ~/.ssh/config
+    src: ssh/config
+  f_ssh_yubikeyA:
+    dst: ~/.ssh/id_rsa_yubiA.pub
+    src: ssh/id_rsa_yubiA.pub
+  f_ssh_yubikeyC:
+    dst: ~/.ssh/id_rsa_yubiC.pub
+    src: ssh/id_rsa_yubiC.pub
+  f_tmux.conf:
+    dst: ~/.tmux.conf
+    src: tmux.conf
+  d_tmux:
+    dst: ~/.tmux
+    src: tmux
+  f_vimrc:
+    dst: ~/.vimrc
+    src: vimrc
+  f_zshrc:
+    dst: ~/.zshrc
+    src: zshrc
+  f_tigrc:
+    dst: ~/.tigrc
+    src: tigrc
+  d_homebin:
+    dst: ~/bin
+    src: homebin
+  f_atlassian_envrc:
+    dst: ~/bin/atlassian/.envrc
+    src: atlassian/envrc
+  d_applescript:
+    dst: ~/Library/Script Libraries
+    src: applescript
+profiles:
+  Titan:
+    dotfiles:
+    - f_zshrc
+    - d_aws
+    - f_gitconfig
+    - f_gitignore
+    - d_gnupg
+    - d_emacs.d
+    - d_irssi
+    - f_mbsyncrc
+    - f_msmtprc
+    - f_nethackrc
+    - f_screenrc
+    - f_ssh_config
+    - f_tmux.conf
+    - d_tmux
+    - f_vimrc
+    - f_tigrc
+    - f_editorconfig
+    - d_homebin
+  Seneca:
+    dotfiles:
+    - f_zshrc
+    - d_aws
+    - f_gitconfig
+    - f_gitignore
+    - d_gnupg
+    - d_emacs.d
+    - d_irssi
+    - f_mbsyncrc
+    - f_msmtprc
+    - f_nethackrc
+    - f_screenrc
+    - f_ssh_config
+    - f_tmux.conf
+    - d_tmux
+    - f_vimrc
+    - f_tigrc
+    - f_editorconfig
+  Groot:
+    dotfiles:
+    - f_zshrc
+    - d_aws
+    - f_gitconfig
+    - f_gitignore
+    - d_gnupg
+    - d_irssi
+    - f_emacs
+    - f_emacsprofiles
+    - d_emacs.d
+    - d_emacsprelude
+    - f_mbsyncrc
+    - f_msmtprc
+    - f_nethackrc
+    - f_screenrc
+    - f_ssh_config
+    - f_ssh_yubikeyC
+    - f_tmux.conf
+    - d_tmux
+    - f_vimrc
+    - f_tigrc
+    - f_editorconfig
+    - d_homebin
+    - f_precommit
+    - d_applescript
+  Logan:
+    dotfiles:
+    - f_zshrc
+    - f_gitconfig
+    - f_emacs
+    - f_emacsprofiles
+    - d_emacsprelude
+    - f_nethackrc
+    - f_screenrc
+    - f_tmux.conf
+    - d_tmux
+    - f_vimrc
+    - f_tigrc
+    - f_editorconfig
+    - d_homebin
+    - f_precommit
+  Nightcrawler:
+    dotfiles:
+    - f_zshrc
+    - f_gitconfig
+    - f_emacs
+    - f_emacsprofiles
+    - d_emacsprelude
+    - d_doom_emacs.d
+    - f_nethackrc
+    - f_screenrc
+    - f_tmux.conf
+    - d_tmux
+    - f_vimrc
+    - f_tigrc
+    - f_editorconfig
+    - d_homebin
+    - f_precommit
+    - f_ssh_config
+    - d_gnupg

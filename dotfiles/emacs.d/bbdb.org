@@ -1,0 +1,15 @@
+#+STARTUP: content
+
+* BBDB
+  BBDB has been the de facto Emacs contact database for a long time. I haven't relly got into using it as it doesn't fit my workflow. (Too much time spent having to use Other People's Email Services, for example.)
+
+  Nevertheless, let's keep it loaded for now.
+
+  #+name: bbdb-things
+  #+begin_src emacs-lisp :tangle yes
+    (use-package bbdb
+      :defer t)
+    (require 'bbdb)
+    (use-package bbdb-ext
+      :defer t)
+  #+end_src

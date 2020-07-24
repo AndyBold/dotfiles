@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: Shell Block
+# uuid:
+# key: <sh
+# condition: t
+# --
+#+BEGIN_SRC sh :session ${1:myshell} :results verbatim drawer
+$0
+#+END_SRC

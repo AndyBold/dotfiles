@@ -1,0 +1,50 @@
+* Undo and history
+** Undo
+   The undo-tree package can help make sense of Emacs' very powerful, but often confusing, undo and redo history.
+   #+name: undo-things
+   #+begin_src emacs-lisp :tangle yes
+     (use-package undo-tree
+       :defer t
+       :diminish undo-tree-mode
+       :init
+       (progn
+         (global-undo-tree-mode)
+         (setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/tmp/undo"))
+               undo-tree-auto-save-history t
+               undo-tree-visualizer-timestamps t
+               undo-tree-visualizer-diff t)))
+   #+end_src
+
+** History
+   Disk is cheap, so it doesnt hurt to be generous with hanging on to old things.
+
+   Auto-number versions.
+   #+name: undo-things
+   #+begin_src emacs-lisp :tangle yes
+    (setq version-control t)
+   #+end_src
+
+   Trim old versions...
+   #+name: undo-things
+   #+begin_src emacs-lisp :tangle yes
+   (setq delete-old-versions t)
+   #+end_src
+
+   ...when we have more than 100.
+   #+name: undo-things
+   #+begin_src emacs-lisp :tangle yes
+   (setq-default history-length 100)
+   #+end_src
+
+   Set where to save the minibuffer history.
+   #+name: undo-things
+   #+begin_src emacs-lisp :tangle yes
+    (setq savehist-file "~/.emacs.d/history"
+          history-delete-duplicates t
+          savehist-save-minibuffer-history 1
+          savehist-additional-variables
+          '(kill-ring
+            search-ring
+            regexp-search-ring))
+    (savehist-mode t)
+    #+end_src

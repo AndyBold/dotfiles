@@ -1,0 +1,95 @@
+#+TITLE: Dired tweaks
+#+OPTIONS: toc:4 h:4
+#+STARTUP: showeverything
+
+* Dired
+  This is mostly about loading dired+, which is a better dired.
+
+  There are a few other tweaks in here too.
+
+  Dired+ isn't in Melpa any longer, so tangling is currently disabled.
+  #+name: dired-things
+  #+begin_src emacs-lisp :tangle no
+  (use-package dired+)
+  #+end_src
+
+  Dired has a nasty habit of opening a new buffer for every directory you visit, which clogs up the buffer list. Make it stop doing that.
+
+  #+name: dired-things
+  #+begin_src emacs-lisp :tangle no
+  (diredp-toggle-find-file-reuse-dir 1)
+  #+end_src
+
+  I prefer to enable recursive copies and deletes by default. One day this might bite me on the ass. That day hasn't arrived yet.
+
+  $+name: dired-things
+  #+begin_src emacs-lisp :tangle yes
+  (setq dired-recursive-copies 'always)
+  (setq dired-recursive-deletes 'always)
+  #+end_src
+
+  Enable "Do What I Mean" mode. If dired is split into two windows, the default target to copy or move to will be the other window
+
+  #+name: dired-things
+  #+begin_src emacs-lisp :tangle yes
+  (setq dired-dwim-target t)
+  (setq dired-listing-switches "-lh")
+  #+end_src
+
+  Automatically refresh the dired buffer when things change.
+
+  #+name: dired-things
+  #+begin_src emacs-lisp :tangle yes
+  (add-hook 'dired-mode-hook 'auto-revert-mode)
+  #+end_src
+
+
+  MacOS 'ls' doesn't support '--dired' flag. I could probably install GNU ls and... no, life's too short.
+
+  #+name: dired-things
+  #+begin_src emacs-lisp :tangle yes
+  (when (eq system-type 'darwin)
+    (defvar dired-use-ls-dired)
+    (setq dired-use-ls-dired nil)
+    )
+
+  #+end_src
+
+** Neotree
+   Emacs neotree is an implementation of Vim neotree which is a hierarchical file browser that sits in a mini-buffer to the left of the frame.
+
+   It's a little bit like the file browser in Sublime Text.
+
+   *Currently disabled*. There are enough conflicts between Neotree and other things that I used - mostly around window/frame/buffer handling - that I'm taking Ranger for a spin for a while.
+
+   #+name: dired-things
+   #+begin_src emacs-lisp :tangle no
+     (use-package neotree
+       :defer t
+       :config
+       (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
+       )
+
+     (global-set-key (kbd "C-c n") 'neotree)
+   #+end_src
+
+** Ranger
+   [[https://github.com/ralesi/ranger.el][ralesi/ranger.el: Bringing the goodness of ranger to dired!]]
+
+   #+name: dired-things
+   #+begin_src emacs-lisp :tangle yes
+     (use-package ranger
+       :defer t
+       :bind (:map dired-mode-map
+              ("W" . dired-ranger-copy)
+              ("X" . dired-ranger-move)
+              ("Y" . dired-ranger-paste))
+       :config
+       (ranger-override-dired-mode t)
+       (setq ranger-cleanup-eagerly t
+             ranger-show-literal nil
+             ranger-preview-file t
+             ranger-excluded-extensions '("mp3" "iso" "mp4" "dmg")
+             ranger-dont-show-binary t
+             ranger-max-preview-size 5))
+   #+end_src

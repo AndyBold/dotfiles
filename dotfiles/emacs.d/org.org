@@ -1,0 +1,1024 @@
+#+STARTUP: content
+
+* Org Mode
+  The biggy. If you're reading this, then you're reading an org mode file.
+
+  Org is the Swiss army knife of text based... things. It's the reason I initially took time to learn Emacs about 10 years ago and, boy, has it come a long way. I never thought that I'd be using it to help desribe and manage my =init.el=, for example.
+
+** Initialisation
+*** Modules
+     What modules do we want to use?
+     #+name org-things
+     #+begin_src emacs-lisp :tangle yes
+       (setq org-modules '(org-w3m
+                           org-bbdb
+                           org-bibtex
+                           org-docview
+                           org-gnus
+                           org-info
+                           org-irc
+                           org-mhe
+                           org-rmail
+                           org-habit
+                           org-protocol
+                           org-annotate-file
+                           org-panel
+                           org-toc
+                           org-contacts
+                           org-secretary
+                           ox-confluence
+                           ))
+
+       (eval-after-load 'org
+         '(org-load-modules-maybe t))
+     #+end_src
+*** Load org
+    Start by loading the core package and configuring some basics.
+
+    #+name: org-things
+    #+begin_src emacs-lisp :tangle yes
+       (use-package org
+         :mode (("\\.org$" . org-mode)
+                ("\\.org\\.gpg$" . org-mode))
+         :ensure org-plus-contrib
+         :init
+         (progn
+           (setq org-expiry-inactive-timestamps t
+                 org-clock-idle-time nil
+                 org-log-done 'time
+                 org-clock-continuously nil
+                 org-clock-in-switch-to-state "STARTED"
+                 org-show-notification-handler 'message)))
+         :config
+         (progn
+           (org-clock-persistence-insinuate)
+           (defvar org-enable-github-support)
+           (defvar org-journal-dir)
+           (setq
+                 org-directory "~/Documents/Main Brain/Files/org"
+                 org-enable-github-support t
+                 org-M-RET-may-split-line '(default . nil)
+                 org-agenda-files (delq nil
+                                        (mapcar (lambda (x) (and (file-exists-p x) x))
+                                                `("~/Documents/Main Brain/Files/org/agenda.org"
+                                                  )))
+
+                 org-note-files (delq nil
+                                      (mapcar (lambda (x) (and (file-exists-p x) x))
+                                              `("~/Documents/Main Brain/Files/org/techtips.org"
+                                                "~/Documents/Main Brain/Files/org/essential-tools.org"
+                                                "~/Documents/Main Brain/Files/org/notes_and_reference.org.gpg"
+                                                )))
+
+                 all-my-org-files (directory-files-recursively (expand-file-name "~/Documents/Main Brain/Files/org/") "\.org")))
+
+      (use-package org-journal
+        :bind
+        ("C-c n j" . org-journal-new-entry)
+        :custom
+        (org-journal-dir "~/Documents/Main Brain/Files/org/zk/")
+        (org-journal-date-prefix "#+TITLE: ")
+        (org-journal-file-format "%Y-%m-%d.org")
+        (org-journal-date-format "%A, %d %B %Y")
+        )
+    #+end_src
+** Basics
+*** Key bindings
+    #+name: org-things
+    #+begin_src emacs-lisp :tangle yes
+    (global-set-key (kbd "C-c r") 'org-refile)
+    #+end_src
+*** Configure context aware completions
+     My Lisp-fu is nowhere near this good. Not even in the same country, never mind ballpark. If you've looked at =ivy.org= then you already know that abo-abo is smart. That's why I [[https://oremacs.com/2017/10/04/completion-at-point/][stole this from him]].
+
+     Now, orgmode can support the =C-M-i= symbol completion stanza.
+
+     #+name: org-things
+     #+begin_src emacs-lisp :tangle yes
+     (setq completion-at-point-functions
+       '(org-completion-symbols
+         ora-cap-filesystem
+         org-completion-refs))
+
+     (defun org-completion-symbols ()
+     (when (looking-back "=[a-zA-Z]+")
+       (let (cands)
+         (save-match-data
+           (save-excursion
+             (goto-char (point-min))
+             (while (re-search-forward "=\\([a-zA-Z]+\\)=" nil t)
+               (cl-pushnew
+                 (match-string-no-properties 0) cands :test 'equal))
+                 cands))
+                 (when cands
+                 (list (match-beginning 0) (match-end 0) cands)))))
+
+     ;; File name completion
+     (defun ora-cap-filesystem ()
+       (let (path)
+         (when (setq path (ffap-string-at-point))
+           (let ((compl
+                  (all-completions path #'read-file-name-internal)))
+            (when compl
+              (let ((offset (ivy-completion-common-length (car compl))))
+              (list (- (point) offset) (point) compl)))))))
+     #+end_src
+
+*** Status change logging
+    Help with answering "When did I finish that task?" questions.
+    #+name: org-things
+    #+begin_src emacs-lisp :tangle yes
+    (setq org-log-into-drawer "LOGBOOK")
+    #+end_src
+
+*** Don't break tasks when adding new tasks
+    Maybe.
+
+    This should ensure that new tasks are inserted after the current task, not in the middle, when using shortcut keys.
+
+    #+name: org-things
+    #+begin_src emacs-lisp :tangle yes
+    (setq org-insert-heading-respect-content nil)
+    #+end_src
+
+*** Attachment IDs
+    Use UUIDs for attachment IDs
+
+    #+name: org-things
+    #+begin_src emacs-lisp :tangle yes
+    (defvar org-id-method)
+    (setq org-id-method (quote uuidgen))
+    #+end_src
+** Task dependencies
+   #+begin_src emacs-lisp :tangle yes
+     (setq org-enforce-todo-dependencies t
+           org-track-ordered-property-with-tag t
+           org-agenda-dim-blocked-tasks t)
+   #+end_src
+** Pretty bullets
+   Out of the box, the org bullets are a bit 'functional'. This makes them nicer.
+
+   #+name: org-things
+   #+begin_src emacs-lisp :tangle yes
+   (use-package org-bullets)
+   (require 'org-bullets)
+   (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+
+   ;; Make 'em pretty
+   ;; From: https://zhangda.wordpress.com/2016/02/15/configurations-for-beautifying-emacs-org-mode/
+   (setq org-bullets-face-name (quote org-bullet-face))
+   (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+
+   (setq org-bullets-bullet-list '("○" "☉" "◎" "◉" "○" "◌" "◎" "●" "◦" "◯" "⚬" "❍" "￮" "⊙" "⊚" "⊛" "∙" "∘"))
+
+   ;; To be tested - using a specific font for bullets
+   ;; (custom-set-faces
+   ;;  '(org-bullet-face ((t (:foreground "burlywood" :weight normal :height 1.5)))))
+
+   #+end_src
+
+** Fancy Priorities
+   Similar to Pretty Bullets and Pretty Magit, replace normal Org priorities with fancy icons.
+   #+begin_src emacs-lisp :tangle yes
+     (use-package org-fancy-priorities
+       :hook
+       (org-mode . org-fancy-priorities-mode)
+       :config
+       (setq org-fancy-priorities-list '("⚡" "⬆" "⬇" "☕")))
+   #+end_src
+** Archive options
+
+   Where, by default, do archived items get saved to? (We can always override this on a file-by-file, or item-by-item, basis.)
+
+   #+name: org-things
+   #+begin_src emacs-lisp :tangle yes
+   (defvar org-archive-mark-done)
+   (setq org-archive-mark-done nil
+         org-archive-location "archive/archive_%s::* Archived Tasks")
+
+   ;; Include agenda archive files when searching for things
+   (setq org-agenda-text-search-extra-files (quote (agenda-archives)))
+
+   #+end_src
+
+** Outline magic
+   Better outline cycling for orgmode.
+
+   #+name: org-things
+   #+begin_src emacs-lisp :tangle yes
+     (use-package outline-magic)
+     (require 'outline-magic)
+     (define-key outline-minor-mode-map (kbd "<C-tab>") 'outline-cycle)
+     (define-key outline-minor-mode-map (kbd "<right>") 'outline-demote)
+
+     ;; Use arrow keys to move outlines in org-mode.
+     ;; Bonus: It will help to wean me off using arrow keys to navigate.
+     (with-eval-after-load "org"
+       (org-defkey org-mode-map [right] 'outline-demote)
+       (org-defkey org-mode-map [left]  'outline-promote)
+       (org-defkey org-mode-map [up]    'outline-move-subtree-up)
+       (org-defkey org-mode-map [down]  'outline-move-subtree-down)
+
+     )
+
+   #+end_src
+
+** The Brain for Orgmode
+   [[http://www.thebrain.com/][The Brain]] is a powerful mindmapping tool that has some useful and interesting ways of presenting the information that you save into it.
+
+   [[https://github.com/Kungsgeten/org-brain][org-brain]] attempts to implement similar features in Orgmode. It looks like it could be a powerful way of managing certain types of information, but I haven't had time to really get to grips with it.
+
+   #+name: org-things
+   #+begin_src emacs-lisp :tangle no
+   (use-package org-brain
+     :init
+     (setq org-brain-path "~/Documents/Main Brain/Files/org/brain")
+     ;; For Evil users
+     (eval-after-load 'evil
+       (evil-set-initial-state 'org-brain-visualize-mode 'emacs))
+     :config
+     (setq org-id-track-globally t)
+     (setq org-id-locations-file "~/.emacs.d/.org-id-locations")
+     (setq org-brain-visualize-default-choices 'all))
+   #+end_src
+
+** Agenda
+   Diary and other scheduling things in orgmode.
+
+   Keyboard shortcut.
+   #+name: org-things
+   #+begin_src emacs-lisp :tangle yes
+   (global-set-key (kbd "C-c a") 'org-agenda)
+   #+end_src
+
+   Always highlight the current agenda line.
+   #+name: org-things
+   #+begin_src emacs-lisp :tangle yes
+   (add-hook 'org-agenda-mode-hook
+             '(lambda () (hl-line-mode 1))
+             'append)
+   #+end_src
+
+   Some settings from http://pages.sachachua.com/.emacs.d/Sacha.html#babel-init
+
+   #+name: org-things
+   #+begin_src emacs-lisp :tangle yes
+
+     (setq org-agenda-span 14
+           org-agenda-tags-column -100
+           org-agenda-sticky nil
+           org-agenda-inhibit-startup t
+           org-agenda-use-tag-inheritance t
+           org-agenda-show-log t
+           org-agenda-include-diary t
+           org-agenda-skip-scheduled-if-done nil
+           org-agenda-skip-deadline-if-done nil
+           org-agenda-skip-deadline-prewarning-if-scheduled 'pre-scheduled
+           org-habit-show-all-today nil
+           org-habit-show-habits t
+           org-habit-show-habits-only-for-today t
+           org-habit-preceding-days 10
+           org-habit-following-days 3
+           org-agenda-time-grid
+           '((daily today require-timed)
+             (800 900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100)
+             "......"
+             "----------------")
+             org-columns-default-format "%14SCHEDULED %Effort{:} %1PRIORITY %TODO %50ITEM %TAGS")
+   #+end_src
+
+   Configure a helper for org-agenda-custom-commands for org-secretary.
+
+   #+begin_src emacs-lisp :tangle yes
+     (defun ab/org-agenda-list-unscheduled (&rest ignore)
+       "Create agenda view for tasks that are unscheduled and not done."
+       (let* ((org-agenda-todo-ignore-with-date t)
+              (org-agenda-overriding-header "List of unscheduled tasks: "))
+         (org-agenda-get-todos)))
+   #+end_src
+
+   I am only just starting to understand how useful the custom agenda filters are.
+
+   #+name: org-things
+   #+begin_src emacs-lisp :tangle yes
+     ;; Various agenda views
+     (setq org-agenda-custom-commands
+           `(;; match those tagged which are not scheduled, are not DONE.
+             ("u" "Unscheduled tasks" tags "-SCHEDULED={.+}-DEADLINE={.+}/!+TODO|+STARTED|+WAITING")
+             (;; List Notes
+              "n" "Notes" tags "NOTE"
+              ((org-agenda-overriding-header "Notes")
+               (org-tags-match-list-sublevels t)))
+             (;; List habits
+              "h" "Habits" tags-todo "STYLE=\"habit\""
+              ((org-agenda-overriding-header "Habits")
+               (org-agenda-sorting-strategy
+                '(todo-state-down effort-up category-keep)))
+              )
+             (;; In progress/started
+              "i" "In Progress" tags "/+DOING|+STARTED")
+             (;; Work things only
+              "w" "Work things" tags "@work/+TODO|+DOING|+STARTED|+WAITING")
+             (;; Home things only
+              "H" "Home" tags "house|chores/+TODO|+DOING|+STARTED|+WAITING")
+             (;; Label for 'W'
+              "W" . "Waiting for...")
+             (;; Things held or waiting for something else
+              "Ww" "@work Waiting for" tags "@work/+HOLD|+WAITING")
+             (;; Things held or waiting for something else
+              "Wh" "@home Waiting for" tags "@home/+HOLD|+WAITING")
+
+             ;; org-secretary related
+             ("Wt" "Work todos" tags-todoa
+              "-personal-doat={.+}-dowith={.+}/!-TASK"
+              ((org-agenda-todo-ignore-scheduled t)))
+             ("WH" "All work todos" tags-todo "-personal/!-TASK-MAYBE"
+              ((org-agenda-todo-ignore-scheduled nil)))
+             ("WA" "Work todos with doat or dowith" tags-todo
+              "-personal+doat={.+}|dowith={.+}/!-TASK"
+              ((org-agenda-todo-ignore-scheduled nil)))
+             ("Wj" "TODO dowith and TASK with"
+              ((org-sec-with-view "TODO dowith")
+               (org-sec-where-view "TODO doat")
+               (org-sec-assigned-with-view "TASK with")
+               (org-sec-stuck-with-view "STUCK with")))
+             ("j" "TODO dowith and TASK with"
+              ((org-sec-with-view "TODO dowith")
+               (org-sec-where-view "TODO doat")
+               (org-sec-assigned-with-view "TASK with")
+               (org-sec-stuck-with-view "STUCK with")))
+             ("J" "Interactive TODO dowith and TASK with"
+              ((org-sec-who-view "TODO dowith")))
+             )
+           )
+   #+end_src
+
+   Weeks start on Monday. This makes the agenda always start display from Monday, even if it's Thursday. I.e., as you move through the week, you get a retrospective look back. The way that I use org scheduling means that this is of limited use to me so it's currently disabled.
+   #+name: org-things
+   #+begin_src emacs-lisp :tangle yes
+   (setq org-agenda-start-on-weekday 1)
+   #+end_src
+
+   More Agenda customisation via http://pages.sachachua.com/.emacs.d/Sacha.html
+
+   Includes some org-secretary config from [[http://juanreyero.com/article/emacs/org-teams.html][Org-mode tricks for team management]]
+
+   Ensure =org-agenda= is loaded.
+   #+name: org-things
+   #+begin_src emacs-lisp :tangle yes
+   (require 'org-agenda)
+   #+end_src
+
+   Set ToDo status to 'Done' with a single press of =x=.
+   #+name: org-things
+   #+begin_src emacs-lisp :tangle yes
+     (defun ab/org-agenda-done (&optional arg)
+       "Mark current TODO as done.
+     This changes the line at point, all other lines in the agenda referring to
+     the same tree node, and the headline of the tree node in the Org-mode file."
+       (interactive "P")
+       (org-agenda-todo "DONE"))
+     ;; Override the key definition for org-exit
+     (define-key org-agenda-mode-map "x" 'ab/org-agenda-done)
+   #+end_src
+
+   Mark a task as done and create a follow up task.
+   #+name: org-things
+   #+begin_src emacs-lisp :tangle yes
+     (defun ab/org-agenda-mark-done-and-add-followup ()
+         "Mark the current TODO as done and add another task after it.
+     Creates it at the same level as the previous task, so it's better to use
+     this with to-do items than with projects or headings."
+         (interactive)
+         (org-agenda-todo "DONE")
+         (org-agenda-switch-to)
+         (org-capture 0 "t"))
+     ;; Override the key definition
+     (define-key org-agenda-mode-map "X" 'ab/org-agenda-mark-done-and-add-followup)
+   #+end_src
+
+   Create new tasks or todos from the Agenda buffer.
+   #+name: org-things
+   #+begin_src emacs-lisp :tangle yes
+     (defun ab/org-agenda-new ()
+       "Create a new note or task at the current agenda item.
+     Creates it at the same level as the previous task, so it's better to use
+     this with to-do items than with projects or headings."
+       (interactive)
+       (org-agenda-switch-to)
+       (org-capture 0))
+     ;; New key assignment
+     (define-key org-agenda-mode-map "N" 'ab/org-agenda-new)
+   #+end_src
+
+   #+name: org-things
+   #+begin_src emacs-lisp :tangle yes
+     (setq org-stuck-projects
+           '("+prj/-MAYBE-DONE"
+             ("TODO" "TASK")
+             nil
+             "\\<IGNORE\\>"))
+   #+end_src
+** Secretary
+   From: [[http://juanreyero.com/article/emacs/org-teams.html][Org-mode tricks for team management]]
+   #+begin_src emacs-lisp :tangle yes
+   (setq org-tags-exclude-from-inheritance '("prj"))
+   (setq org-todo-keyword-faces
+      '(("TODO" . (:foreground "DarkOrange1" :weight bold))
+        ("MAYBE" . (:foreground "sea green"))
+        ("DONE" . (:foreground "light sea green"))
+        ("CANCELLED" . (:foreground "forest green"))
+        ("TASK" . (:foreground "blue"))))
+   #+end_src
+** Configure refile options
+  Use refile to move things between Org sections and files.
+  #+name: org-things
+  #+begin_src emacs-lisp :tangle yes
+  (setq org-default-notes-file "~/Documents/Main Brain/Files/org/refile.org")
+
+  ;; Targets include this file and any file contributing to the agenda - up to 9 levels deep
+  (setq org-refile-targets (quote ((nil :maxlevel . 9)
+                                  (org-agenda-files :maxlevel . 9)
+                                  (org-note-files :maxlevel . 5)
+                                  )))
+
+  ;; Use full outline paths for refile targets
+  (setq org-refile-use-outline-path t)
+
+  ;; Targets complete directly with IDO
+  (setq org-outline-path-complete-in-steps nil)
+
+  ;; Allow refile to create parent tasks with confirmation
+  (setq org-refile-allow-creating-parent-nodes (quote confirm))
+
+  ;; Exclude DONE state tasks from refile targets
+  (defun bh/verify-refile-target ()
+    "Exclude todo keywords with a done state from refile targets."
+     (not (member (nth 2 (org-heading-components)) org-done-keywords)))
+
+  (setq org-refile-target-verify-function 'bh/verify-refile-target)
+  #+end_src
+** Capture
+   I'd like to make more, and better, use of capture and templates.
+
+   #+name: org-things
+   #+begin_src emacs-lisp :tangle yes
+        ;; Set a global capture key
+        (define-key (current-global-map) [remap org-capture] 'counsel-org-capture)
+        (define-key (current-global-map) [remap org-goto] 'counsel-org-goto)
+
+        (setq org-capture-templates
+              (quote (("t" "todo" entry          (file "~/Documents/Main Brain/Files/org/refile.org")
+                       "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
+                      ("r" "respond" entry       (file "~/Documents/Main Brain/Files/org/refile.org")
+                       "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
+                      ("n" "note" entry          (file "~/Documents/Main Brain/Files/org/refile.org")
+                       "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
+                      ("j" "Journal"
+                       entry                     (file+datetree "~/Documents/Main Brain/Files/org/journal.org")
+                       "* %?\n%U\n\n%i\n\n    From: %a\n" :clock-in t :clock-resume t :empty-lines 1)
+                      ("w" "org-protocol" entry  (file "~/Documents/Main Brain/Files/org/refile.org")
+                       "* TODO Review %c\n%U\n" :immediate-finish t)
+                      ("m" "Meeting" entry       (file "~/Documents/Main Brain/Files/org/refile.org")
+                       "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
+                      ("h" "Habit" entry         (file "~/Documents/Main Brain/Files/org/refile.org")
+                                      "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\"\")"\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n""))))
+
+   #+end_src
+
+** Templates
+   Some shortcut templates.
+   Updated to be compatible with Orgmode 9.2 by switching to org-tempo.
+   There's probably a slicker way of defining multiple additional templates. (TODO)
+   #+name: org-things
+   #+begin_src emacs-lisp :tangle yes
+     (require 'org-tempo)
+     (tempo-define-template "plain-src"
+                            '("#+begin_src ?\n\n" > "#+end_src")
+                            "<s"
+                            "Insert a generic source code template")
+
+     (tempo-define-template "lisp-block"
+                            '("#+begin_src emacs-lisp :tangle yes\n?\n" > "#+end_src")
+                            "<sl"
+                            "Insert an embedded Lisp block for literate emacs.d")
+
+     (tempo-define-template "k8s"
+                            '("#+name: k8s\n#+begin_src shell :tangle no :results output\n?\n" > "#+end_src")
+                            "<sk"
+                            "Insert a, non-tangled, k8s block")
+
+     (tempo-define-template "shell-code"
+                            '("#+begin_src shell :tangle no :results value raw :results value drawer :session" > "\n\n#+end_src")
+                            "<ss"
+                            "Shell code block, with raw results")
+
+     (tempo-define-template "properties-block"
+                            '(":PROPERTIES:\n" > ":END:")
+                            "<PROP"
+                            "Orgmode properties block")
+     (tempo-define-template "python-code"
+                            '("#+begin_src python :tangle no :results value raw :results value drawer :session" > "\n\n#+end_src")
+                            "<sp"
+                            "Python code block, with raw results")
+     (tempo-define-template "plantuml"
+                            '("#+begin_src plantuml :tangle no :results value raw :results value drawer :session" > "\n\n#+end_src")
+                            "<puml"
+                            "Plantuml")
+   #+end_src
+** Columns
+   Fancy pants todo lists with estimated and actual effort. For me, this is currently a little too granular.
+
+   But.
+
+   I think it's something that could be helpful. E.g, tracking time for client work, and assessing how good my estimating actually is.
+
+   #+name: org-things
+   #+begin_src emacs-lisp :tangle yes
+   ;; Set default column view headings: Status Task Effort Clock_Summary Scheduled_Date Priority
+   (setq org-columns-default-format "%TODO %80ITEM(Task) %10Effort(Effort){:} %10CLOCKSUM %14SCHEDULED %1PRIORITY")
+
+   ;; global Effort estimate values
+   ;; global STYLE property values for completion
+   (setq org-global-properties (quote (("Effort_ALL" . "0:15 0:30 0:45 1:00 2:00 3:00 4:00 5:00 6:00 0:00")
+                                       ("STYLE_ALL" . "habit"))))
+
+
+   ;; Tags with fast selection keys
+   (setq org-tag-alist (quote ((:startgroup)
+                               ("@errand"    . ?e)
+                               ("@work"      . ?o)
+                               ("@home"      . ?H)
+                               ("@shops"     . ?s)
+                               (:endgroup)
+                               ("WAITING"    . ?w)
+                               ("HOLD"       . ?h)
+                               ("PERSONAL"   . ?P)
+                               ("WORK"       . ?W)
+                               ("ORG"        . ?O)
+                               ("crypt"      . ?E)
+                               ("NOTE"       . ?n)
+                               ("CANCELLED"  . ?c)
+                               ("FLAGGED"    . ??))))
+
+
+   #+end_src
+
+** Babel
+   Configure various org-babel modes.
+
+   #+name: org-things
+   #+begin_src emacs-lisp :tangle yes
+     (use-package ob-mongo)
+
+     (org-babel-do-load-languages
+       'org-babel-load-languages
+       '(;; other Babel languages
+          (emacs-lisp . t)
+          (shell      . t)
+          (ditaa      . t)
+          (gnuplot    . t)
+          (latex      . t)
+          (org        . t)
+          (makefile   . t)
+          (js         . t)
+          (emacs-lisp . t)
+          (clojure    . t)
+          (python     . t)
+          (ruby       . t)
+          (dot        . t)
+          (plantuml   . t)))
+
+     ;; Where is ditaa.jar?
+     ;; On MacOS:
+     (setq org-ditaa-jar-path "/usr/local/Cellar/ditaa/0.11/libexec/ditaa0_11.jar")
+
+     ;; refresh images after execution
+     (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
+
+   #+end_src
+
+** Export
+   Orgs worst kept secret - it's great at exporting to different formats.
+
+   #+name: org-things
+   #+begin_src emacs-lisp :tangle yes
+            (use-package ox-pandoc)
+
+
+            ;; Work with PDFs
+            (use-package pdf-tools
+              :config
+              (custom-set-variables
+               '(pdf-tools-handle-upgrades nil)) ; Use brew upgrade pdf-tools instead.
+              (setq pdf-info-epdfinfo-program "/usr/local/bin/pdfinfo")
+              ;; (pdf-tools-install)
+              (setq-default pdf-view-display-size 'fit-page
+                            pdf-view-use-imagemagick t
+                            pdf-view-midnight-colors '("white smoke" . "gray5"))
+              (bind-keys :map pdf-view-mode-map
+                 ("\\" . hydra-pdftools/body)
+                 ("<s-spc>" .  pdf-view-scroll-down-or-next-page)
+                 ("g"  . pdf-view-first-page)
+                 ("G"  . pdf-view-last-page)
+                 ("l"  . image-forward-hscroll)
+                 ("h"  . image-backward-hscroll)
+                 ("j"  . pdf-view-next-line-or-next-page)
+                 ("k"  . pdf-view-previous-line-or-previous-page)
+                 ("e"  . pdf-view-goto-page)
+                 ("t"  . pdf-view-goto-label)
+                 ("u"  . pdf-view-revert-buffer)
+                 ("al" . pdf-annot-list-annotations)
+                 ("ad" . pdf-annot-delete)
+                 ("aa" . pdf-annot-attachment-dired)
+                 ("am" . pdf-annot-add-markup-annotation)
+                 ("at" . pdf-annot-add-text-annotation)
+                 ("y"  . pdf-view-kill-ring-save)
+                 ("i"  . pdf-misc-display-metadata)
+                 ("s"  . pdf-occur)
+                 ("b"  . pdf-view-set-slice-from-bounding-box)
+                 ("r"  . pdf-view-reset-slice))
+
+              (when (package-installed-p 'hydra)
+                (bind-keys :map pdf-view-mode-map
+                          ("\\" . hydra-pdftools/body))
+                (defhydra hydra-pdftools (:color blue :hint nil)
+                   "
+                                                                                 ╭───────────┐
+                  Move  History   Scale/Fit     Annotations  Search/Link    Do   │ PDF Tools │
+              ╭──────────────────────────────────────────────────────────────────┴───────────╯
+                 ^^^_g_^^^       _B_    ^↧^    _+_    ^ ^     [_al_] list    [_s_] search      [_u_] revert buffer
+                 ^^^^↑^^^^       ^↑^    _H_    ^↑^  ↦ _W_ ↤   [_am_] markup  [_o_] outline     [_i_] info
+                 ^^^_p_^^^       ^ ^    ^↥^    _0_    ^ ^     [_at_] text    [_F_] link        [_d_] midgnight mode
+                 ^^^^↑^^^^       ^↓^  ╭─^─^─┐  ^↓^  ╭─^ ^─┐   [_ad_] delete  [_f_] search link [_D_] print mode
+            _h_ ← _e_/_t_ → _l_  _N_  │ _P_ │  _-_    _b_     [_aa_] dired
+                 ^^^^↓^^^^       ^ ^  ╰─^─^─╯  ^ ^  ╰─^ ^─╯   [_y_]  yank
+                 ^^^_n_^^^       ^ ^  _r_eset slice box
+                 ^^^^↓^^^^
+                 ^^^_G_^^^
+              --------------------------------------------------------------------------------
+                   "
+                   ("\\" hydra-master/body "back")
+                   ("<ESC>" nil "quit")
+                   ("al" pdf-annot-list-annotations)
+                   ("ad" pdf-annot-delete)
+                   ("aa" pdf-annot-attachment-dired)
+                   ("am" pdf-annot-add-markup-annotation)
+                   ("at" pdf-annot-add-text-annotation)
+                   ("y"  pdf-view-kill-ring-save)
+                   ("+" pdf-view-enlarge :color red)
+                   ("-" pdf-view-shrink :color red)
+                   ("0" pdf-view-scale-reset)
+                   ("H" pdf-view-fit-height-to-window)
+                   ("W" pdf-view-fit-width-to-window)
+                   ("P" pdf-view-fit-page-to-window)
+                   ("n" pdf-view-next-page-command :color red)
+                   ("p" pdf-view-previous-page-command :color red)
+                   ("d" pdf-view-midnight-minor-mode)
+                   ("D" pdf-view-printer-minor-mode)
+                   ("b" pdf-view-set-slice-from-bounding-box)
+                   ("r" pdf-view-reset-slice)
+                   ("g" pdf-view-first-page)
+                   ("G" pdf-view-last-page)
+                   ("e" pdf-view-goto-page)
+                   ("t" pdf-view-goto-label)
+                   ("o" pdf-outline)
+                   ("s" pdf-occur)
+                   ("i" pdf-misc-display-metadata)
+                   ("u" pdf-view-revert-buffer)
+                   ("F" pdf-links-action-perfom)
+                   ("f" pdf-links-isearch-link)
+                   ("B" pdf-history-backward :color red)
+                   ("N" pdf-history-forward :color red)
+                   ("l" image-forward-hscroll :color red)
+                   ("h" image-backward-hscroll :color red)))
+
+              (use-package org-pdfview))
+
+
+            ;; Sneaking in some bibtex
+            ;; https://github.com/tmalsburg/helm-bibtex
+            ;; and
+            ;; https://codearsonist.com/reading-for-programmers
+
+            (use-package ivy-bibtex
+              :config
+              (setq bibtex-completion-bibliography
+                   '("~/Documents/Main Brain/Files/org/bibtex/bibtex-default.org"))
+
+              (setq bibtex-completion-library-path '("~/Documents/Main Brain/Files/org/bibtex/pdfs"))
+              (setq bibtex-completion-notes-path "~/Documents/Main Brain/Files/org/bibtex/notes")
+              )
+
+            ;; Add Interleave (https://github.com/rudolfochrist/interleave)
+            (use-package interleave)
+
+            ;; Add some more LaTeX classes. CV Classes assume that various classes from
+            ;; http://www.latextemplates.com have been installed.
+            (add-to-list 'org-latex-classes
+                        '("cvlongprofessional"
+                          "\\documentclass{res}"
+                          ("\\section{%s}" . "\\section*{%s}")
+                          ("\\subsection{%s}" . "\\subsection*{%s}")
+                          ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                          ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                          ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+            (add-to-list 'org-latex-classes
+                        '("cvawesome"
+                          "\\documentclass{awesome-cv}"
+                          ("\\section{%s}" . "\\section*{%s}")
+                          ("\\subsection{%s}" . "\\subsection*{%s}")
+                          ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                          ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                          ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+            (add-to-list 'org-latex-classes
+                        '("cv20second"
+                          "\\class{twentysecondcv}"
+                          ("\\section{%s}" . "\\section*{%s}")
+                          ("\\subsection{%s}" . "\\subsection*{%s}")
+                          ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                          ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                          ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+
+              ;; Define some LaTeX classes.
+              (add-to-list 'org-latex-classes
+                          '("tufte-book"
+                            "\\documentclass{tufte-book}"
+                            ("\\section{%s}" . "\\section*{%s}")
+                            ("\\subsection{%s}" . "\\subsection*{%s}")
+                            ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                            ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                            ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+              (add-to-list 'org-latex-classes
+                          '("tufte-handout"
+                            "\\documentclass{tufte-handout}"
+                            ("\\section{%s}" . "\\section*{%s}")
+                            ("\\subsection{%s}" . "\\subsection*{%s}")
+                            ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                            ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                            ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+   #+end_src
+
+** Kanban
+   Kanban in Org. Fantastic! (Though I havent used it as much as I thought I would so it's being disabled for now.)
+
+   #+begin_src emacs-lisp :tangle no
+        (use-package org-kanban)
+   #+end_src
+** Autolist
+   When editing a list item, pressing "Return" will insert a new list item automatically. This works for both bullet points and checkboxes, so there's no need to think about whether to use =M-<return>= or =M-S-<return>=.
+
+   #+begin_src emacs-lisp :tangle yes
+   (use-package org-autolist
+   :config
+   (add-hook 'org-mode-hook (lambda () (org-autolist-mode))))
+   #+end_src
+** Hydra configs
+   Hydra helps with the long forgotten commands and bindings.
+*** Hydra for org-agenda
+
+    #+begin_src emacs-lisp :tangle yes
+      ;; Hydra for org agenda (graciously taken from Spacemacs)
+      (defhydra hydra-org-agenda (:pre (setq which-key-inhibit t)
+                                  :post (setq which-key-inhibit nil)
+                                  :hint none)
+        "
+      Org agenda (_q_uit)
+
+      ^Clock^      ^Visit entry^              ^Date^             ^Other^
+      ^-----^----  ^-----------^------------  ^----^-----------  ^-----^---------
+      _ci_ in      _SPC_ in other window      _ds_ schedule      _gr_ reload
+      _co_ out     _TAB_ & go to location     _dd_ set deadline  _._  go to today
+      _cq_ cancel  _RET_ & del other windows  _dt_ timestamp     _gd_ go to date
+      _cj_ jump    _o_   link                 _+_  do later      ^^
+      ^^           ^^                         _-_  do earlier    ^^
+      ^^           ^^                         ^^                 ^^
+      ^View^          ^Filter^                 ^Headline^         ^Toggle mode^
+      ^----^--------  ^------^---------------  ^--------^-------  ^-----------^----
+      _vd_ day        _ft_ by tag              _ht_ set status    _tf_ follow
+      _vw_ week       _fr_ refine by tag       _hk_ kill          _tl_ log
+      _vt_ fortnight  _fc_ by category         _hr_ refile        _ta_ archive trees
+      _vm_ month      _fh_ by top headline     _hA_ archive       _tA_ archive files
+      _vy_ year       _fx_ by regexp           _h:_ set tags      _tr_ clock report
+      _vn_ next span  _fd_ delete all filters  _hp_ set priority  _td_ diaries
+      _vp_ prev span  ^^                       ^^                 ^^
+      _vr_ reset      ^^                       ^^                 ^^
+      ^^              ^^                       ^^                 ^^
+      "
+        ;; Entry
+        ("hA" org-agenda-archive-default)
+        ("hk" org-agenda-kill)
+        ("hp" org-agenda-priority)
+        ("hr" org-agenda-refile)
+        ("h:" org-agenda-set-tags)
+        ("ht" org-agenda-todo)
+        ;; Visit entry
+        ("o"   link-hint-open-link :exit t)
+        ("<tab>" org-agenda-goto :exit t)
+        ("TAB" org-agenda-goto :exit t)
+        ("SPC" org-agenda-show-and-scroll-up)
+        ("RET" org-agenda-switch-to :exit t)
+        ;; Date
+        ("dt" org-agenda-date-prompt)
+        ("dd" org-agenda-deadline)
+        ("+" org-agenda-do-date-later)
+        ("-" org-agenda-do-date-earlier)
+        ("ds" org-agenda-schedule)
+        ;; View
+        ("vd" org-agenda-day-view)
+        ("vw" org-agenda-week-view)
+        ("vt" org-agenda-fortnight-view)
+        ("vm" org-agenda-month-view)
+        ("vy" org-agenda-year-view)
+        ("vn" org-agenda-later)
+        ("vp" org-agenda-earlier)
+        ("vr" org-agenda-reset-view)
+        ;; Toggle mode
+        ("ta" org-agenda-archives-mode)
+        ("tA" (org-agenda-archives-mode 'files))
+        ("tr" org-agenda-clockreport-mode)
+        ("tf" org-agenda-follow-mode)
+        ("tl" org-agenda-log-mode)
+        ("td" org-agenda-toggle-diary)
+        ;; Filter
+        ("fc" org-agenda-filter-by-category)
+        ("fx" org-agenda-filter-by-regexp)
+        ("ft" org-agenda-filter-by-tag)
+        ("fr" org-agenda-filter-by-tag-refine)
+        ("fh" org-agenda-filter-by-top-headline)
+        ("fd" org-agenda-filter-remove-all)
+        ;; Clock
+        ("cq" org-agenda-clock-cancel)
+        ("cj" org-agenda-clock-goto :exit t)
+        ("ci" org-agenda-clock-in :exit t)
+        ("co" org-agenda-clock-out)
+        ;; Other
+        ("q" nil :exit t)
+        ("gd" org-agenda-goto-date)
+        ("." org-agenda-goto-today)
+        ("gr" org-agenda-redo))
+
+      (define-key org-agenda-mode-map (kbd "\\") 'hydra-org-agenda/body)
+    #+end_src
+** Radiobutton
+   [["https://github.com/Fuco1/org-radiobutton][This is neat.]]
+
+   Example usage:
+
+   \#+attr_org: :radio
+   \#+name: service-to-query
+     - [ ] localhost
+     - [X] staging
+     - [ ] production
+
+   \#+BEGIN_SRC elisp :var service=(org-radiobutton-value "service-to-query")
+   =(format "Will query the %s database" service)=
+   \#+END_SRC
+
+   \#+RESULTS:
+   =: Will query the staging database=
+   \#+end_src
+
+   #+begin_src emacs-lisp :tangle yes
+   (use-package org-radiobutton)
+   #+end_src
+** Calfw
+   Integrate external calendar sources into Emacs and org-agenda.
+
+  Currently unused. Work life makes it real difficult to keep everything in org, so there's no need for this.
+   #+begin_src emacs-lisp :tangle no
+     (use-package calfw
+       :config
+       (use-package calfw-gcal)
+       (use-package calfw-org
+         :config
+         (setq cfw:org-overwrite-default-keybinding t)
+         ))
+   #+end_src
+** Time keeping
+   Some clock in/out functions from [[http://doc.norang.ca/org-mode.html][Org Mode - Organize Your Life In Plain Text!]]
+
+   #+begin_src emacs-lisp :tangle yes
+          ;; Show lot of clocking history so it's easy to pick items off the C-F11 list
+          (setq org-clock-history-length 23)
+          ;; Resume clocking task on clock-in if the clock is open
+          (setq org-clock-in-resume t)
+          ;; Separate drawers for clocking and logs
+          (setq org-drawers (quote ("PROPERTIES" "LOGBOOK")))
+          ;; Save clock data and state changes and notes in the LOGBOOK drawer
+          (setq org-clock-into-drawer t)
+          ;; Sometimes I change tasks I'm clocking quickly - this removes clocked tasks with 0:00 duration
+          (setq org-clock-out-remove-zero-time-clocks t)
+          ;; Clock out when moving task to a done state
+          (setq org-clock-out-when-done t)
+          ;; Save the running clock and all clock history when exiting Emacs, load it on startup
+          (setq org-clock-persist t)
+          ;; Do not prompt to resume an active clock
+          (setq org-clock-persist-query-resume nil)
+          ;; Enable auto clock resolution for finding open clocks
+          (setq org-clock-auto-clock-resolution (quote when-no-clock-is-running))
+          ;; Include current clocking task in clock reports
+          (setq org-clock-report-include-clocking-task t)
+
+          (setq bh/keep-clock-running nil)
+
+
+          (setq bh/keep-clock-running nil)
+          (defvar bh/organization-task-id "eb155a82-92b2-4f25-a3c6-0304591af2f9")
+
+          (defun bh/clock-in-organization-task-as-default ()
+            (interactive)
+            (org-with-point-at (org-id-find bh/organization-task-id 'marker)
+              (org-clock-in '(16))))
+
+          (defun bh/punch-in (arg)
+            "Start continuous clocking and set the default task to the
+          selected task.  If no task is selected set the Organization task
+          as the default task."
+            (interactive "p")
+            (setq bh/keep-clock-running t)
+            (if (equal major-mode 'org-agenda-mode)
+                ;;
+                ;; We're in the agenda
+                ;;
+                (let* ((marker (org-get-at-bol 'org-hd-marker))
+                       (tags (org-with-point-at marker (org-get-tags-at))))
+                  (if (and (eq arg 4) tags)
+                      (org-agenda-clock-in '(16))
+                    (bh/clock-in-organization-task-as-default)))
+              ;;
+              ;; We are not in the agenda
+              ;;
+              (save-restriction
+                (widen)
+                ; Find the tags on the current task
+                (if (and (equal major-mode 'org-mode) (not (org-before-first-heading-p)) (eq arg 4))
+                    (org-clock-in '(16))
+                  (bh/clock-in-organization-task-as-default)))))
+
+          (defun bh/punch-out ()
+            (interactive)
+            (setq bh/keep-clock-running nil)
+            (when (org-clock-is-active)
+              (org-clock-out))
+            (org-agenda-remove-restriction-lock))
+
+     ;; Remove empty LOGBOOK drawers on clock out
+     (defun bh/remove-empty-drawer-on-clock-out ()
+       (interactive)
+       (save-excursion
+         (beginning-of-line 0)
+         (org-remove-empty-drawer-at "LOGBOOK" (point))))
+
+     (add-hook 'org-clock-out-hook 'bh/remove-empty-drawer-on-clock-out 'append)
+
+   #+end_src
+**
+** Table of Contents
+   #+begin_src emacs-lisp :tangle yes
+     (use-package org-make-toc
+       :config
+       (add-hook 'org-mode-hook #'org-make-toc-mode))
+   #+end_src
+** Org-Roam
+   :PROPERTIES:
+   :on:       <2020-02-08 Sat 21:44>
+   :END:
+   "Org-roam is a rudimentary Roam replica in Org-mode. This project intends to adaptively implement the core features of Roam in org-mode and eventually introduce newer features suitable for the Emacs ecosystem. It offers a non-hierarchical note-taking approach which is effortless yet powerful. Note-taking becomes fluent and easy when you don't have to worry about where a particular note should go: you just start writing from anywhere about anything."
+
+   From [[https://github.com/jethrokuan/org-roam][Github]].
+
+  #+begin_src emacs-lisp :tangle yes
+    (use-package org-roam
+      :after org
+      :hook (org-mode . org-roam-mode)
+      :straight (:host github :repo "jethrokuan/org-roam")
+      :custom
+      (org-roam-directory "~/Documents/Main Brain/Files/org/zk/")
+      :bind
+      ("C-c n l" . org-roam)
+      ("C-c n t" . org-roam-today)
+      ("C-c n f" . org-roam-find-file)
+      ("C-c n i" . org-roam-insert)
+      ("C-c n g" . org-roam-show-graph))
+  #+end_src
+
+  org-roam works well with Deft.
+
+  #+begin_src emacs-lisp :tangle yes
+    (use-package deft
+      :after org
+      :bind
+      ("C-c n d" . deft)
+      :custom
+      (deft-recursive t)
+      (deft-use-filter-string-for-filename t)
+      (deft-default-extension "org")
+      (deft-directory "~/Documents/Main Brain/Files/org/zk/")
+      (deft-use-filename-as-title t))
+  #+end_src

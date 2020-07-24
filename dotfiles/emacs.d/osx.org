@@ -1,0 +1,44 @@
+* My Emacs-on-OSX settings
+  Pretty standard stuff.
+
+  #+begin_src emacs-lisp :tangle yes
+    (when (eq system-type 'darwin)
+      (use-package osx-browse
+        :config
+        (osx-browse-mode 1)
+        )
+      (use-package osx-clipboard
+        :config
+        (osx-clipboard-mode +1)
+        )
+      (use-package osx-lib)
+      (use-package grab-mac-link
+        :config
+        (global-set-key (kbd "C-c l") 'grab-mac-link)
+        )
+      (use-package applescript-mode)
+      (use-package ob-applescript)
+
+      ;; Unmap right hand Alt so I can use it for standard OSX things like ™ £ √ etc
+      (when (boundp 'ns-right-alternate-modifier)
+        (setq ns-right-alternate-modifier nil)))
+  #+end_src
+
+  I somehow managed to get different Macs configured with different understandings of what the Command and Option keys are configured to do.
+
+  This standardises what they /should/ do, and the next time I find a keyboard that isn't I can head to the keyboard settings and unbreak what I broke.
+
+  #+begin_src emacs-lisp :tangle yes
+    (when (eq system-type 'darwin)
+      (setq mac-option-modifier 'meta)
+      (setq mac-command-modifier 'super))
+  #+end_src
+
+  Enable thin font smoothing.
+  #+begin_src emacs-lisp :tangle yes
+    (when (eq system-type 'darwin)
+      (if (version< emacs-version "26.1")
+          (message "Old emacs. Unable to set font-smoothing")
+        (setq ns-use-thin-smoothing t)
+        ))
+  #+end_src

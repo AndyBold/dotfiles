@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: dbentry
+# key: dbentry
+# --
+**** `(format-time-string "%Y-%m-%d %A")`
+***** Goals [0/0]
+      - [ ] ?

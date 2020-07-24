@@ -1,0 +1,18 @@
+#+STARTUP: content
+
+* Taskpaper mode
+  Enable Taskpaper aware ways of working.
+  #+begin_src emacs-lisp :tangle yes
+    (use-package taskpaper-mode
+      :config
+      (setq taskpaper-tag-alist
+            '(("today"       . ?t)
+              ("due(%%)"     . ?d)
+              ("due(%%+7d)"  . ?s)
+              ("priority(1)" . ?1)
+              ("priority(2)" . ?2)
+              ("priority(3)" . ?3))))
+
+    (add-hook 'taskpaper-mode-hook
+              '(lambda () (highlignt-indent-guides-mode 1)))
+  #+end_src

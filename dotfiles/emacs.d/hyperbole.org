@@ -1,0 +1,10 @@
+* Hyperbole
+  A possible replacement, or very strong complement to, Orgmode.
+
+  [[https://www.gnu.org/software/hyperbole/][GNU Hyperbole - The Everyday Hypertextual Information Manager]]
+
+  #+name: hyperbole-things
+  #+begin_src emacs-lisp :tangle yes
+    (use-package hyperbole
+      :defer t)
+  #+end_src

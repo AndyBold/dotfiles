@@ -1,0 +1,5 @@
+* Flyspell preferences
+  #+begin_src emacs-lisp :tangle yes
+    (use-package flyspell-popup)
+    (use-package flyspell-correct-ivy)
+  #+end_src

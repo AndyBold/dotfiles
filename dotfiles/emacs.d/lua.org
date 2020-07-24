@@ -1,0 +1,9 @@
+* Lua
+  #+begin_src emacs-lisp :tangle yes
+    (use-package company-lua
+      :config
+      (use-package lua-mode
+        :mode ("\\.lua\\'" . lua-mode)
+        :interpreter ("lua" . lua-mode))
+      )
+  #+end_src

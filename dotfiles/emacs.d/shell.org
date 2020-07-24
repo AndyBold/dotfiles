@@ -1,0 +1,49 @@
+* Shell
+  A holdover from an experiment of doing everything in Emacs.
+  Didn't like it.
+  But in case I ever try again, for posterity.
+
+  #+begin_src emacs-lisp :tangle yes
+    (use-package company-shell
+      :defer t)
+
+    ;; Give ansi-term a spin...
+    (defvar my-term-shell "/usr/bin/zsh")
+    (defadvice ansi-term (before force-bash)
+      "List shells before forcing bash."
+      (interactive (list my-term-shell)))
+    (ad-activate 'ansi-term)
+
+    ;; Finished means Finished
+    (defadvice term-sentinel (around my-advice-term-sentinel (proc msg))
+      "Finishing."
+      (if (memq (process-status proc) '(signal exit))
+          (let ((buffer (process-buffer proc)))
+            ad-do-it
+            (kill-buffer buffer))
+        ad-do-it))
+    (ad-activate 'term-sentinel)
+
+    ;; Toggle between char and line mode
+    (defun term-toggle-mode ()
+      "Toggle terminal mode between char and line."
+      (interactive)
+      (if (term-in-line-mode)
+          (term-char-mode)
+        (term-line-mode)))
+
+    ;; Hooks
+    (defun my-term-hook ()
+      "Set up hooks for terminal mode."
+      (goto-address-mode)
+      (local-set-key "\C-c\C-j" 'term-toggle-mode) ;; toggle line/char mode
+      (local-set-key "\C-c\C-k" 'term-toggle-mode)
+      (setq global-hl-line-mode nil)
+      (setq term-buffer-maximum-size 10000)
+      (setq-local ml-interactive? t) ;; for mode line
+      (setq-local show-dir-in-mode-line? t) ;; also mode linec'
+      (setq show-trailing-whitespace nil)
+      ;; disable company in favor of shell completion
+      (company-mode -1))
+    (add-hook 'term-mode-hook 'my-term-hook)
+  #+end_src

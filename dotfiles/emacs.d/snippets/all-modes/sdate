@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: .sdate
+# key: .sdate
+# --
+`(format-time-string "%Y-%m-%d")`

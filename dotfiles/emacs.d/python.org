@@ -1,0 +1,40 @@
+* Python
+
+  Use elpy, which requires some things.
+
+  # Either of these
+  pip install rope
+  pip install jedi
+
+  # flake8 for code checks
+  pip install flake8
+
+  # importmagic for automatic imports
+  pip install importmagic
+
+  # and autopep8 for automatic PEP8 formatting
+  pip install autopep8
+
+  # and yapf for code formatting
+  pip install yapf
+
+  #+begin_src emacs-lisp :tangle yes
+    (use-package elpy
+      :defer t
+      :config
+      (elpy-enable)
+      (setq elpy-rpc-backend "jedi")
+      (setq elpy-modules
+            (quote
+             (elpy-module-company
+              elpy-module-eldoc
+              elpy-module-pyvenv
+              elpy-module-yasnippet
+              elpy-module-sane-defaults))
+            )
+      )
+
+    (use-package pyvenv
+      :defer t)
+
+  #+end_src
