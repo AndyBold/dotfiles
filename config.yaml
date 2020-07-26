@@ -2,6 +2,7 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
+  showdiff: true
 dotfiles:
   d_aws:
     dst: ~/.aws
@@ -87,6 +88,12 @@ dotfiles:
   d_applescript:
     dst: ~/Library/Script Libraries
     src: applescript
+  d_fish:
+    dst: ~/.config/fish
+    src: fish/dotconfig
+  d_ohmyfish:
+    dst: ~/.config/omf
+    src: fish/omf
 profiles:
   Titan:
     dotfiles:
@@ -153,6 +160,8 @@ profiles:
     - d_homebin
     - f_precommit
     - d_applescript
+    - d_fish
+    - d_ohmyfish
   Logan:
     dotfiles:
     - f_zshrc
@@ -188,3 +197,5 @@ profiles:
     - f_precommit
     - f_ssh_config
     - d_gnupg
+    - d_fish
+    - d_ohmyfish
