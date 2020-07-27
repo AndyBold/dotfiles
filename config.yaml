@@ -3,6 +3,8 @@ config:
   create: true
   dotpath: dotfiles
   showdiff: true
+actions:
+  omfinstall: fish -c 'omf install'
 dotfiles:
   d_aws:
     dst: ~/.aws
@@ -94,6 +96,8 @@ dotfiles:
   d_ohmyfish:
     dst: ~/.config/omf
     src: fish/omf
+    actions:
+      - omfinstall
 profiles:
   Titan:
     dotfiles:
