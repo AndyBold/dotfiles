@@ -1,0 +1,5 @@
+#+TITLE: Readme
+
+* Andy Bold's dotfiles configuration
+
+I use [[https://github.com/deadc0de6/dotdrop][dotdrop]] to manage my dotfiles configuration. Any sensitive information is encrypted in =env.gpg=. I decrypt that to .secrets and use templates to add those secrets into the relevant dotfiles. I make them available to =dotdrop= using the method described in the Environment Variables section of [[https://github.com/deadc0de6/dotdrop/wiki/templating][the dotdrop templating documentation]].
