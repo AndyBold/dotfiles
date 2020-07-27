@@ -122,7 +122,7 @@ alias dotdrop='eval $(grep -v "^#" ~/src/dotfiles/.secrets) ~/src/dotfiles/dotdr
 # It isn't fussy, it will encrypt any .secrets, but I use it for dotdrop secrets
 envcrypt () {
   secret .secrets
-  mv .secrets.[0-9]*.env env.gpg
+  mv .secrets.[0-9]*.enc env.gpg
 }
 
 alias eme='
