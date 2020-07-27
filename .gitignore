@@ -1,3 +1,4 @@
 /.env
+/.secrets
 dotfiles/prelude-personal/custom.el
 /dotfiles/doom/*.dotdropbak
