@@ -66,6 +66,12 @@
 
 (ab-load-file-if-exists "~/.emacs-secrets.el")
 
+;;
+;; Generic Emacs things
+;;
+;; Keyboard shortcuts
+(global-set-key (kbd "C-c =") 'er/expand-region)
+
 ;; Make sure Tempo templating is enabled.
 (require 'org-tempo)
 (tempo-define-template "plain-src"
@@ -322,8 +328,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages '(git-auto-commit-mode))
- '(paradox-github-token "{{@@ env['personal_github_token']"))
-  IdentityFile {{@@ env['ld_id_file1'] @@}}
+ '(paradox-github-token "{{@@ env['personal_github_token'] @@}}"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
