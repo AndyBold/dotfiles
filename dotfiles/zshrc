@@ -116,13 +116,13 @@ reveal () {
 }
 
 # Portable dotfiles config installer
-alias dotdrop='eval $(grep -v "^#" ~/src/dotfiles/.env) ~/src/dotfiles/dotdrop.sh'
+alias dotdrop='eval $(grep -v "^#" ~/src/dotfiles/.secrets) ~/src/dotfiles/dotdrop.sh'
 
-# Encrypt the dotdrop .env
-# It isn't fussy, it will encrypt any .env, but I use it for dotdrop secrets
+# Encrypt the dotdrop .secrets
+# It isn't fussy, it will encrypt any .secrets, but I use it for dotdrop secrets
 envcrypt () {
-  secret .env
-  mv .env.[0-9]*.env env.gpg
+  secret .secrets
+  mv .secrets.[0-9]*.env env.gpg
 }
 
 alias eme='
