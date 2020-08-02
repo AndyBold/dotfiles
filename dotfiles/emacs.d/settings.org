@@ -1,6 +1,8 @@
-#+TITLE: Andy Bold's Emacs configuration
+#+TITLE: Andy Bold's Old Emacs configuration
 #+OPTIONS: toc:4 h:4
 #+STARTUP: showeverything
+
+This all became too large and complex, and my emacs load times were silly. Rather than try to figure out how to move everything to `autoload`, I started again with Doom Emacs. I'm occasionally copying things from here, but trying to do it in a Doomacs friendly way to keep the load times down.
 
 * Startup Config
 Do some things that we want to happen before everything else.
