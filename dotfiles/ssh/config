@@ -12,6 +12,9 @@ Host {{@@ env['ld_ssh_hosts'] @@}}
   IdentityFile {{@@ env['ld_id_file2'] @@}}
 {%@@ endif @@%}
 {%@@ if profile == "Groot" @@%}
+Host github.com
+  IdentityFile ~/.ssh/id_mba
+
 Host {{@@ env['ssh_home_host1_nick'] @@}}
   HostName {{@@ env['ssh_home_host1_hostname'] @@}}
   Port {{@@ env['ssh_home_host1_port'] @@}}
