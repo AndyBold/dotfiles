@@ -1,26 +1,28 @@
 ;;; $DOOMDIR/config.org -*- lexical-binding: t; -*-
 
 * Contents :TOC_3:
-- [[#my-illiterate-config-for-doom][My (il)literate config for doom]]
+- [[#my-illiterate-config-for-doom-emacs][My (il)literate config for Doom Emacs]]
   - [[#before-we-start][Before we start...]]
   - [[#who-am-i][Who Am I?]]
   - [[#look-and-feel][Look and Feel]]
   - [[#orgmode][Orgmode]]
-    - [[#org-file-location][Org file location]]
+    - [[#org-file-locations][Org file locations]]
     - [[#display-line-numbers][Display line numbers?]]
     - [[#support-for-encrypted-org-files][Support for encrypted org files]]
     - [[#state-keywords][State keywords]]
+    - [[#capture-templates][Capture templates]]
     - [[#agenda-configuration][Agenda configuration]]
     - [[#refile-configuration][Refile configuration]]
     - [[#org-roam][Org Roam]]
     - [[#org-journal-for-my-daybook][Org-journal for my daybook]]
+    - [[#enable-babel-support-for-restclient][Enable Babel support for restclient]]
   - [[#snippets-and-templates][Snippets and Templates]]
   - [[#key-bindings][Key bindings]]
   - [[#shell-mode][Shell mode]]
   - [[#magit][Magit]]
   - [[#random][Random]]
 
-* My (il)literate config for doom
+* My (il)literate config for Doom Emacs
 There comes a time in every emacsers life where they consider migrating to a literate config.
 
 For me, this time, it's when my Doom =config.el= hit the 350-ish line mark.
@@ -81,15 +83,18 @@ This is not a theme. It's just a place where I configure what theme to use, face
 #+end_src
 
 ** Orgmode
-*** Org file location
-#+begin_src emacs-lisp :tangle yes
-;; If you use `org' and don't want your org files in the default location below,
-;; change `org-directory'. It must be set before org loads!
-(setq org-directory "/Users/andyb/Google Drive File Stream/My Drive/org")
+*** Org file locations
+To keep things simple (i.e., to remove the need to encrypt/decrypt every file I work with) my main org folder is my work Google Drive.
 
+The rationale for this is that the main things I am concerned about keeping confidential are my work things. My personal things that need to be confidential are kept in other places. My work G-Drive is pre-approved for work things, so I don't need to crypto every org file.
+
+If any of my personal life leaks into the work drive then it won't be anything that I am concerned about anybody else seeing.
+**** The main org folder
+#+begin_src emacs-lisp :tangle yes
+(setq org-directory "/Users/andyb/Google Drive File Stream/My Drive/org")
 #+end_src
 *** Display line numbers?
-Yes, please.
+Yes, please. I like positional context.
 #+begin_src emacs-lisp :tangle yes
 (setq display-line-numbers-type t)
 
@@ -115,6 +120,22 @@ The default drawer name for logging state is =LOGBOOK=, but it doesn't hurt to b
 #+begin_src emacs-lisp :tangle yes
 (setq org-log-into-drawer "LOGBOOK")
 #+end_src
+*** Capture templates
+- A generic ToDo item
+  #+begin_src emacs-lisp :tangle yes
+  (add-to-list 'org-capture-templates
+               '("t" "Task" entry
+                 (file org-default-notes-file)
+                 "* TODO %?" :empty-lines 1))
+  #+end_src
+- Accomplishments
+  #+begin_src emacs-lisp :tangle yes
+(add-to-list 'org-capture-templates
+             '("A" "Achievement" entry
+               (file expand-file-name "achievements.org"
+                     org-directory)
+               "* %?" :empty-lines 1))
+  #+end_src
 
 *** Agenda configuration
 Remember the earlier mention of encrypted orgmode files? Let's make sure Agenda is aware of them.
@@ -214,6 +235,8 @@ I try to keep notes about what I'm working on through the day. Ideally they take
 
 I use [[https://github.com/bastibe/org-journal][org-journal]] to do the heavy lifting on filenames, formats, etc.
 
+Re =org-journal-time-format=, that is blank as I'm not bothered about what time I take a note. It just adds noise.
+
 #+begin_src emacs-lisp :tangle no
 (use-package org-journal
       :bind
@@ -226,7 +249,8 @@ I use [[https://github.com/bastibe/org-journal][org-journal]] to do the heavy li
   (org-journal-dir "/Users/andyb/Google Drive File Stream/My Drive/org/journal/")
       (org-journal-date-prefix "#+TITLE: ")
       (org-journal-file-format "%Y-%m-%d.org")
-      (org-journal-date-format "%A, %d %B %Y"))
+      (org-journal-date-format "%A, %d %B %Y")
+      (org-journal-time-format ""))
     (setq org-journal-enable-agenda-integration t)
 
   (defun org-journal-file-header-func (time)
@@ -246,10 +270,48 @@ I use [[https://github.com/bastibe/org-journal][org-journal]] to do the heavy li
   (org-download-enable)
   (setq org-download-method "directory"
     org-download-heading-lvl nil))
+#+end_src
 
-;;
-;; Restclient babel for Orgmode
-;;
+**** Daily entries
+I like this idea from [[https://github.com/howardabrams/dot-files/blob/master/emacs-org.org][Howard Abrams' org config]], of automatically inserting a 'daily' file of items that have to occur on certain days. A file called =journal-dailies.org= is auto-inserted for every day. If there are daily journal files that include a weekday abbreviation, such as =journal-mon.org= for Monday, then they are inserted on the relevant day.
+#+begin_src emacs-lisp :tangle yes
+(defun journal-file-insert ()
+  "Insert's the journal heading based on the file's name."
+  (interactive)
+  (let* ((year  (string-to-number (substring (buffer-name) 0 4)))
+         (month (string-to-number (substring (buffer-name) 4 6)))
+         (day   (string-to-number (substring (buffer-name) 6 8)))
+         (datim (encode-time 0 0 0 day month year)))
+
+      (insert (format-time-string org-journal-date-format datim))
+      (insert "\n\n  $0\n") ; Start with a blank separating line
+
+      ;; Note: The `insert-file-contents' leaves the cursor at the
+      ;; beginning, so the easiest approach is to insert these files
+      ;; in reverse order:
+
+      ;; If the journal entry I'm creating matches today's date:
+      (when (equal (file-name-base (buffer-file-name))
+                   (format-time-string "%Y%m%d"))
+        (insert-file-contents "journal-dailies-end.org")
+
+        ;; Insert dailies that only happen once a week:
+        (let ((weekday-template (downcase
+                                 (format-time-string "journal-%a.org"))))
+          (when (file-exists-p weekday-template)
+            (insert-file-contents weekday-template)))
+        (insert-file-contents "journal-dailies.org")
+        (insert "$0")
+
+        (let ((contents (buffer-string)))
+          (delete-region (point-min) (point-max))
+          (yas-expand-snippet contents (point-min) (point-max))))))
+
+(define-auto-insert "/[0-9]\\{8\\}$" [journal-file-insert])
+#+end_src
+
+*** Enable Babel support for restclient
+#+end_src
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((restclient . t)))
