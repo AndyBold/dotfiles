@@ -9,8 +9,8 @@ package gi
 package git-flow
 package makeme
 package nvm
-package osx
 package open_github
+package osx
 package pyenv
 package rbenv
 package sublime
