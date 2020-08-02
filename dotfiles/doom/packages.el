@@ -54,6 +54,7 @@
 
 (package! git-auto-commit-mode)
 (package! org-download)
+(package! toc-org)
 (package! jq-mode)
 (package! paradox)
 (package! pyvenv)

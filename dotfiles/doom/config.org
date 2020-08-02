@@ -1,5 +1,17 @@
 ;;; $DOOMDIR/config.org -*- lexical-binding: t; -*-
 
+* Contents :TOC:
+- [[#my-illiterate-config-for-doom][My (il)literate config for doom]]
+  - [[#before-we-start][Before we start...]]
+  - [[#who-am-i][Who Am I?]]
+  - [[#look-and-feel][Look and Feel]]
+  - [[#orgmode][Orgmode]]
+  - [[#snippets-and-templates][Snippets and Templates]]
+  - [[#key-bindings][Key bindings]]
+  - [[#shell-mode][Shell mode]]
+  - [[#magit][Magit]]
+  - [[#random][Random]]
+
 * My (il)literate config for doom
 There comes a time in every emacsers life where they consider migrating to a literate config.
 
