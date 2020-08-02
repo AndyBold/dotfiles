@@ -1,11 +1,19 @@
 ;;; $DOOMDIR/config.org -*- lexical-binding: t; -*-
 
-* Contents :TOC:
+* Contents :TOC_3:
 - [[#my-illiterate-config-for-doom][My (il)literate config for doom]]
   - [[#before-we-start][Before we start...]]
   - [[#who-am-i][Who Am I?]]
   - [[#look-and-feel][Look and Feel]]
   - [[#orgmode][Orgmode]]
+    - [[#org-file-location][Org file location]]
+    - [[#display-line-numbers][Display line numbers?]]
+    - [[#support-for-encrypted-org-files][Support for encrypted org files]]
+    - [[#state-keywords][State keywords]]
+    - [[#agenda-configuration][Agenda configuration]]
+    - [[#refile-configuration][Refile configuration]]
+    - [[#org-roam][Org Roam]]
+    - [[#org-journal-for-my-daybook][Org-journal for my daybook]]
   - [[#snippets-and-templates][Snippets and Templates]]
   - [[#key-bindings][Key bindings]]
   - [[#shell-mode][Shell mode]]
@@ -73,132 +81,140 @@ This is not a theme. It's just a place where I configure what theme to use, face
 #+end_src
 
 ** Orgmode
+*** Org file location
 #+begin_src emacs-lisp :tangle yes
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "/Users/andyb/Google Drive File Stream/My Drive/org")
 
-;; This determines the style of line numbers in effect. If set to `nil', line
-;; numbers are disabled. For relative line numbers, set this to `relative'.
+#+end_src
+*** Display line numbers?
+Yes, please.
+#+begin_src emacs-lisp :tangle yes
 (setq display-line-numbers-type t)
 
-
-;; Here are some additional functions/macros that could help you configure Doom:
-;;
-;; - `load!' for loading external *.el files relative to this one
-;; - `use-package!' for configuring packages
-;; - `after!' for running code after a package has loaded
-;; - `add-load-path!' for adding directories to the `load-path', relative to
-;;   this file. Emacs searches the `load-path' when you load packages with
-;;   `require' or `use-package'.
-;; - `map!' for binding new keys
-;;
-;; To get information about any of these functions/macros, move the cursor over
-;; the highlighted symbol at press 'K' (non-evil users must press 'C-c c k').
-;; This will open documentation for it, including demos of how they are used.
-;;
-;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
-;; they are implemented.
-;;
-
-;;
-;; Orgmode configuration
-;;
-
-;; Add .org.gpg file suffix to the auto-mode list
+#+end_src
+*** Support for encrypted org files
+I may encrypt files that contain sensitive info. This adds .org.gpg file suffix to the auto-mode list for =orgmode=. The sequences in braces after the long state names are the shortcut keys.
+#+begin_src emacs-lisp :tangle yes
 (add-to-list 'auto-mode-alist '("\\.org\\.gpg" . org-mode))
+#+end_src
+*** State keywords
+These are my ToDo workflow states. When I'm on a header and hit =C-c C-t= these are the options that I see for the todo state.
 
-;; Configure todo keywords
+If the shortcut key has a "!" following it then a timestamp is added to a LOGBOOK drawer attached to the todo when it transitions to that state. Good for "When did I finish that?", and also "When did I start it?". If I want to include a note with a timestamp then I need to change "!" to "@".
 
+The "/" in =WAIT= and =HOLD= also results in a timestamp being added when an item leaves that state. I.e., "When was I able to stop waiting and continue with this task?"
+#+begin_src emacs-lisp :tangle yes
 (setq org-todo-keywords
   '((sequence "TODO(t)" "PROJ(p)" "STRT(s!)" "WAIT(w@/!)" "HOLD(h@/!)" "|" "DONE(d!)" "KILL(k!)")
     (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
+#+end_src
 
-;; Keep a log of when a task was completed.
+The default drawer name for logging state is =LOGBOOK=, but it doesn't hurt to be explicit.
+#+begin_src emacs-lisp :tangle yes
 (setq org-log-into-drawer "LOGBOOK")
+#+end_src
 
-;; Configure fancy-priorities
-(after! org-fancy-priorities
-  (add-hook! org-mode . org-fancy-priorities-mode)
-  (setq org-fancy-priorities-list '("⚡" "⬆" "⬇" "☕")))
-
-;; Refile configuration
-
-;; Tell Agenda mode to include .org.gpg files
+*** Agenda configuration
+Remember the earlier mention of encrypted orgmode files? Let's make sure Agenda is aware of them.
+#+begin_src emacs-lisp :tangle yes
 (unless (string-match-p "\\.gpg" org-agenda-file-regexp)
   (setq org-agenda-file-regexp
     (replace-regexp-in-string "\\\\\\.org" "\\\\.org\\\\(\\\\.gpg\\\\)?"
       org-agenda-file-regexp)))
+#+end_src
 
-;; Expand Agenda targets to include .org.gpg. Refile uses these to build it's list of places
+*** Refile configuration
+Expand Agenda targets to include .org.gpg. Refile uses these to build it's list of places.
+#+begin_src emacs-lisp :tangle yes
 (add-to-list 'org-agenda-files (expand-file-name "~/Documents/org/*\\.org\\.gpg"))
+#+end_src
 
-;; Targets include the current file and any file contributing to the agenda - up to 9 levels deep
+Configure the list of file names that we want to refile to. I think I am too liberal with this and need to trim it down. For now, it is the current file plus any file defined in =org-agenda-files=.
+#+begin_src emacs-lisp :tangle yes
 (setq org-refile-targets (quote ((nil :maxlevel . 4)
                                 (org-agenda-files :maxlevel . 4)
                                 )))
+#+end_src
 
-;; Use full outline paths for refile targets
+Because I am being so liberal with my refile targets I like to see the full path for the refile options. Also, if I am typing in a target manually and using =Tab= expansion, do the expansion in steps. Don't be greedy.
+#+begin_src emacs-lisp :tangle yes
 (setq org-refile-use-outline-path t)
-
-;; Targets complete directly with IDO
 (setq org-outline-path-complete-in-steps nil)
+#+end_src
 
-;; Allow refile to create parent tasks with confirmation
+If I am refiling something from three levels deep, tell refile to create the parent nodes in the refile target too, but ask first. I usually need the context, but I may not.
+#+begin_src emacs-lisp :tangle yes
 (setq org-refile-allow-creating-parent-nodes (quote confirm))
+#+end_src
 
+I cannot remember where I stole this from. I won't ever want to refile to a completed TODO item, so they are excluded from the refile targets.
+#+begin_src emacs-lisp :tangle yes
 ;; Exclude DONE state tasks from refile targets
 (defun bh/verify-refile-target ()
   "Exclude todo keywords with a done state from refile targets."
    (not (member (nth 2 (org-heading-components)) org-done-keywords)))
 
 (setq org-refile-target-verify-function 'bh/verify-refile-target)
+#+end_src
 
-;; I haven't invested enough (any) time in properly getting to grips with
-;; org-roam, so it's disabled for now.
-;; org-roam
-;;
-;;(setq org-roam-directory "~/Documents/org/launchdarkly")
-;;
-;;(after! org-roam
-;;        (map! :leader
-;;            :prefix "n"
-;;            :desc "org-roam" "l" #'org-roam
-;;            :desc "org-roam-insert" "i" #'org-roam-insert
-;;            :desc "org-roam-switch-to-buffer" "b" #'org-roam-switch-to-buffer
-;;            :desc "org-roam-find-file" "f" #'org-roam-find-file
-;;            :desc "org-roam-show-graph" "g" #'org-roam-show-graph
-;;            :desc "org-roam-insert" "i" #'org-roam-insert
-;;            :desc "org-roam-capture" "c" #'org-roam-capture))
-;;
-;;(require 'company-org-roam)
-;;    (use-package company-org-roam
-;;      :when (featurep! :completion company)
-;;      :after org-roam
-;;      :config
-;;      (set-company-backend! 'org-mode '(company-org-roam company-yasnippet company-dabbrev)))
-;;
-;;(after! org-roam
-;;  (setq org-roam-encrypt-files t)
-;;  (setq org-roam-ref-capture-templates
-;;    '(("r" "ref" plain (function org-roam-capture--get-point)
-;;        "%?"
-;;        :file-name "websites/${slug}.org.gpg"
-;;        :head "-*- epa-file-encrypt-to: ("andy.bold@me.com") -*-
-;;#+TITLE: ${title}
-;;    #+ROAM_KEY: ${ref}
-;;    - source :: ${ref}"
-;;        :unnarrowed t)))
-;;
-;;  (setq org-roam-capture-templates
-;;    '(("d" "default" plain (function org-roam--capture-get-point)
-;;       "%?"
-;;       :file-name "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}\" (current-time) t)"
-;;       :head "-*- epa-file-encrypt-to: (\"andy.bold@me.com\") -*-
-;;
-;;#+TITLE: ${title}\n"
-;;       :unnarrowed t))))
+*** Org Roam
+I am interested in getting to grips with [[https://zettelkasten.de][Zettelkasten]] methods for note taking.
 
+[[https://www.orgroam.com][Org-roam]] is an Orgmode implementation of the popular [[https://roamresearch.com][Roam]] web-based tool that supports Zettelkasten methods. I haven't, yet, taken the time to learn and implement this, so it is disabled.
+
+I'm interested in understanding if/how the org-roam sidebar can surface notes related to whatever I am working on, and writing in may daybook about, in the org-roam sidebar. However, until I've invested the time the empty org-roam sidebar is a distraction, hence it being disabled for now.
+#+begin_src emacs-lisp :tangle no
+
+(setq org-roam-directory "~/Documents/org")
+
+(after! org-roam
+       (map! :leader
+           :prefix "n"
+           :desc "org-roam" "l" #'org-roam
+           :desc "org-roam-insert" "i" #'org-roam-insert
+           :desc "org-roam-switch-to-buffer" "b" #'org-roam-switch-to-buffer
+           :desc "org-roam-find-file" "f" #'org-roam-find-file
+           :desc "org-roam-show-graph" "g" #'org-roam-show-graph
+           :desc "org-roam-insert" "i" #'org-roam-insert
+           :desc "org-roam-capture" "c" #'org-roam-capture))
+
+(require 'company-org-roam)
+   (use-package company-org-roam
+     :when (featurep! :completion company)
+     :after org-roam
+     :config
+     (set-company-backend! 'org-mode '(company-org-roam company-yasnippet company-dabbrev)))
+
+(after! org-roam
+ (setq org-roam-encrypt-files t)
+ (setq org-roam-ref-capture-templates
+   '(("r" "ref" plain (function org-roam-capture--get-point)
+       "%?"
+       :file-name "websites/${slug}.org.gpg"
+       :head "-*- epa-file-encrypt-to: ("andy.bold@me.com") -*-
+,#+TITLE: ${title}
+   ,#+ROAM_KEY: ${ref}
+   - source :: ${ref}"
+       :unnarrowed t)))
+
+ (setq org-roam-capture-templates
+   '(("d" "default" plain (function org-roam--capture-get-point)
+      "%?"
+      :file-name "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}\" (current-time) t)"
+      :head "-*- epa-file-encrypt-to: (\"andy.bold@me.com\") -*-
+
+,#+TITLE: ${title}\n"
+      :unnarrowed t))))
+#+end_src
+
+*** Org-journal for my daybook
+I try to keep notes about what I'm working on through the day. Ideally they take a [[http://howardism.org/Technical/Emacs/literate-devops.html][Literate DevOps]] approach.
+
+I use [[https://github.com/bastibe/org-journal][org-journal]] to do the heavy lifting on filenames, formats, etc.
+
+#+begin_src emacs-lisp :tangle no
 (use-package org-journal
       :bind
       ("C-c j n" . org-journal-new-entry)
@@ -240,6 +256,7 @@ This is not a theme. It's just a place where I configure what theme to use, face
 #+end_src
 
 ** Snippets and Templates
+I should probably go all-in with yasnippets, but until I do...
 #+begin_src emacs-lisp :tangle yes
 ;; Make sure Tempo templating is enabled.
 (require 'org-tempo)
@@ -278,21 +295,24 @@ This is not a theme. It's just a place where I configure what theme to use, face
 #+end_src
 
 ** Key bindings
+Some key bindings that don't fit anywhere else.
 #+begin_src emacs-lisp :tangle yes
 (global-set-key (kbd "C-c =") 'er/expand-region)
 #+end_src
 
 ** Shell mode
 I recently started to use vterm, and it is a game changer for me, at least compared to =eshell=. There isn't much in here at the moment, but that may change.
+
+All that I have at the moment is a hook to help deal with Ansi colour filtering in shell mode.
 #+begin_src emacs-lisp :tangle yes
-;; Hook Ansi colour filtering into shell mode
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
 #+end_src
 
 ** Magit
 Pretty Magit configures Magit to display unicode chars to replace text strings in Git messages. It only affects Emacs. Git messages contain the full string. More details are available at [[http://www.modernemacs.com/post/pretty-magit/][Modern Emacs]].
 
-That is the extent of my Magit config tweaks at the moment.
+This is the extent of my Magit config tweaks at the moment.
+
 #+begin_src emacs-lisp :tangle yes
 (require 'dash)
 
@@ -368,7 +388,7 @@ That is the extent of my Magit config tweaks at the moment.
 #+end_src
 
 ** Random
-Some things set through =custom= that I haven't give a proper home to yet.
+Some things set through =custom= that I haven't given a proper home to yet.
 #+begin_src emacs-lisp :tangle yes
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
