@@ -150,6 +150,7 @@ profiles:
     - f_emacsprofiles
     - d_emacs.d
     - d_emacsprelude
+    - d_doom_emacs.d
     - f_mbsyncrc
     - f_msmtprc
     - f_nethackrc
