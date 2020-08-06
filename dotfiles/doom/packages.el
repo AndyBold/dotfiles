@@ -52,11 +52,20 @@
 ;; (package! company-org-roam
 ;;    :recipe (:host github :repo "jethrokuan/company-org-roam"))
 
+
+(package! exec-path-from-shell)
+
 (package! git-auto-commit-mode)
-(package! org-download)
-(package! jq-mode)
-(package! paradox)
-(package! pyvenv)
+(package! org-download
+  :after org-mode)
+(package! toc-org
+  :after org-mode)
+(package! jq-mode
+  :defer t)
+(package! paradox
+  :defer t)
+(package! pyvenv
+  :defer t)
 
 (use-package! org-fancy-priorities
   :hook (org-mode . org-fancy-priorities-mode)

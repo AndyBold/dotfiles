@@ -30,6 +30,9 @@
 (setq doom-variable-pitch-font "Gill Sans")
 (setq doom-theme 'doom-nord)
 
+(exec-path-from-shell-copy-env "GPG_TTY")
+(exec-path-from-shell-copy-env "SSH_AUTH_SOCK")
+
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "/Users/andyb/Google Drive File Stream/My Drive/org")
@@ -221,6 +224,7 @@
       (org-journal-file-format "%Y-%m-%d.org")
       (org-journal-date-format "%A, %d %B %Y"))
     (setq org-journal-enable-agenda-integration t)
+    (setq org-journal-time-format "")
 
   (defun org-journal-file-header-func (time)
   "Custom function to create journal header."
