@@ -1,40 +1,50 @@
-;;; $DOOMDIR/config.org -*- lexical-binding: t; -*-
-
-* Contents :TOC_3:
-- [[#my-illiterate-config-for-doom-emacs][My (il)literate config for Doom Emacs]]
-  - [[#before-we-start][Before we start...]]
-  - [[#who-am-i][Who Am I?]]
-  - [[#look-and-feel][Look and Feel]]
-  - [[#orgmode][Orgmode]]
-    - [[#org-file-locations][Org file locations]]
-    - [[#display-line-numbers][Display line numbers?]]
-    - [[#support-for-encrypted-org-files][Support for encrypted org files]]
-    - [[#state-keywords][State keywords]]
-    - [[#capture-templates][Capture templates]]
-    - [[#agenda-configuration][Agenda configuration]]
-    - [[#refile-configuration][Refile configuration]]
-    - [[#org-roam][Org Roam]]
-    - [[#org-journal-for-my-daybook][Org-journal for my daybook]]
-    - [[#enable-babel-support-for-restclient][Enable Babel support for restclient]]
-  - [[#snippets-and-templates][Snippets and Templates]]
-  - [[#key-bindings][Key bindings]]
-  - [[#shell-mode][Shell mode]]
-  - [[#magit][Magit]]
-  - [[#random][Random]]
-
-* My (il)literate config for Doom Emacs
-There comes a time in every emacsers life where they consider migrating to a literate config.
-
-For me, this time, it's when my Doom =config.el= hit the 350-ish line mark.
-
-I would normally split this into a number of files to be loaded separately, but Doom Emacs doesn't seem to like that - or my literate configuration for Doom Emacs isn't correct - as Doom only seemed to process this file, and not the files that this file was loading.
-
-I am managing this file with [[https://github.com/deadc0de6/dotdrop][dotdrop]] so some of the code you will see is Jinja template code. It should be obvious what's what.
-
-** Before we start...
-Occasionally there are things that I don't want to put in source control in any format. They are often context specific, and if I need them in Emacs then this is how I make them available.
+* My /n/th literal emacs configuration
+** Initial setup
 #+begin_src emacs-lisp :tangle yes
-;; Load in some personal config before doing anything else
+;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
+
+#+end_src
+
+*** Personal details
+#+begin_src emacs-lisp :tangle yes
+;; Some functionality uses this to identify you, e.g. GPG configuration, email
+;; clients, file templates and snippets.
+(setq user-full-name "Andy Bold"
+      user-mail-address "{{@@ env['work_git_email'] @@}}")
+
+#+end_src
+
+*** Configure base fonts
+#+begin_src emacs-lisp :tangle yes
+(setq doom-font "Input Mono")
+(setq doom-variable-pitch-font "Gill Sans")
+(setq doom-theme 'doom-nord)
+
+#+end_src
+
+*** Talk to my ssh-agent
+#+begin_src emacs-lisp :tangle yes
+(exec-path-from-shell-copy-env "GPG_TTY")
+(exec-path-from-shell-copy-env "SSH_AUTH_SOCK")
+
+#+end_src
+
+*** Where's my org?
+#+begin_src emacs-lisp :tangle yes
+(setq org-directory "/Users/andyb/Google Drive File Stream/My Drive/org")
+
+#+end_src
+
+*** Display line numbers? (Yes.)
+#+begin_src emacs-lisp :tangle yes
+;; This determines the style of line numbers in effect. If set to `nil', line
+;; numbers are disabled. For relative line numbers, set this to `relative'.
+(setq display-line-numbers-type t)
+
+#+end_src
+
+*** Some things don't go into git
+#+begin_src emacs-lisp :tangle yes
 (defun ab-load-file-if-exists (&rest paths)
   "Load files when they exists."
   (dolist (file-path paths)
@@ -42,103 +52,112 @@ Occasionally there are things that I don't want to put in source control in any 
     (load file-path))))
 
 (ab-load-file-if-exists "~/.emacs-secrets.el")
+
 #+end_src
 
-** Who Am I?
+*** Keyboard shortcuts
 #+begin_src emacs-lisp :tangle yes
-;; Some functionality uses this to identify you, e.g. GPG configuration, email
-;; clients, file templates and snippets.
-(setq user-full-name "Andy Bold"
-{%@@ if profile == "Nightcrawler" @@%}
-      user-mail-address "{{@@ env['work_git_email'] @@}}")
-{%@@ elif profile == "Groot" @@%}
-      user-mail-address "{{@@ env['my_email'] @@}}")
-{%@@ endif @@%}
+(global-set-key (kbd "C-c =") 'er/expand-region)
 
 #+end_src
 
-** Look and Feel
-This is not a theme. It's just a place where I configure what theme to use, face configs, and so on. Anything that affects Emacs bling.
+** Package management
+I let Doom manage my packages. If I need to look something up then I use Paradox
 #+begin_src emacs-lisp :tangle yes
-;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
-;; are the three important ones:
-;;
-;; + `doom-font'
-;; + `doom-variable-pitch-font'
-;; + `doom-big-font' -- used for `doom-big-font-mode'; use this for
-;;   presentations or streaming.
-;;
-;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
-;; font string. You generally only need these two:
-;; (setq doom-font (font-spec :family "monospace" :size 12 :weight 'semi-light)
-;;       doom-variable-pitch-font (font-spec :family "sans" :size 13))
-
-;; There are two ways to load a theme. Both assume the theme is installed and
-;; available. You can either set `doom-theme' or manually load a theme with the
-;; `load-theme' function. This is the default:
-
-(setq doom-font "Input Mono")
-(setq doom-variable-pitch-font "Gill Sans")
-(setq doom-theme 'doom-nord)
+(setq paradox-github-token "{{@@ env['personal_github_token'] @@}}")
 #+end_src
+
+
+** Snippets and templates
+I need to move these to yasnippets at some point.
+
+Start by making sure that org-tempo is enabled.
+#+begin_src emacs-lisp :tangle yes
+(require 'org-tempo)
+
+#+end_src
+
+Set up some templates for Babel.
+#+begin_src emacs-lisp :tangle yes
+(tempo-define-template "plain-src"
+                       '("#+begin_src ?\n\n" > "#+end_src")
+                       "<s"
+                       "Insert a generic source code template")
+
+(tempo-define-template "lisp-block"
+                       '("#+begin_src emacs-lisp :tangle yes\n?\n" > "#+end_src")
+                       "<sl"
+                       "Insert an embedded Lisp block for literate emacs.d")
+
+(tempo-define-template "k8s"
+                       '("#+name: k8s\n#+begin_src shell :tangle no :results output\n?\n" > "#+end_src")
+                       "<sk"
+                       "Insert a, non-tangled, k8s block")
+
+(tempo-define-template "shell-code"
+                       '("#+begin_src shell :tangle no :results value raw :results value drawer :session" > "\n\n#+end_src")
+                       "<ss"
+                       "Shell code block, with raw results")
+
+(tempo-define-template "properties-block"
+                       '(":PROPERTIES:\n" > ":END:")
+                       "<PROP"
+                       "Orgmode properties block")
+(tempo-define-template "python-code"
+                       '("#+begin_src python :tangle no :results value raw :results value drawer :session" > "\n\n#+end_src")
+                       "<sp"
+                       "Python code block, with raw results")
+(tempo-define-template "plantuml"
+                       '("#+begin_src plantuml :tangle no :results value raw :results value drawer :session" > "\n\n#+end_src")
+                       "<puml"
+                       "Plantuml")
+
+#+end_src
+
+** EShell configuration.
+When I need a quick shell I use VTerm. This is for org-babel.
+
+Hook Ansi colour filtering into shell mode
+#+begin_src emacs-lisp :tangle yes
+(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
+
+#+end_src
+
 
 ** Orgmode
-*** Org file locations
-To keep things simple (i.e., to remove the need to encrypt/decrypt every file I work with) my main org folder is my work Google Drive.
+If I need to keep anything confidential in a .org then it gets GPG encrypted. Configure Org to deal with that when it happens.
 
-The rationale for this is that the main things I am concerned about keeping confidential are my work things. My personal things that need to be confidential are kept in other places. My work G-Drive is pre-approved for work things, so I don't need to crypto every org file.
-
-If any of my personal life leaks into the work drive then it won't be anything that I am concerned about anybody else seeing.
-**** The main org folder
-#+begin_src emacs-lisp :tangle yes
-(setq org-directory "/Users/andyb/Google Drive File Stream/My Drive/org")
-#+end_src
-*** Display line numbers?
-Yes, please. I like positional context.
-#+begin_src emacs-lisp :tangle yes
-(setq display-line-numbers-type t)
-
-#+end_src
-*** Support for encrypted org files
-I may encrypt files that contain sensitive info. This adds .org.gpg file suffix to the auto-mode list for =orgmode=. The sequences in braces after the long state names are the shortcut keys.
+Add .org.gpg file suffix to the auto-mode list
 #+begin_src emacs-lisp :tangle yes
 (add-to-list 'auto-mode-alist '("\\.org\\.gpg" . org-mode))
+
 #+end_src
-*** State keywords
-These are my ToDo workflow states. When I'm on a header and hit =C-c C-t= these are the options that I see for the todo state.
 
-If the shortcut key has a "!" following it then a timestamp is added to a LOGBOOK drawer attached to the todo when it transitions to that state. Good for "When did I finish that?", and also "When did I start it?". If I want to include a note with a timestamp then I need to change "!" to "@".
-
-The "/" in =WAIT= and =HOLD= also results in a timestamp being added when an item leaves that state. I.e., "When was I able to stop waiting and continue with this task?"
+*** ToDo configuration
+Configure todo keywords.
 #+begin_src emacs-lisp :tangle yes
 (setq org-todo-keywords
   '((sequence "TODO(t)" "PROJ(p)" "STRT(s!)" "WAIT(w@/!)" "HOLD(h@/!)" "|" "DONE(d!)" "KILL(k!)")
     (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)")))
+
 #+end_src
 
-The default drawer name for logging state is =LOGBOOK=, but it doesn't hurt to be explicit.
+Keep a log of when a task was completed.
 #+begin_src emacs-lisp :tangle yes
 (setq org-log-into-drawer "LOGBOOK")
-#+end_src
-*** Capture templates
-- A generic ToDo item
-  #+begin_src emacs-lisp :tangle yes
-  (add-to-list 'org-capture-templates
-               '("t" "Task" entry
-                 (file org-default-notes-file)
-                 "* TODO %?" :empty-lines 1))
-  #+end_src
-- Accomplishments
-  #+begin_src emacs-lisp :tangle yes
-(add-to-list 'org-capture-templates
-             '("A" "Achievement" entry
-               (file expand-file-name "achievements.org"
-                     org-directory)
-               "* %?" :empty-lines 1))
-  #+end_src
 
-*** Agenda configuration
-Remember the earlier mention of encrypted orgmode files? Let's make sure Agenda is aware of them.
+#+end_src
+
+*** Fancy priorities.
+#+begin_src emacs-lisp :tangle yes
+(after! org-fancy-priorities
+  (add-hook! org-mode . org-fancy-priorities-mode)
+  (setq org-fancy-priorities-list '("⚡" "⬆" "⬇" "☕")))
+
+#+end_src
+
+*** Agenda configuration.
+Tell Agenda mode to include .org.gpg files.
 #+begin_src emacs-lisp :tangle yes
 (unless (string-match-p "\\.gpg" org-agenda-file-regexp)
   (setq org-agenda-file-regexp
@@ -146,49 +165,52 @@ Remember the earlier mention of encrypted orgmode files? Let's make sure Agenda 
       org-agenda-file-regexp)))
 #+end_src
 
-*** Refile configuration
-Expand Agenda targets to include .org.gpg. Refile uses these to build it's list of places.
+Expand Agenda targets to include .org.gpg. Refile uses these below to build it's list of places it can save to.
 #+begin_src emacs-lisp :tangle yes
 (add-to-list 'org-agenda-files (expand-file-name "~/Documents/org/*\\.org\\.gpg"))
 #+end_src
 
-Configure the list of file names that we want to refile to. I think I am too liberal with this and need to trim it down. For now, it is the current file plus any file defined in =org-agenda-files=.
+*** Refile
+Refile targets include the current file and any file contributing to the agenda - up to 9 levels deep.
 #+begin_src emacs-lisp :tangle yes
 (setq org-refile-targets (quote ((nil :maxlevel . 4)
                                 (org-agenda-files :maxlevel . 4)
                                 )))
 #+end_src
 
-Because I am being so liberal with my refile targets I like to see the full path for the refile options. Also, if I am typing in a target manually and using =Tab= expansion, do the expansion in steps. Don't be greedy.
+Use full outline paths for refile targets.
 #+begin_src emacs-lisp :tangle yes
 (setq org-refile-use-outline-path t)
-(setq org-outline-path-complete-in-steps nil)
+
 #+end_src
 
-If I am refiling something from three levels deep, tell refile to create the parent nodes in the refile target too, but ask first. I usually need the context, but I may not.
+Refile targets complete directly with IDO.
+#+begin_src emacs-lisp :tangle yes
+(setq org-outline-path-complete-in-steps nil)
+
+#+end_src
+
+Allow refile to create parent tasks with confirmation.
 #+begin_src emacs-lisp :tangle yes
 (setq org-refile-allow-creating-parent-nodes (quote confirm))
 #+end_src
 
-I cannot remember where I stole this from. I won't ever want to refile to a completed TODO item, so they are excluded from the refile targets.
+Exclude DONE state tasks from refile targets.
 #+begin_src emacs-lisp :tangle yes
-;; Exclude DONE state tasks from refile targets
-(defun bh/verify-refile-target ()
+(defun ab/verify-refile-target ()
   "Exclude todo keywords with a done state from refile targets."
    (not (member (nth 2 (org-heading-components)) org-done-keywords)))
 
-(setq org-refile-target-verify-function 'bh/verify-refile-target)
+(setq org-refile-target-verify-function 'ab/verify-refile-target)
 #+end_src
 
-*** Org Roam
-I am interested in getting to grips with [[https://zettelkasten.de][Zettelkasten]] methods for note taking.
+*** org-roam
+I haven't invested enough (any) time in properly getting to grips with
+org-roam, so it's disabled for now.
 
-[[https://www.orgroam.com][Org-roam]] is an Orgmode implementation of the popular [[https://roamresearch.com][Roam]] web-based tool that supports Zettelkasten methods. I haven't, yet, taken the time to learn and implement this, so it is disabled.
-
-I'm interested in understanding if/how the org-roam sidebar can surface notes related to whatever I am working on, and writing in may daybook about, in the org-roam sidebar. However, until I've invested the time the empty org-roam sidebar is a distraction, hence it being disabled for now.
 #+begin_src emacs-lisp :tangle no
 
-(setq org-roam-directory "~/Documents/org")
+(setq org-roam-directory "~/Documents/org/launchdarkly")
 
 (after! org-roam
        (map! :leader
@@ -230,15 +252,9 @@ I'm interested in understanding if/how the org-roam sidebar can surface notes re
       :unnarrowed t))))
 #+end_src
 
-*** Org-journal for my daybook
-I try to keep notes about what I'm working on through the day. Ideally they take a [[http://howardism.org/Technical/Emacs/literate-devops.html][Literate DevOps]] approach.
-
-I use [[https://github.com/bastibe/org-journal][org-journal]] to do the heavy lifting on filenames, formats, etc.
-
-Re =org-journal-time-format=, that is blank as I'm not bothered about what time I take a note. It just adds noise.
-
-#+begin_src emacs-lisp :tangle no
-(use-package org-journal
+*** Journal
+#+begin_src emacs-lisp :tangle yes
+(use-package! org-journal
       :bind
       ("C-c j n" . org-journal-new-entry)
       ("C-c j <" . org-journal-open-previous-entry)
@@ -249,9 +265,9 @@ Re =org-journal-time-format=, that is blank as I'm not bothered about what time 
   (org-journal-dir "/Users/andyb/Google Drive File Stream/My Drive/org/journal/")
       (org-journal-date-prefix "#+TITLE: ")
       (org-journal-file-format "%Y-%m-%d.org")
-      (org-journal-date-format "%A, %d %B %Y")
-      (org-journal-time-format ""))
+      (org-journal-date-format "%A, %d %B %Y"))
     (setq org-journal-enable-agenda-integration t)
+    (setq org-journal-time-format "")
 
   (defun org-journal-file-header-func (time)
   "Custom function to create journal header."
@@ -263,8 +279,15 @@ Re =org-journal-time-format=, that is blank as I'm not bothered about what time 
       (`yearly "-*- mode: org; fill-column: 78 -*-\n#+STARTUP: folded\n"))))
 
   (setq org-journal-file-header 'org-journal-file-header-func)
+#+end_src
 
+Add a hook for org-download...
+#+begin_src emacs-lisp :tangle yes
 (add-hook 'dired-mode-hook 'org-download-enable)
+#+end_src
+
+...and enable it.
+#+begin_src emacs-lisp :tangle yes
 
 (after! org-journal
   (org-download-enable)
@@ -272,108 +295,13 @@ Re =org-journal-time-format=, that is blank as I'm not bothered about what time 
     org-download-heading-lvl nil))
 #+end_src
 
-**** Daily entries
-I like this idea from [[https://github.com/howardabrams/dot-files/blob/master/emacs-org.org][Howard Abrams' org config]], of automatically inserting a 'daily' file of items that have to occur on certain days. A file called =journal-dailies.org= is auto-inserted for every day. If there are daily journal files that include a weekday abbreviation, such as =journal-mon.org= for Monday, then they are inserted on the relevant day.
-#+begin_src emacs-lisp :tangle yes
-(defun journal-file-insert ()
-  "Insert's the journal heading based on the file's name."
-  (interactive)
-  (let* ((year  (string-to-number (substring (buffer-name) 0 4)))
-         (month (string-to-number (substring (buffer-name) 4 6)))
-         (day   (string-to-number (substring (buffer-name) 6 8)))
-         (datim (encode-time 0 0 0 day month year)))
 
-      (insert (format-time-string org-journal-date-format datim))
-      (insert "\n\n  $0\n") ; Start with a blank separating line
-
-      ;; Note: The `insert-file-contents' leaves the cursor at the
-      ;; beginning, so the easiest approach is to insert these files
-      ;; in reverse order:
-
-      ;; If the journal entry I'm creating matches today's date:
-      (when (equal (file-name-base (buffer-file-name))
-                   (format-time-string "%Y%m%d"))
-        (insert-file-contents "journal-dailies-end.org")
-
-        ;; Insert dailies that only happen once a week:
-        (let ((weekday-template (downcase
-                                 (format-time-string "journal-%a.org"))))
-          (when (file-exists-p weekday-template)
-            (insert-file-contents weekday-template)))
-        (insert-file-contents "journal-dailies.org")
-        (insert "$0")
-
-        (let ((contents (buffer-string)))
-          (delete-region (point-min) (point-max))
-          (yas-expand-snippet contents (point-min) (point-max))))))
-
-(define-auto-insert "/[0-9]\\{8\\}$" [journal-file-insert])
-#+end_src
-
-*** Enable Babel support for restclient
-#+end_src
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((restclient . t)))
-#+end_src
-
-** Snippets and Templates
-I should probably go all-in with yasnippets, but until I do...
-#+begin_src emacs-lisp :tangle yes
-;; Make sure Tempo templating is enabled.
-(require 'org-tempo)
-(tempo-define-template "plain-src"
-                       '("#+begin_src ?\n\n" > "#+end_src")
-                       "<s"
-                       "Insert a generic source code template")
-
-(tempo-define-template "lisp-block"
-                       '("#+begin_src emacs-lisp :tangle yes\n?\n" > "#+end_src")
-                       "<sl"
-                       "Insert an embedded Lisp block for literate emacs.d")
-
-(tempo-define-template "k8s"
-                       '("#+name: k8s\n#+begin_src shell :tangle no :results output\n?\n" > "#+end_src")
-                       "<sk"
-                       "Insert a, non-tangled, k8s block")
-
-(tempo-define-template "shell-code"
-                       '("#+begin_src shell :tangle no :results value raw :results value drawer :session" > "\n\n#+end_src")
-                       "<ss"
-                       "Shell code block, with raw results")
-
-(tempo-define-template "properties-block"
-                       '(":PROPERTIES:\n" > ":END:")
-                       "<PROP"
-                       "Orgmode properties block")
-(tempo-define-template "python-code"
-                       '("#+begin_src python :tangle no :results value raw :results value drawer :session" > "\n\n#+end_src")
-                       "<sp"
-                       "Python code block, with raw results")
-(tempo-define-template "plantuml"
-                       '("#+begin_src plantuml :tangle no :results value raw :results value drawer :session" > "\n\n#+end_src")
-                       "<puml"
-                       "Plantuml")
-#+end_src
-
-** Key bindings
-Some key bindings that don't fit anywhere else.
-#+begin_src emacs-lisp :tangle yes
-(global-set-key (kbd "C-c =") 'er/expand-region)
-#+end_src
-
-** Shell mode
-I recently started to use vterm, and it is a game changer for me, at least compared to =eshell=. There isn't much in here at the moment, but that may change.
-
-All that I have at the moment is a hook to help deal with Ansi colour filtering in shell mode.
-#+begin_src emacs-lisp :tangle yes
-(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
-#+end_src
 
 ** Magit
-Pretty Magit configures Magit to display unicode chars to replace text strings in Git messages. It only affects Emacs. Git messages contain the full string. More details are available at [[http://www.modernemacs.com/post/pretty-magit/][Modern Emacs]].
+Magit is the other reason that Emacs is so sticky for me. I haven't come across any IDE that does Git as well as magit does.
 
-This is the extent of my Magit config tweaks at the moment.
+*** Pretty Magit
+Might as well make it look good, then.
 
 #+begin_src emacs-lisp :tangle yes
 (require 'dash)
@@ -415,11 +343,10 @@ This is the extent of my Magit config tweaks at the moment.
 
 (advice-add 'magit-status :after 'add-magit-faces)
 (advice-add 'magit-refresh-buffer :after 'add-magit-faces)
+#+end_src
 
-;;;
-;;; Configure Ivy to prompt for a leader
-;;;
-
+Configure Ivy to prompt for a leader
+#+begin_src emacs-lisp :tangle yes
 (setq use-magit-commit-prompt-p nil)
 (defun use-magit-commit-prompt (&rest args)
   (setq use-magit-commit-prompt-p t))
@@ -443,26 +370,19 @@ This is the extent of my Magit config tweaks at the moment.
 (remove-hook 'git-commit-setup-hook 'with-editor-usage-message)
 (add-hook 'git-commit-setup-hook 'magit-commit-prompt)
 (advice-add 'magit-commit :after 'use-magit-commit-prompt)
+#+end_src
 
 ;;;
 ;;; END pretty magit
 ;;;
-#+end_src
-
-** Random
-Some things set through =custom= that I haven't given a proper home to yet.
-#+begin_src emacs-lisp :tangle yes
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages '(git-auto-commit-mode))
- '(paradox-github-token "{{@@ env['personal_github_token'] @@}}"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
-#+end_src

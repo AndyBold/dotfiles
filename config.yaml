@@ -5,6 +5,7 @@ config:
   showdiff: true
 actions:
   omfinstall: fish -c 'omf install'
+  doomsync: ~/doom-emacs/bin/doom sync
 dotfiles:
   d_aws:
     dst: ~/.aws
@@ -24,6 +25,8 @@ dotfiles:
   d_doom_emacs.d:
     dst: ~/.doom.d
     src: doom
+    actions:
+      - doomsync
   d_gnupg:
     dst: ~/.gnupg
     src: gnupg
