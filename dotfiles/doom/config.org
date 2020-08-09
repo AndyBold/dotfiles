@@ -18,7 +18,6 @@
 #+begin_src emacs-lisp :tangle yes
 (setq doom-font "Input Mono")
 (setq doom-variable-pitch-font "Gill Sans")
-(setq doom-theme 'doom-nord)
 
 #+end_src
 
@@ -55,7 +54,65 @@
 
 #+end_src
 
-*** Keyboard shortcuts
+** Look and feel
+#+begin_src emacs-lisp :tangle yes
+(setq doom-theme 'doom-Iosvkem)
+
+#+end_src
+*** Beacon
+Beacon helps you to find your cursor when you are scrolling around. It is installed in =packages.el=
+#+begin_src emacs-lisp :tangle yes
+(setq beacon-color +evil--emacs-cursor-color + -1)
+(setq beacon-blink-when-point-moves-vertically 10)
+(setq beacon-dont-blink-major-modes '(dashboard-mode))
+(beacon-mode 1)
+#+end_src
+
+*** Golden ratio
+I like splitting my editor window so that I can see more than one file that I'm working on. Sometimes it's essential. For example, if I'm working on a Terraform module, and I want to keep an eye on several bits of relevant info.
+
+I don't like the way that Emacs handles this. Window sizes are usually 'wrong', and I spend too much time resizing them. Golden Ratio might fix this for me. I'm starting out with letting GR handle things automatically, but a max width of 120 characters.
+
+There are some buffers that should never be scaled. They are added to =golden-ratio-exclude-buffer-regexp=.
+
+That being said, Zoom is set up below and this block is currently disabled. Zoom might do a better job. Golden Ratio also appears to be unmaintained at the moment.
+#+begin_src emacs-lisp :tangle no
+(golden-ration-mode 1)
+(setq golden-ratio-auto-scale t)
+(setq golden-ratio-max-width 120)
+(add-to-list 'golden-ratio-exclude-buffer-regexp "^\\*[hH]elm.*")
+(add-to-list 'golden-ratio-exclude-buffer-regexp "^\\*vterm.*")
+
+#+end_src
+
+*** Zoom
+Automatically resize the active window.
+
+If the frame size is >1280 then use 100 columns and 75% of the frame height. Otherwise, make it a 50%x50% split.
+#+begin_src emacs-lisp :tangle yes
+(zoom-mode)
+(defun size-callback ()
+  (cond ((> (frame-pixel-width) 1280) '(100 . 0.75))
+        (t                            '(0.5 . 0.5))))
+
+(custom-set-variables
+ '(zoom-size 'size-callback))
+
+#+end_src
+
+*** Stripe buffer
+Use stripe-y buffer lists.
+
+#+begin_src emacs-lisp :tangle yes
+;; hl-line (higher priority stripes) fix:
+(defadvice sb/redraw-region (after stripe-set-priority activate)
+  (when (or stripe-buffer-mode stripe-table-mode)
+    (dolist (overlay sb/overlays)
+      (overlay-put overlay 'priority -100))))
+
+#+end_src
+
+** Keyboard shortcuts
 #+begin_src emacs-lisp :tangle yes
 (global-set-key (kbd "C-c =") 'er/expand-region)
 
@@ -372,17 +429,17 @@ Configure Ivy to prompt for a leader
 (advice-add 'magit-commit :after 'use-magit-commit-prompt)
 #+end_src
 
-;;;
-;;; END pretty magit
-;;;
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+*** Magit TODOs
+Configure Magit to show TODO items in the Magit buffer
+#+begin_src emacs-lisp :tangle yes
+(add-hook! magit-mode
+           (magit-todos-mode))
+
+#+end_src
+
+*** Magit Forge
+Interact with Git forges like Github via Magit. E.g., handle PRs.
+#+begin_src emacs-lisp :tangle yes
+(defadvice magit-pull-from-upstream (after forge-pull activate)
+  (forge-pull))
+#+end_src

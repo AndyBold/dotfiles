@@ -27,6 +27,9 @@ dotfiles:
     src: doom
     actions:
       - doomsync
+  f_authinfo:
+    dst: ~/.authinfo.gpg
+    src: authinfo.gpg
   d_gnupg:
     dst: ~/.gnupg
     src: gnupg
@@ -154,6 +157,7 @@ profiles:
     - d_emacs.d
     - d_emacsprelude
     - d_doom_emacs.d
+    - f_authinfo
     - f_mbsyncrc
     - f_msmtprc
     - f_nethackrc
@@ -194,6 +198,7 @@ profiles:
     - f_emacsprofiles
     - d_emacsprelude
     - d_doom_emacs.d
+    - f_authinfo
     - f_nethackrc
     - f_screenrc
     - f_tmux.conf

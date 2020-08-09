@@ -23,3 +23,5 @@
 	keepBackup = true
 [commit]
 	gpgsign = true
+[github]
+	user = Andy Bold

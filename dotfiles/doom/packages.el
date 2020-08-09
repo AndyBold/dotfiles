@@ -62,8 +62,7 @@
   :after org-mode)
 (use-package! jq-mode
   :defer t)
-(use-package! paradox
-  :defer t)
+(package! paradox)
 (use-package! pyvenv
   :defer t)
 
@@ -71,3 +70,16 @@
   :hook (org-mode . org-fancy-priorities-mode)
   :config
   (setq org-fancy-priorities-list '("⚡" "⬆" "⬇" "☕")))
+
+;; Highlight the cursor when you're scrolling around.
+(package! beacon)
+
+;; Auto-resizing of the active window.
+(package! golden-ratio)
+(package! zoom)
+
+;; Use stripe-y buffer lists for readability.
+(package! stripe-buffer)
+
+;; Use Magit Forge
+(package! forge)
