@@ -83,3 +83,5 @@
 
 ;; Use Magit Forge
 (package! forge)
+
+(package! which-key-posframe)

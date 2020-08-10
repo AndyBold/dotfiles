@@ -1,4 +1,33 @@
-* My /n/th literal emacs configuration
+* My /n/th literal emacs configuration     :TOC_3:
+  - [[#initial-setup][Initial setup]]
+    - [[#personal-details][Personal details]]
+    - [[#configure-base-fonts][Configure base fonts]]
+    - [[#talk-to-my-ssh-agent][Talk to my ssh-agent]]
+    - [[#wheres-my-org][Where's my org?]]
+    - [[#display-line-numbers-yes][Display line numbers? (Yes.)]]
+    - [[#some-things-dont-go-into-git][Some things don't go into git]]
+  - [[#look-and-feel][Look and feel]]
+    - [[#beacon][Beacon]]
+    - [[#golden-ratio][Golden ratio]]
+    - [[#zoom][Zoom]]
+    - [[#stripe-buffer][Stripe buffer]]
+    - [[#which-key][Which Key]]
+  - [[#keyboard-shortcuts][Keyboard shortcuts]]
+  - [[#package-management][Package management]]
+  - [[#snippets-and-templates][Snippets and templates]]
+  - [[#eshell-configuration][EShell configuration.]]
+  - [[#orgmode][Orgmode]]
+    - [[#configuration][configuration]]
+    - [[#fancy-priorities][Fancy priorities.]]
+    - [[#agenda-configuration][Agenda configuration.]]
+    - [[#refile][Refile]]
+    - [[#org-roam][org-roam]]
+    - [[#journal][Journal]]
+  - [[#magit][Magit]]
+    - [[#pretty-magit][Pretty Magit]]
+    - [[#magit-todos][Magit TODOs]]
+    - [[#magit-forge][Magit Forge]]
+
 ** Initial setup
 #+begin_src emacs-lisp :tangle yes
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
@@ -109,6 +138,20 @@ Use stripe-y buffer lists.
   (when (or stripe-buffer-mode stripe-table-mode)
     (dolist (overlay sb/overlays)
       (overlay-put overlay 'priority -100))))
+
+#+end_src
+*** Which Key
+Doom has =which-key= configured out of the box. =which-key-posframe= causes =which-key= windows to work as a popover centred in the emacs frame.
+
+#+begin_src emacs-lisp :tangle yes
+(setq which-key-idle-secondary-delay 0)
+;;(which-key-side-window-max-height 0.99)
+
+(which-key-mode)
+(which-key-posframe-mode)
+
+(set-face-attribute 'which-key-posframe-border nil :background "slategray")
+(set-face-attribute 'which-key-posframe nil :background "darkslategray")
 
 #+end_src
 
