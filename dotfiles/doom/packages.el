@@ -85,3 +85,8 @@
 (package! forge)
 
 (package! which-key-posframe)
+
+(package! pyenv-mode)
+
+(after! pyenv-mode
+  (package! pyenv-virtualenv))
