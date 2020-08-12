@@ -111,6 +111,7 @@ That being said, Zoom is set up below and this block is currently disabled. Zoom
 (setq golden-ratio-max-width 120)
 (add-to-list 'golden-ratio-exclude-buffer-regexp "^\\*[hH]elm.*")
 (add-to-list 'golden-ratio-exclude-buffer-regexp "^\\*vterm.*")
+(add-to-list 'golden-ratio-exclude-buffer-regexp "^\\*ediff.*")
 
 #+end_src
 
@@ -125,7 +126,8 @@ If the frame size is >1280 then use 100 columns and 75% of the frame height. Oth
         (t                            '(0.5 . 0.5))))
 
 (custom-set-variables
- '(zoom-size 'size-callback))
+ '(zoom-size 'size-callback)
+ '(zoom-ignored-buffer-name-regexps '("^*ediff.*"))')
 
 #+end_src
 
