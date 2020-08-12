@@ -90,3 +90,5 @@
 
 (after! pyenv-mode
   (package! pyenv-virtualenv))
+
+(package! flyspell-lazy :pin "3ebf68cc9e...")
