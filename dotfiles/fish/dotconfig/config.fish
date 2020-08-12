@@ -23,9 +23,12 @@ if not __ssh_agent_is_started
 end
 
 # Use autoenv for .env parsing, if it is installed
-[ -e /usr/local/opt/autoenv_fish/activate.fish ] && source /usr/local/opt/autoenv_fish/activate.fish
+# Currently disabled as it's more trouble that it's worth
+# [ -e /usr/local/opt/autoenv_fish/activate.fish ] && source /usr/local/opt/autoenv_fish/activate.fish
 
 # Use autovenv for auto Python venv enable/disable
 set -U autovenv_enable yes
 set -U autovenv_announce yes
 
+# Configure enhancd
+set -U ENHANCD_FILTER fzf

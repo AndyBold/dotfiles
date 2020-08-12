@@ -15,6 +15,5 @@ package pyenv
 package rbenv
 package sublime
 package tab
-package z
 theme bobthefish
 theme default
