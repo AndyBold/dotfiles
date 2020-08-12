@@ -93,6 +93,9 @@ dotfiles:
   f_atlassian_envrc:
     dst: ~/bin/atlassian/.envrc
     src: atlassian/envrc
+  d_src_python:
+    dst: ~/src/python
+    src: src/python
   d_applescript:
     dst: ~/Library/Script Libraries
     src: applescript
@@ -174,6 +177,7 @@ profiles:
     - d_applescript
     - d_fish
     - d_ohmyfish
+    - d_src_python
   Logan:
     dotfiles:
     - f_zshrc
@@ -212,3 +216,4 @@ profiles:
     - d_gnupg
     - d_fish
     - d_ohmyfish
+    - d_src_python
