@@ -2,26 +2,49 @@
   name = Andy Bold
 	email = abold@launchdarkly.com
 	signingkey = 0B41D4FE8A3629BE7F6A3E1DB5D3239D7EF33CF5
+
 [credential]
 	helper = osxkeychain
+
 [push]
 	default = simple
+
 [core]
 	excludesfile = ~/.gitignore
+  pager = delta
+
 [filter "lfs"]
   required = true
   clean = git-lfs clean -- %f
   smudge = git-lfs smudge -- %f
   process = git-lfs filter-process
+
 [url "git@github.com:"]
 	insteadOf = https://github.com/
+
 [pull]
 	ff = only
+
 [gpg]
 	program = /usr/local/MacGPG2/bin/gpg2
+
 [mergetool]
 	keepBackup = true
+
 [commit]
 	gpgsign = true
+
 [github]
 	user = AndyBold
+
+[interactive]
+    diffFilter = delta --color-only
+
+[delta]
+    features = side-by-side line-numbers decorations
+    whitespace-error-style = 22 reverse
+
+[delta "decorations"]
+    commit-decoration-style = bold yellow box ul
+    file-style = bold yellow ul
+    file-decoration-style = none

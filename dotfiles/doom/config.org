@@ -5,27 +5,41 @@
     - [[#wheres-my-org][Where's my org?]]
     - [[#better-defaults][Better Defaults]]
     - [[#secrets-because-some-things-dont-belong-in-git][Secrets, because some things don't belong in git]]
+  - [[#packages][Packages]]
+    - [[#shells][Shells]]
+    - [[#git-auto-commit][Git auto commit]]
+    - [[#flyspell-lazy][Flyspell lazy]]
+    - [[#info-colours][Info Colours]]
+    - [[#orgmode][Orgmode]]
+    - [[#jq][JQ]]
+    - [[#paradox][Paradox]]
+    - [[#python][Python]]
+    - [[#beacon][Beacon]]
+    - [[#zoom][Zoom]]
+    - [[#stripey-buffer-lists][Stripey buffer lists]]
+    - [[#which-key][Which Key]]
+    - [[#magit-forge][Magit Forge]]
+    - [[#info-colours-1][Info colours]]
   - [[#look-and-feel][Look and feel]]
     - [[#configure-base-fonts][Configure base fonts]]
     - [[#theme-and-modeline][Theme and modeline]]
     - [[#use-nicer-window-titles][Use nicer window titles.]]
     - [[#fancy-splash-screen][Fancy Splash Screen]]
-    - [[#beacon][Beacon]]
+    - [[#beacon-1][Beacon]]
     - [[#golden-ratio][Golden ratio]]
-    - [[#zoom][Zoom]]
+    - [[#zoom-1][Zoom]]
     - [[#stripe-buffer][Stripe buffer]]
-    - [[#which-key][Which Key]]
+    - [[#which-key-1][Which Key]]
     - [[#keyboard-shortcuts][Keyboard shortcuts]]
-  - [[#packages][Packages]]
-    - [[#flyspell-lazy][Flyspell lazy]]
   - [[#text-editing][Text editing]]
     - [[#flyspell][Flyspell]]
   - [[#languages][Languages]]
     - [[#plaintext][Plaintext]]
   - [[#package-management][Package management]]
-  - [[#snippets-and-templates][Snippets and templates]]
   - [[#eshell-configuration][EShell configuration.]]
-  - [[#orgmode][Orgmode]]
+  - [[#orgmode-1][Orgmode]]
+    - [[#improve-agenda-and-capture][Improve Agenda and Capture]]
+    - [[#snippets-and-templates][Snippets and templates]]
     - [[#configuration][configuration]]
     - [[#fancy-priorities][Fancy priorities.]]
     - [[#agenda-configuration][Agenda configuration.]]
@@ -35,7 +49,7 @@
   - [[#magit][Magit]]
     - [[#pretty-magit][Pretty Magit]]
     - [[#magit-todos][Magit TODOs]]
-    - [[#magit-forge][Magit Forge]]
+    - [[#magit-forge-1][Magit Forge]]
 
 ** Initial setup
 #+begin_src emacs-lisp :tangle yes
@@ -143,6 +157,171 @@ And tell Ivy to show a preview of the buffer being selected.
     (load file-path))))
 
 (ab-load-file-if-exists "~/.emacs-secrets.el")
+
+#+end_src
+
+** Packages
+This sections tangles together a =packages.el= that Doom Emacs will use to decide what additional packages to load.
+
+The tangling is defined as a section property so that we do not need to keep setting it.
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle "packages.el" :comments link
+:END:
+
+The =pacakges.el= file shouldn't be byte compiled.
+#+BEGIN_SRC emacs-lisp :tangle "packages.el" :comments no
+;; -*- no-byte-compile: t; -*-
+#+END_SRC
+
+*** Shells
+For Eshell and friends, get $PATH from my shell.
+#+begin_src emacs-lisp
+(package! exec-path-from-shell)
+
+#+end_src
+
+*** Git auto commit
+I occasionally want Emacs to do a git commit on every save. E.g., with =orgmode= files that live in a git repo.
+
+Obviously this results in a massive =git= commit history that is of little use, so it's not something I use often.
+#+begin_src emacs-lisp
+(package! git-auto-commit-mode)
+
+#+end_src
+
+*** Flyspell lazy
+Prevents flyspell being a CPU hog. This is actually in =packages.el=, but noted here for posterity
+#+begin_src emacs-lisp
+(package! flyspell-lazy :pin "3ebf68cc9e...")
+
+#+end_src
+
+*** Info Colours
+Make =info= pages look nice.
+#+begin_src emacs-lisp
+(package! info-colors)
+
+#+end_src
+
+*** Orgmode
+Don't be a laggard. Use org from HEAD.
+#+begin_src emacs-lisp :tangle yes
+(unpin! org)
+
+#+end_src
+
+Nicer agendas.
+#+begin_src emacs-lisp :tangle yes
+(package! org-super-agenda)
+
+#+end_src
+
+=org-download= allows me to drag and drop images directly into an Org document.
+#+begin_src emacs-lisp
+(use-package! org-download
+  :after org-mode)
+
+#+end_src
+
+=org-toc= will auto-generate a Table of Contents when a header has the right tag. You can see it's output at the top of this very file.
+#+begin_src emacs-lisp
+(use-package! toc-org
+  :after org-mode)
+#+end_src
+
+Install and configure =org-journal=
+#+begin_src emacs-lisp
+(use-package! org-journal
+      :bind
+      ("C-c j n" . org-journal-new-entry)
+      ("C-c j <" . org-journal-open-previous-entry)
+      ("C-c j >" . org-journal-open-next-entry)
+  :custom
+
+  ;; (org-journal-enable-encryption t)
+  (org-journal-dir "/Users/andyb/Google Drive File Stream/My Drive/org/journal/")
+  (org-journal-date-prefix "#+TITLE: ")
+  (org-journal-file-format "%Y-%m-%d.org")
+  (org-journal-date-format "%A, %d %B %Y"))
+
+#+end_src
+
+Fancy priority indicators
+#+begin_src emacs-lisp
+(use-package! org-fancy-priorities
+  :hook (org-mode . org-fancy-priorities-mode)
+  :config
+  (setq org-fancy-priorities-list '("⚡" "⬆" "⬇" "☕")))
+
+#+end_src
+
+*** JQ
+#+begin_src emacs-lisp
+(use-package! jq-mode
+  :defer t)
+
+#+end_src
+
+*** Paradox
+A better Emacs Package browser.
+#+begin_src emacs-lisp
+(package! paradox)
+
+#+end_src
+
+*** Python
+Support for =virtualenv= in Emacs. Any venvs that I create outside Emacs can be activated, and I can use commands like =M-x pyvenv-workon= to select them.
+#+begin_src emacs-lisp
+(use-package! pyvenv
+  :defer t)
+
+(package! pyenv-mode)
+
+(after! pyenv-mode
+  (package! pyenv-virtualenv))
+#+end_src
+
+*** Beacon
+Highlight the cursor when you're scrolling around.
+#+begin_src emacs-lisp
+(package! beacon)
+
+#+end_src
+
+*** Zoom
+No, not the video comms tool that we're all a bit tired of, an Emacs window auto-sizer.
+#+begin_src emacs-lisp
+(package! zoom)
+
+#+end_src
+
+*** Stripey buffer lists
+#+begin_src emacs-lisp
+(package! stripe-buffer)
+
+#+end_src
+
+*** Which Key
+Show =which-key= prompts in a popover.
+#+begin_src emacs-lisp
+(package! which-key-posframe)
+
+#+end_src
+
+*** Magit Forge
+Github and =git-delta= integration for Magit.
+#+begin_src emacs-lisp
+(package! forge)
+
+(after! magit
+  (package! magit-delta))
+
+#+end_src
+
+*** Info colours
+Colour highlighting for =info= buffers.
+#+begin_src emacs-lisp
+(package! info-colors)
 
 #+end_src
 
@@ -396,14 +575,6 @@ And we don't need all the mentions of =evil= in the =which-key= prompts. I know 
 
 #+end_src
 
-
-** Packages
-*** Flyspell lazy
-Prevents flyspell being a CPU hog. This is actually in =packages.el=, but noted here for posterity
-#+begin_src emacs-lisp :tangle no
-(package! flyspell-lazy :pin "3ebf68cc9e...")
-#+end_src
-
 ** Text editing
 *** Flyspell
 Enable the =flyspell-lazy= package that was referenced earlier.
@@ -429,7 +600,44 @@ I let Doom manage my packages. If I need to look something up then I use Paradox
 #+end_src
 
 
-** Snippets and templates
+** EShell configuration.
+When I need a quick shell I use VTerm. This is for org-babel.
+
+Hook Ansi colour filtering into shell mode
+#+begin_src emacs-lisp :tangle yes
+(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
+
+#+end_src
+
+
+** Orgmode
+Don't be a laggard - use the most recent version of orgmode.
+#+begin_src emacs-lisp :tangle yes
+(unpin! org)
+
+#+end_src
+
+If I need to keep anything confidential in a .org then it gets GPG encrypted. Configure Org to deal with that when it happens.
+#+begin_src emacs-lisp :tangle yes
+(add-to-list 'auto-mode-alist '("\\.org\\.gpg" . org-mode))
+
+#+end_src
+
+*** Improve Agenda and Capture
+Install super-agenda.
+#+begin_src emacs-lisp :tangle "packages.el" :comments link
+(package! org-super-agenda)
+
+#+end_src
+
+Install DOCT (Declarative Org Capture Templates) - nicer templates for =org-capture=.
+#+begin_src emacs-lisp :tangle "packages.el" :comments link
+(package! doct
+  :recipe (:host github :repo "progfolio/doct"))
+
+#+end_src
+
+*** Snippets and templates
 I need to move these to yasnippets at some point.
 
 Start by making sure that org-tempo is enabled.
@@ -472,25 +680,6 @@ Set up some templates for Babel.
                        '("#+begin_src plantuml :tangle no :results value raw :results value drawer :session" > "\n\n#+end_src")
                        "<puml"
                        "Plantuml")
-
-#+end_src
-
-** EShell configuration.
-When I need a quick shell I use VTerm. This is for org-babel.
-
-Hook Ansi colour filtering into shell mode
-#+begin_src emacs-lisp :tangle yes
-(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
-
-#+end_src
-
-
-** Orgmode
-If I need to keep anything confidential in a .org then it gets GPG encrypted. Configure Org to deal with that when it happens.
-
-Add .org.gpg file suffix to the auto-mode list
-#+begin_src emacs-lisp :tangle yes
-(add-to-list 'auto-mode-alist '("\\.org\\.gpg" . org-mode))
 
 #+end_src
 
@@ -615,31 +804,20 @@ org-roam, so it's disabled for now.
 
 *** Journal
 #+begin_src emacs-lisp :tangle yes
-(use-package! org-journal
-      :bind
-      ("C-c j n" . org-journal-new-entry)
-      ("C-c j <" . org-journal-open-previous-entry)
-      ("C-c j >" . org-journal-open-next-entry)
-  :custom
 
-  ;; (org-journal-enable-encryption t)
-  (org-journal-dir "/Users/andyb/Google Drive File Stream/My Drive/org/journal/")
-      (org-journal-date-prefix "#+TITLE: ")
-      (org-journal-file-format "%Y-%m-%d.org")
-      (org-journal-date-format "%A, %d %B %Y"))
-    (setq org-journal-enable-agenda-integration t)
-    (setq org-journal-time-format "")
+(setq org-journal-enable-agenda-integration t)
+(setq org-journal-time-format "")
 
-  (defun org-journal-file-header-func (time)
+(defun org-journal-file-header-func (time)
   "Custom function to create journal header."
   (concat
-    (pcase org-journal-file-type
-      (`daily "-*- mode: org; fill-column: 78 -*-\n#+STARTUP: folded\n")
-      (`weekly "-*- mode: org; fill-column: 78 -*-\n#+STARTUP: folded\n")
-      (`monthly "-*- mode: org; fill-column: 78 -*-\n#+STARTUP: folded\n")
-      (`yearly "-*- mode: org; fill-column: 78 -*-\n#+STARTUP: folded\n"))))
+   (pcase org-journal-file-type
+     (`daily "-*- mode: org; fill-column: 78 -*-\n#+STARTUP: folded\n")
+     (`weekly "-*- mode: org; fill-column: 78 -*-\n#+STARTUP: folded\n")
+     (`monthly "-*- mode: org; fill-column: 78 -*-\n#+STARTUP: folded\n")
+     (`yearly "-*- mode: org; fill-column: 78 -*-\n#+STARTUP: folded\n"))))
 
-  (setq org-journal-file-header 'org-journal-file-header-func)
+(setq org-journal-file-header 'org-journal-file-header-func)
 #+end_src
 
 Add a hook for org-download...

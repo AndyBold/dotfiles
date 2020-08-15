@@ -53,42 +53,6 @@
 ;;    :recipe (:host github :repo "jethrokuan/company-org-roam"))
 
 
-(package! exec-path-from-shell)
 
-(package! git-auto-commit-mode)
-(use-package! org-download
-  :after org-mode)
-(use-package! toc-org
-  :after org-mode)
-(use-package! jq-mode
-  :defer t)
-(package! paradox)
-(use-package! pyvenv
-  :defer t)
 
-(use-package! org-fancy-priorities
-  :hook (org-mode . org-fancy-priorities-mode)
-  :config
-  (setq org-fancy-priorities-list '("⚡" "⬆" "⬇" "☕")))
-
-;; Highlight the cursor when you're scrolling around.
-(package! beacon)
-
-;; Auto-resizing of the active window.
-(package! golden-ratio)
-(package! zoom)
-
-;; Use stripe-y buffer lists for readability.
-(package! stripe-buffer)
-
-;; Use Magit Forge
-(package! forge)
-
-(package! which-key-posframe)
-
-(package! pyenv-mode)
-
-(after! pyenv-mode
-  (package! pyenv-virtualenv))
-
-(package! flyspell-lazy :pin "3ebf68cc9e...")
+;;
