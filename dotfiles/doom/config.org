@@ -3,13 +3,13 @@
     - [[#personal-details][Personal details]]
     - [[#talk-to-my-ssh-agent][Talk to my ssh-agent]]
     - [[#wheres-my-org][Where's my org?]]
+    - [[#some-other-random-configuration-settings][Some other random configuration settings]]
     - [[#better-defaults][Better Defaults]]
     - [[#secrets-because-some-things-dont-belong-in-git][Secrets, because some things don't belong in git]]
   - [[#packages][Packages]]
     - [[#shells][Shells]]
     - [[#git-auto-commit][Git auto commit]]
     - [[#flyspell-lazy][Flyspell lazy]]
-    - [[#info-colours][Info Colours]]
     - [[#orgmode][Orgmode]]
     - [[#jq][JQ]]
     - [[#paradox][Paradox]]
@@ -19,33 +19,31 @@
     - [[#stripey-buffer-lists][Stripey buffer lists]]
     - [[#which-key][Which Key]]
     - [[#magit-forge][Magit Forge]]
-    - [[#info-colours-1][Info colours]]
   - [[#look-and-feel][Look and feel]]
     - [[#configure-base-fonts][Configure base fonts]]
     - [[#theme-and-modeline][Theme and modeline]]
     - [[#use-nicer-window-titles][Use nicer window titles.]]
+    - [[#info-colours][Info colours]]
     - [[#fancy-splash-screen][Fancy Splash Screen]]
     - [[#beacon-1][Beacon]]
     - [[#golden-ratio][Golden ratio]]
     - [[#zoom-1][Zoom]]
     - [[#stripe-buffer][Stripe buffer]]
     - [[#which-key-1][Which Key]]
+    - [[#company][Company]]
+    - [[#evil][Evil]]
+    - [[#font-display][Font display]]
     - [[#keyboard-shortcuts][Keyboard shortcuts]]
   - [[#text-editing][Text editing]]
+    - [[#spelling][Spelling]]
+    - [[#yasnippets][YaSnippets]]
     - [[#flyspell][Flyspell]]
   - [[#languages][Languages]]
     - [[#plaintext][Plaintext]]
+    - [[#orgmode-1][Orgmode]]
+    - [[#markdown][Markdown]]
   - [[#package-management][Package management]]
   - [[#eshell-configuration][EShell configuration.]]
-  - [[#orgmode-1][Orgmode]]
-    - [[#improve-agenda-and-capture][Improve Agenda and Capture]]
-    - [[#snippets-and-templates][Snippets and templates]]
-    - [[#configuration][configuration]]
-    - [[#fancy-priorities][Fancy priorities.]]
-    - [[#agenda-configuration][Agenda configuration.]]
-    - [[#refile][Refile]]
-    - [[#org-roam][org-roam]]
-    - [[#journal][Journal]]
   - [[#magit][Magit]]
     - [[#pretty-magit][Pretty Magit]]
     - [[#magit-todos][Magit TODOs]]
@@ -66,7 +64,7 @@ My name and email address. Various things use this, such as Git and GPG.
 #+end_src
 
 *** Talk to my ssh-agent
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
 (exec-path-from-shell-copy-env "GPG_TTY")
 (exec-path-from-shell-copy-env "SSH_AUTH_SOCK")
 
@@ -76,6 +74,18 @@ My name and email address. Various things use this, such as Git and GPG.
 #+begin_src emacs-lisp :tangle yes
 (setq org-directory "/Users/andyb/Google Drive File Stream/My Drive/org")
 
+#+end_src
+
+Keep my =org-roam= files somwhere else.
+#+begin_src emacs-lisp :tangle yes
+(setq org-roam-directory "~/Documents/org/roam")
+
+#+end_src
+
+*** Some other random configuration settings
+Where is my dotfiles repo?
+#+begin_src emacs-lisp :tangle yes
+(setq dotfiles-dir "~/src/dotfiles/dotfiles")
 #+end_src
 
 *** Better Defaults
@@ -161,15 +171,15 @@ And tell Ivy to show a preview of the buffer being selected.
 #+end_src
 
 ** Packages
-This sections tangles together a =packages.el= that Doom Emacs will use to decide what additional packages to load.
-
-The tangling is defined as a section property so that we do not need to keep setting it.
 :PROPERTIES:
 :header-args:emacs-lisp: :tangle "packages.el" :comments link
 :END:
+This sections tangles together a =packages.el= that Doom Emacs will use to decide what additional packages to load.
+
+The tangling is defined as a section property so that we do not need to keep setting it.
 
 The =pacakges.el= file shouldn't be byte compiled.
-#+BEGIN_SRC emacs-lisp :tangle "packages.el" :comments no
+#+BEGIN_SRC emacs-lisp 
 ;; -*- no-byte-compile: t; -*-
 #+END_SRC
 
@@ -196,40 +206,49 @@ Prevents flyspell being a CPU hog. This is actually in =packages.el=, but noted 
 
 #+end_src
 
-*** Info Colours
-Make =info= pages look nice.
-#+begin_src emacs-lisp
-(package! info-colors)
-
-#+end_src
-
 *** Orgmode
 Don't be a laggard. Use org from HEAD.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp 
 (unpin! org)
 
 #+end_src
 
-Nicer agendas.
-#+begin_src emacs-lisp :tangle yes
+**** Nicer agendas.
+#+begin_src emacs-lisp
 (package! org-super-agenda)
 
 #+end_src
 
-=org-download= allows me to drag and drop images directly into an Org document.
+**** Make things pretty
+#+begin_src emacs-lisp
+(package! org-pretty-tags)
+
+#+end_src
+
+**** Better Capture
+Install DOCT (Declarative Org Capture Templates) - nicer templates for =org-capture=.
+#+begin_src emacs-lisp :tangle "packages.el" :comments link
+(package! doct
+  :recipe (:host github :repo "progfolio/doct"))
+
+#+end_src
+
+**** =org-download=
+Allows me to drag and drop images directly into an Org document.
 #+begin_src emacs-lisp
 (use-package! org-download
   :after org-mode)
 
 #+end_src
 
-=org-toc= will auto-generate a Table of Contents when a header has the right tag. You can see it's output at the top of this very file.
+**** =org-toc=
+We can auto-generate a Table of Contents when a header has the right tag. You can see it's output at the top of this very file.
 #+begin_src emacs-lisp
 (use-package! toc-org
   :after org-mode)
 #+end_src
 
-Install and configure =org-journal=
+**** Install and configure =org-journal=
 #+begin_src emacs-lisp
 (use-package! org-journal
       :bind
@@ -246,12 +265,47 @@ Install and configure =org-journal=
 
 #+end_src
 
-Fancy priority indicators
+**** Fancy priority indicators
 #+begin_src emacs-lisp
 (use-package! org-fancy-priorities
   :hook (org-mode . org-fancy-priorities-mode)
   :config
   (setq org-fancy-priorities-list '("⚡" "⬆" "⬇" "☕")))
+
+#+end_src
+
+**** Github formatted markdown
+#+begin_src emacs-lisp 
+(package! ox-gfm)
+
+#+end_src
+
+**** Graph view for org files
+Something to play with. Maybe surface unexpected links?
+#+begin_src emacs-lisp 
+(package! org-graph-view :recipe (:host github :repo "alphapapa/org-graph-view"))
+
+#+end_src
+
+**** Org-roam enhancements
+#+begin_src emacs-lisp 
+(package! org-roam-server)
+
+(use-package org-roam-server
+  :after org-roam
+  :config
+  (setq org-roam-server-host "127.0.0.1"
+        org-roam-server-port 8078
+        org-roam-server-export-inline-images t
+        org-roam-server-authenticate nil
+        org-roam-server-label-truncate t
+        org-roam-server-label-truncate-length 60
+        org-roam-server-label-wrap-length 20)
+  (defun org-roam-server-open ()
+    "Ensure the server is active, then open the roam graph."
+    (interactive)
+    (org-roam-server-mode 1)
+    (browse-url-xdg-open (format "http://localhost:%d" org-roam-server-port))))
 
 #+end_src
 
@@ -318,18 +372,22 @@ Github and =git-delta= integration for Magit.
 
 #+end_src
 
-*** Info colours
-Colour highlighting for =info= buffers.
-#+begin_src emacs-lisp
-(package! info-colors)
-
-#+end_src
-
 ** Look and feel
 *** Configure base fonts
+:PROPERTIES:
+:ID:       854e8b2f-131c-4328-a2cb-cea7f2a27e35
+:END:
+I am enjoying Graphik as the variable pitch font. Some other options that I may try in the future are.
+- Avenir Next
+- Founders Grotesk
+- Graphik
+- Helvetica Now Display
+- Proxima Nova
+ 
 #+begin_src emacs-lisp :tangle yes
-(setq doom-font "Fira Code"
-      doom-variable-pitch-font "Overpass"
+(setq doom-font (font-spec :family "Fira Code" :size 12)
+      doom-big-font (font-spec :family "Fire Code" :size 18)
+      doom-variable-pitch-font (font-spec :family "Graphik" :size 14)
       doom-serif-font (font-spec :family "IBM Plex Mono" :weight 'light))
 
 #+end_src
@@ -340,7 +398,7 @@ Colour highlighting for =info= buffers.
 
 #+end_src
 
-Tweak the modeline to remove unnecessary info. Start by making "this file has been edited" less shouty and red.
+Tweak the modeline to remove unnecessary info. Start by making "this file has changed" less shout-y and red.
 #+begin_src emacs-lisp :tangle yes
 (custom-set-faces!
   '(doom-modeline-buffer-modified :foreground "orange"))
@@ -376,6 +434,15 @@ Just the buffer name, followed by the project if it's applicable.
        (let ((project-name (projectile-project-name)))
          (unless (string= "-" project-name)
            (format (if (buffer-modified-p)  " ◉ %s" "  ●  %s") project-name))))))
+#+end_src
+
+*** Info colours
+Colour highlighting for =info= buffers.
+#+begin_src emacs-lisp
+(add-hook 'Info-selection-hook 'info-colors-fontify-node)
+
+(add-hook 'Info-mode-hook #'mixed-pitch-mode)
+
 #+end_src
 
 *** Fancy Splash Screen
@@ -539,6 +606,7 @@ Use stripe-y buffer lists.
       (overlay-put overlay 'priority -100))))
 
 #+end_src
+
 *** Which Key
 Doom has =which-key= configured out of the box. =which-key-posframe= causes =which-key= windows to work as a popover centred in the emacs frame.
 #+begin_src emacs-lisp :tangle yes
@@ -569,6 +637,113 @@ And we don't need all the mentions of =evil= in the =which-key= prompts. I know 
    ))
 #+end_src
 
+*** Company
+#+begin_src emacs-lisp :tangle yes
+(after! company
+  (setq company-idle-delay 0.5
+        company-minimum-prefix-length 2)
+  (setq company-show-numbers t)
+(add-hook 'evil-normal-state-entry-hook #'company-abort)) ;; make aborting less annoying.
+#+end_src
+
+Increase the history length for =precedent=.
+#+begin_src emacs-lisp :tangle yes
+(setq-default history-length 1000)
+(setq-default prescient-history-length 1000)
+#+end_src
+
+*** Evil
+Let's try life without the escape key for a while...
+#+begin_src emacs-lisp :tangle yes
+(after! evil (evil-escape-mode nil))
+
+#+end_src
+*** Font display
+Make Org pretty.
+#+begin_src emacs-lisp :tangle yes
+(add-hook! 'org-mode-hook #'+org-pretty-mode #'mixed-pitch-mode)
+
+#+end_src
+
+#+begin_src emacs-lisp :tangle yes
+(after! org-superstar
+  (setq org-superstar-headline-bullets-list '("◉" "○" "✸" "✿" "✤" "✜" "◆" "▶")
+        ;; org-superstar-headline-bullets-list '("Ⅰ" "Ⅱ" "Ⅲ" "Ⅳ" "Ⅴ" "Ⅵ" "Ⅶ" "Ⅷ" "Ⅸ" "Ⅹ")
+        org-superstar-prettify-item-bullets t ))
+(after! org
+  (setq org-ellipsis " ▾ "
+        org-priority-highest ?A
+        org-priority-lowest ?E
+        org-priority-faces
+        '((?A . 'all-the-icons-red)
+          (?B . 'all-the-icons-orange)
+          (?C . 'all-the-icons-yellow)
+          (?D . 'all-the-icons-green)
+          (?E . 'all-the-icons-blue))))
+#+END_SRC
+
+It's also nice to make use of the Unicode characters for check boxes, and other commands.
+
+#+BEGIN_SRC emacs-lisp
+(after! org
+  (appendq! +pretty-code-symbols
+            `(:checkbox      "☐"
+              :pending       "◼"
+              :checkedbox    "☑"
+              :list_property "∷"
+              :results       "🠶"
+              :property      "☸"
+              :properties    "⚙"
+              :end           "∎"
+              :options       "⌥"
+              :title         "𝙏"
+              :subtitle      "𝙩"
+              :author        "𝘼"
+              :date          "𝘿"
+              :latex_header  "⇥"
+              :latex_class   "🄲"
+              :beamer_header "↠"
+              :begin_quote   "❮"
+              :end_quote     "❯"
+              :begin_export  "⯮"
+              :end_export    "⯬"
+              :priority_a   ,(propertize "⚑" 'face 'all-the-icons-red)
+              :priority_b   ,(propertize "⬆" 'face 'all-the-icons-orange)
+              :priority_c   ,(propertize "■" 'face 'all-the-icons-yellow)
+              :priority_d   ,(propertize "⬇" 'face 'all-the-icons-green)
+              :priority_e   ,(propertize "❓" 'face 'all-the-icons-blue)
+              :em_dash       "—"))
+  (set-pretty-symbols! 'org-mode
+    :merge t
+    :checkbox      "[ ]"
+    :pending       "[-]"
+    :checkedbox    "[X]"
+    :list_property "::"
+    :results       "#+RESULTS:"
+    :property      "#+PROPERTY:"
+    :property      ":PROPERTIES:"
+    :end           ":END:"
+    :options       "#+OPTIONS:"
+    :title         "#+TITLE:"
+    :subtitle      "#+SUBTITLE:"
+    :author        "#+AUTHOR:"
+    :date          "#+DATE:"
+    :latex_class   "#+LATEX_CLASS:"
+    :latex_header  "#+LATEX_HEADER:"
+    :beamer_header "#+BEAMER_HEADER:"
+    :begin_quote   "#+BEGIN_QUOTE"
+    :end_quote     "#+END_QUOTE"
+    :begin_export  "#+BEGIN_EXPORT"
+    :end_export    "#+END_EXPORT"
+    :priority_a    "[#A]"
+    :priority_b    "[#B]"
+    :priority_c    "[#C]"
+    :priority_d    "[#D]"
+    :priority_e    "[#E]"
+    :em_dash       "---")
+(plist-put +pretty-code-symbols :name "⁍")) ; or › could be good?
+#+END_SRC
+
 *** Keyboard shortcuts
 #+begin_src emacs-lisp :tangle yes
 (global-set-key (kbd "C-c =") 'er/expand-region)
@@ -576,6 +751,39 @@ And we don't need all the mentions of =evil= in the =which-key= prompts. I know 
 #+end_src
 
 ** Text editing
+*** Spelling
+I have a SCOWL dictionary downloaded and built as follows:
+#+BEGIN_SRC sh :tangle no
+brew install aspell
+
+mkdir ~/tmp
+cd ~/tmp
+curl -o "aspell6-en-custom.tar.bz2" "http://app.aspell.net/create?max_size=80&spelling=GBs&max_variant=1&diacritic=keep&special=hacker&special=roman-numerals&encoding=utf-8&format=inline&download=aspell"
+
+tar jxf "aspell6-en-custom.tar.bz2"
+
+cd aspell6-en-custom
+./configure && make && sudo make install
+#+END_SRC
+
+One it is installed we need to tell Emacs to use it.
+#+begin_src emacs-lisp :tangle yes
+(setq ispell-dictionary "en-custom")
+
+#+end_src
+
+If I add any words of my own (e.g., technical terms) then they will be saved to my personal dictionary. As I will probably want to share it with the different devices I use, I keep it in a slightly-odd-but-works-for-me place.
+
+#+begin_src emacs-lisp :tangle yes
+(setq ispell-personal-dictionary (expand-file-name "dictionary/ispell_personal" dotfiles-dir))
+#+end_src
+
+*** YaSnippets
+Enable nested snippets.
+#+begin_src emacs-lisp :tangle yes
+(setq yas-triggers-in-field t)
+#+end_src
+
 *** Flyspell
 Enable the =flyspell-lazy= package that was referenced earlier.
 #+begin_src emacs-lisp :tangle yes
@@ -593,28 +801,38 @@ If ANSI colors are there, use them.
       (ansi-color-apply-on-region (point-min) (point-max)))))
 #+end_src
 
-** Package management
-I let Doom manage my packages. If I need to look something up then I use Paradox
+Enable =ispell= in various text modes.
 #+begin_src emacs-lisp :tangle yes
-(setq paradox-github-token "{{@@ env['personal_github_token'] @@}}")
+(set-company-backend! '(text-mode
+                        markdown-mode
+                        gfm-mode)
+  '(:seperate company-ispell
+              company-files
+              company-yasnippet))
 #+end_src
 
-
-** EShell configuration.
-When I need a quick shell I use VTerm. This is for org-babel.
-
-Hook Ansi colour filtering into shell mode
+*** Orgmode
+**** Better defaults
+Let's tweak some defaults.
 #+begin_src emacs-lisp :tangle yes
-(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
-
+(setq org-use-property-inheritance t              ; it's convenient to have properties inherited
+      org-log-done 'time                          ; having the time an item is done is convenient
+      org-list-allow-alphabetical t               ; have a. A. a) A) list bullets
+      org-export-in-background t                  ; run export processes in external emacs process
+      org-catch-invisible-edits 'smart            ; try not to accidently do weird stuff in invisible regions
+      org-re-reveal-root "https://cdn.jsdelivr.net/npm/reveal.js")
 #+end_src
 
-
-** Orgmode
-Don't be a laggard - use the most recent version of orgmode.
+Let's set some default header values.
 #+begin_src emacs-lisp :tangle yes
-(unpin! org)
-
+(setq org-babel-default-header-args '((:session . "none")
+                                      (:results . "replace")
+                                      (:exports . "code")
+                                      (:cache . "no")
+                                      (:noweb . "no")
+                                      (:hlines . "no")
+                                      (:tangle . "no")
+                                      (:comments . "link")))
 #+end_src
 
 If I need to keep anything confidential in a .org then it gets GPG encrypted. Configure Org to deal with that when it happens.
@@ -623,21 +841,992 @@ If I need to keep anything confidential in a .org then it gets GPG encrypted. Co
 
 #+end_src
 
-*** Improve Agenda and Capture
-Install super-agenda.
-#+begin_src emacs-lisp :tangle "packages.el" :comments link
-(package! org-super-agenda)
+**** Org buffer creation
+Let’s also make creating an org buffer just that little bit easier.
 
+#+begin_src emacs-lisp :tangle yes
+(evil-define-command evil-buffer-org-new (count file)
+  "Creates a new ORG buffer replacing the current window, optionally
+   editing a certain FILE"
+  :repeat nil
+  (interactive "P<f>")
+  (if file
+      (evil-edit file)
+    (let ((buffer (generate-new-buffer "*new org*")))
+      (set-window-buffer nil buffer)
+      (with-current-buffer buffer
+        (org-mode)))))
+(map! :leader
+  (:prefix "b"
+    :desc "New empty ORG buffer" "o" #'evil-buffer-org-new))
 #+end_src
 
-Install DOCT (Declarative Org Capture Templates) - nicer templates for =org-capture=.
-#+begin_src emacs-lisp :tangle "packages.el" :comments link
-(package! doct
-  :recipe (:host github :repo "progfolio/doct"))
-
+**** List bullet sequence
+I often use bullet lists, and like this tweak from Teco to have list bullets change with depth.
+#+begin_src emacs-lisp :tangle yes
+(setq org-list-demote-modify-bullet '(("+" . "-")
+                                      ("-" . "+")
+                                      ("*" . "+")
+                                      ("1." . "a.")))
 #+end_src
 
-*** Snippets and templates
+**** Enable spell checking in Orgmode
+#+begin_src emacs-lisp
+(after! org (add-hook 'org-mode-hook 'turn-on-flyspell))
+#+end_src
+
+**** LSP support in =src= blocks
+Definitely above my elisp pay grade. Stolen from Teco again, this enables LSP support in =src= blocks.
+#+begin_src emacs-lisp :tangle yes
+(cl-defmacro lsp-org-babel-enable (lang)
+    "Support LANG in org source code block."
+    (setq centaur-lsp 'lsp-mode)
+    (cl-check-type lang stringp)
+    (let* ((edit-pre (intern (format "org-babel-edit-prep:%s" lang)))
+           (intern-pre (intern (format "lsp--%s" (symbol-name edit-pre)))))
+      `(progn
+         (defun ,intern-pre (info)
+           (let ((file-name (->> info caddr (alist-get :file))))
+             (unless file-name
+               (setq file-name (make-temp-file "babel-lsp-")))
+             (setq buffer-file-name file-name)
+              (lsp-deferred)))
+         (put ',intern-pre 'function-documentation
+              (format "Enable lsp-mode in the buffer of org source block (%s)."
+                      (upcase ,lang)))
+         (if (fboundp ',edit-pre)
+             (advice-add ',edit-pre :after ',intern-pre)
+           (progn
+             (defun ,edit-pre (info)
+               (,intern-pre info))
+             (put ',edit-pre 'function-documentation
+                  (format "Prepare local buffer environment for org source block (%s)."
+                          (upcase ,lang))))))))
+  (defvar org-babel-lang-list
+    '("go" "python" "ipython" "bash" "sh"))
+  (dolist (lang org-babel-lang-list)
+    (eval `(lsp-org-babel-enable ,lang)))
+#+end_src
+
+**** Basic Agenda Configuration
+Tell Agenda mode to include .org.gpg files.
+#+begin_src emacs-lisp :tangle yes
+(after! org-agenda
+(unless (string-match-p "\\.gpg" org-agenda-file-regexp)
+  (setq org-agenda-file-regexp
+    (replace-regexp-in-string "\\\\\\.org" "\\\\.org\\\\(\\\\.gpg\\\\)?"
+      org-agenda-file-regexp))))
+#+end_src
+
+Expand Agenda targets to include .org.gpg. Refile uses these below to build it's list of places it can save to.
+#+begin_src emacs-lisp :tangle yes
+(after! org-agenda
+        (add-to-list 'org-agenda-files (expand-file-name "~/Documents/org/*\\.org\\.gpg")))
+#+end_src
+
+**** Super Agenda Configuration
+#+begin_src emacs-lisp :tangle yes
+(use-package! org-super-agenda
+  :commands (org-super-agenda-mode))
+(after! org-agenda
+  (org-super-agenda-mode))
+
+(setq org-agenda-skip-scheduled-if-done t
+      org-agenda-skip-deadline-if-done t
+      org-agenda-include-deadlines t
+      org-agenda-block-separator nil
+      org-agenda-tags-column 100 ;; from testing this seems to be a good value
+      org-agenda-compact-blocks t)
+
+(setq org-agenda-custom-commands
+      '(("o" "Overview"
+         ((agenda "" ((org-agenda-span 'day)
+                      (org-super-agenda-groups
+                       '((:name "Today"
+                                :time-grid t
+                                :date today
+                                :todo "TODAY"
+                                :scheduled today
+                                :order 1)))))
+          (alltodo "" ((org-agenda-overriding-header "")
+                       (org-super-agenda-groups
+                        '((:name "Next to do"
+                                 :todo "NEXT"
+                                 :order 1)
+                          (:name "Important"
+                                 :tag "Important"
+                                 :priority "A"
+                                 :order 6)
+                          (:name "Due Today"
+                                 :deadline today
+                                 :order 2)
+                          (:name "Due Soon"
+                                 :deadline future
+                                 :order 8)
+                          (:name "Overdue"
+                                 :deadline past
+                                 :face error
+                                 :order 7)
+                          (:name "Assignments"
+                                 :tag "Assignment"
+                                 :order 10)
+                          (:name "Issues"
+                                 :tag "Issue"
+                                 :order 12)
+                          (:name "Emacs"
+                                 :tag "Emacs"
+                                 :order 13)
+                          (:name "Projects"
+                                 :tag "Project"
+                                 :order 14)
+                          (:name "Research"
+                                 :tag "Research"
+                                 :order 15)
+                          (:name "To read"
+                                 :tag "Read"
+                                 :order 30)
+                          (:name "Waiting"
+                                 :todo "WAITING"
+                                 :order 20)
+                          (:name "University"
+                                 :tag "uni"
+                                 :order 32)
+                          (:name "Trivial"
+                                 :priority<= "E"
+                                 :tag ("Trivial" "Unimportant")
+                                 :todo ("SOMEDAY" )
+                                 :order 90)
+                          (:discard (:tag ("Chore" "Routine" "Daily")))))))))))
+#+end_src
+
+**** Snippets and templates
+***** Capture Templates
+#+begin_src emacs-lisp :tangle yes
+(use-package! doct
+  :commands (doct))
+
+(after! org-capture
+  (defun org-capture-select-template-prettier (&optional keys)
+    "Select a capture template, in a prettier way than default
+  Lisp programs can force the template by setting KEYS to a string."
+    (let ((org-capture-templates
+           (or (org-contextualize-keys
+                (org-capture-upgrade-templates org-capture-templates)
+                org-capture-templates-contexts)
+               '(("t" "Task" entry (file+headline "" "Tasks")
+                  "* TODO %?\n  %u\n  %a")))))
+      (if keys
+          (or (assoc keys org-capture-templates)
+              (error "No capture template referred to by \"%s\" keys" keys))
+        (org-mks org-capture-templates
+                 "Select a capture template\n━━━━━━━━━━━━━━━━━━━━━━━━━"
+                 "Template key: "
+                 `(("q" ,(concat (all-the-icons-octicon "stop" :face 'all-the-icons-red :v-adjust 0.01) "\tAbort")))))))
+  (advice-add 'org-capture-select-template :override #'org-capture-select-template-prettier)
+
+  (defun org-mks-pretty (table title &optional prompt specials)
+    "Select a member of an alist with multiple keys. Prettified.
+
+  TABLE is the alist which should contain entries where the car is a string.
+  There should be two types of entries.
+
+  1. prefix descriptions like (\"a\" \"Description\")
+     This indicates that `a' is a prefix key for multi-letter selection, and
+     that there are entries following with keys like \"ab\", \"ax\"…
+
+  2. Select-able members must have more than two elements, with the first
+     being the string of keys that lead to selecting it, and the second a
+     short description string of the item.
+
+  The command will then make a temporary buffer listing all entries
+  that can be selected with a single key, and all the single key
+  prefixes.  When you press the key for a single-letter entry, it is selected.
+  When you press a prefix key, the commands (and maybe further prefixes)
+  under this key will be shown and offered for selection.
+
+  TITLE will be placed over the selection in the temporary buffer,
+  PROMPT will be used when prompting for a key.  SPECIALS is an
+  alist with (\"key\" \"description\") entries.  When one of these
+  is selected, only the bare key is returned."
+    (save-window-excursion
+      (let ((inhibit-quit t)
+      (buffer (org-switch-to-buffer-other-window "*Org Select*"))
+      (prompt (or prompt "Select: "))
+      case-fold-search
+      current)
+        (unwind-protect
+      (catch 'exit
+        (while t
+          (setq-local evil-normal-state-cursor (list nil))
+          (erase-buffer)
+          (insert title "\n\n")
+          (let ((des-keys nil)
+          (allowed-keys '("\C-g"))
+          (tab-alternatives '("\s" "\t" "\r"))
+          (cursor-type nil))
+      ;; Populate allowed keys and descriptions keys
+      ;; available with CURRENT selector.
+      (let ((re (format "\\`%s\\(.\\)\\'"
+            (if current (regexp-quote current) "")))
+            (prefix (if current (concat current " ") "")))
+        (dolist (entry table)
+          (pcase entry
+            ;; Description.
+            (`(,(and key (pred (string-match re))) ,desc)
+             (let ((k (match-string 1 key)))
+         (push k des-keys)
+         ;; Keys ending in tab, space or RET are equivalent.
+         (if (member k tab-alternatives)
+             (push "\t" allowed-keys)
+           (push k allowed-keys))
+         (insert (propertize prefix 'face 'font-lock-comment-face) (propertize k 'face 'bold) (propertize "›" 'face 'font-lock-comment-face) "  " desc "…" "\n")))
+            ;; Usable entry.
+            (`(,(and key (pred (string-match re))) ,desc . ,_)
+             (let ((k (match-string 1 key)))
+         (insert (propertize prefix 'face 'font-lock-comment-face) (propertize k 'face 'bold) "   " desc "\n")
+         (push k allowed-keys)))
+            (_ nil))))
+      ;; Insert special entries, if any.
+      (when specials
+        (insert "─────────────────────────\n")
+        (pcase-dolist (`(,key ,description) specials)
+          (insert (format "%s   %s\n" (propertize key 'face '(bold all-the-icons-red)) description))
+          (push key allowed-keys)))
+      ;; Display UI and let user select an entry or
+      ;; a sub-level prefix.
+      (goto-char (point-min))
+      (unless (pos-visible-in-window-p (point-max))
+        (org-fit-window-to-buffer))
+      (let ((pressed (org--mks-read-key allowed-keys prompt)))
+        (setq current (concat current pressed))
+        (cond
+         ((equal pressed "\C-g") (user-error "Abort"))
+         ;; Selection is a prefix: open a new menu.
+         ((member pressed des-keys))
+         ;; Selection matches an association: return it.
+         ((let ((entry (assoc current table)))
+            (and entry (throw 'exit entry))))
+         ;; Selection matches a special entry: return the
+         ;; selection prefix.
+         ((assoc current specials) (throw 'exit current))
+         (t (error "No entry available")))))))
+    (when buffer (kill-buffer buffer))))))
+  (advice-add 'org-mks :override #'org-mks-pretty)
+
+  (defun +doct-icon-declaration-to-icon (declaration)
+    "Convert :icon declaration to icon"
+    (let ((name (pop declaration))
+          (set  (intern (concat "all-the-icons-" (plist-get declaration :set))))
+          (face (intern (concat "all-the-icons-" (plist-get declaration :color))))
+          (v-adjust (or (plist-get declaration :v-adjust) 0.01)))
+      (apply set `(,name :face ,face :v-adjust ,v-adjust))))
+
+  (defun +doct-iconify-capture-templates (groups)
+    "Add declaration's :icon to each template group in GROUPS."
+    (let ((templates (doct-flatten-lists-in groups)))
+      (setq doct-templates (mapcar (lambda (template)
+                                     (when-let* ((props (nthcdr (if (= (length template) 4) 2 5) template))
+                                                 (spec (plist-get (plist-get props :doct) :icon)))
+                                       (setf (nth 1 template) (concat (+doct-icon-declaration-to-icon spec)
+                                                                      "\t"
+                                                                      (nth 1 template))))
+                                     template)
+                                   templates))))
+
+  (setq doct-after-conversion-functions '(+doct-iconify-capture-templates))
+
+  (add-transient-hook! 'org-capture-select-template
+    (setq org-capture-templates
+          (doct `(("Personal todo" :keys "t"
+                   :icon ("checklist" :set "octicon" :color "green")
+                   :file +org-capture-todo-file
+                   :prepend t
+                   :headline "Inbox"
+                   :type entry
+                   :template ("* TODO %?"
+                              "%i %a")
+                   )
+                  ("Personal note" :keys "n"
+                   :icon ("sticky-note-o" :set "faicon" :color "green")
+                   :file +org-capture-todo-file
+                   :prepend t
+                   :headline "Inbox"
+                   :type entry
+                   :template ("* %?"
+                              "%i %a")
+                   )
+                  ("Interesting" :keys "i"
+                   :icon ("eye" :set "faicon" :color "lcyan")
+                   :file +org-capture-todo-file
+                   :prepend t
+                   :headline "Interesting"
+                   :type entry
+                   :template ("* [ ] %{desc}%? :%{i-type}:"
+                              "%i %a")
+                   :children (("Webpage" :keys "w"
+                               :icon ("globe" :set "faicon" :color "green")
+                               :desc "%(org-cliplink-capture) "
+                               :i-type "read:web"
+                               )
+                              ("Article" :keys "a"
+                               :icon ("file-text" :set "octicon" :color "yellow")
+                               :desc ""
+                               :i-type "read:reaserch"
+                               )
+                              ("Information" :keys "i"
+                               :icon ("info-circle" :set "faicon" :color "blue")
+                               :desc ""
+                               :i-type "read:info"
+                               )
+                              ("Idea" :keys "I"
+                               :icon ("bubble_chart" :set "material" :color "silver")
+                               :desc ""
+                               :i-type "idea"
+                               )))
+                  ("Tasks" :keys "k"
+                   :icon ("inbox" :set "octicon" :color "yellow")
+                   :file +org-capture-todo-file
+                   :prepend t
+                   :headline "Tasks"
+                   :type entry
+                   :template ("* TODO %? %^G%{extra}"
+                              "%i %a")
+                   :children (("General Task" :keys "k"
+                               :icon ("inbox" :set "octicon" :color "yellow")
+                               :extra ""
+                               )
+                              ("Task with deadline" :keys "d"
+                               :icon ("timer" :set "material" :color "orange" :v-adjust -0.1)
+                               :extra "\nDEADLINE: %^{Deadline:}t"
+                               )
+                              ("Scheduled Task" :keys "s"
+                               :icon ("calendar" :set "octicon" :color "orange")
+                               :extra "\nSCHEDULED: %^{Start time:}t"
+                               )
+                              ))
+                ("Project" :keys "p"
+                 :icon ("repo" :set "octicon" :color "silver")
+                   :prepend t
+                   :type entry
+                   :headline "Inbox"
+                   :template ("* %{time-or-todo} %?"
+                              "%i"
+                              "%a")
+                   :file ""
+                   :custom (:time-or-todo "")
+                   :children (("Project-local todo" :keys "t"
+                               :icon ("checklist" :set "octicon" :color "green")
+                               :time-or-todo "TODO"
+                               :file +org-capture-project-todo-file)
+                              ("Project-local note" :keys "n"
+                               :icon ("sticky-note" :set "faicon" :color "yellow")
+                               :time-or-todo "%U"
+                               :file +org-capture-project-notes-file)
+                              ("Project-local changelog" :keys "c"
+                               :icon ("list" :set "faicon" :color "blue")
+                               :time-or-todo "%U"
+                               :heading "Unreleased"
+                               :file +org-capture-project-changelog-file))
+                   )
+                  ("\tCentralised project templates"
+                   :keys "o"
+                   :type entry
+                   :prepend t
+                   :template ("* %{time-or-todo} %?"
+                              "%i"
+                              "%a")
+                   :children (("Project todo"
+                               :keys "t"
+                               :prepend nil
+                               :time-or-todo "TODO"
+                               :heading "Tasks"
+                               :file +org-capture-central-project-todo-file)
+                              ("Project note"
+                               :keys "n"
+                               :time-or-todo "%U"
+                               :heading "Notes"
+                               :file +org-capture-central-project-notes-file)
+                              ("Project changelog"
+                               :keys "c"
+                               :time-or-todo "%U"
+                               :heading "Unreleased"
+                               :file +org-capture-central-project-changelog-file))
+                   ))))))
+#+end_src
+
+Also taken from Teco, beautify the capture box.
+#+begin_src emacs-lisp :tangle yes
+(defun org-capture-select-template-prettier (&optional keys)
+  "Select a capture template, in a prettier way than default
+Lisp programs can force the template by setting KEYS to a string."
+  (let ((org-capture-templates
+         (or (org-contextualize-keys
+              (org-capture-upgrade-templates org-capture-templates)
+              org-capture-templates-contexts)
+             '(("t" "Task" entry (file+headline "" "Tasks")
+                "* TODO %?\n  %u\n  %a")))))
+    (if keys
+        (or (assoc keys org-capture-templates)
+            (error "No capture template referred to by \"%s\" keys" keys))
+      (org-mks org-capture-templates
+               "Select a capture template\n━━━━━━━━━━━━━━━━━━━━━━━━━"
+               "Template key: "
+               `(("q" ,(concat (all-the-icons-octicon "stop" :face 'all-the-icons-red :v-adjust 0.01) "\tAbort")))))))
+(advice-add 'org-capture-select-template :override #'org-capture-select-template-prettier)
+
+(defun org-mks-pretty (table title &optional prompt specials)
+  "Select a member of an alist with multiple keys. Prettified.
+
+TABLE is the alist which should contain entries where the car is a string.
+There should be two types of entries.
+
+1. prefix descriptions like (\"a\" \"Description\")
+   This indicates that `a' is a prefix key for multi-letter selection, and
+   that there are entries following with keys like \"ab\", \"ax\"…
+
+2. Select-able members must have more than two elements, with the first
+   being the string of keys that lead to selecting it, and the second a
+   short description string of the item.
+
+The command will then make a temporary buffer listing all entries
+that can be selected with a single key, and all the single key
+prefixes.  When you press the key for a single-letter entry, it is selected.
+When you press a prefix key, the commands (and maybe further prefixes)
+under this key will be shown and offered for selection.
+
+TITLE will be placed over the selection in the temporary buffer,
+PROMPT will be used when prompting for a key.  SPECIALS is an
+alist with (\"key\" \"description\") entries.  When one of these
+is selected, only the bare key is returned."
+  (save-window-excursion
+    (let ((inhibit-quit t)
+    (buffer (org-switch-to-buffer-other-window "*Org Select*"))
+    (prompt (or prompt "Select: "))
+    case-fold-search
+    current)
+      (unwind-protect
+    (catch 'exit
+      (while t
+        (setq-local evil-normal-state-cursor (list nil))
+        (erase-buffer)
+        (insert title "\n\n")
+        (let ((des-keys nil)
+        (allowed-keys '("\C-g"))
+        (tab-alternatives '("\s" "\t" "\r"))
+        (cursor-type nil))
+    ;; Populate allowed keys and descriptions keys
+    ;; available with CURRENT selector.
+    (let ((re (format "\\`%s\\(.\\)\\'"
+          (if current (regexp-quote current) "")))
+          (prefix (if current (concat current " ") "")))
+      (dolist (entry table)
+        (pcase entry
+          ;; Description.
+          (`(,(and key (pred (string-match re))) ,desc)
+           (let ((k (match-string 1 key)))
+       (push k des-keys)
+       ;; Keys ending in tab, space or RET are equivalent.
+       (if (member k tab-alternatives)
+           (push "\t" allowed-keys)
+         (push k allowed-keys))
+       (insert (propertize prefix 'face 'font-lock-comment-face) (propertize k 'face 'bold) (propertize "›" 'face 'font-lock-comment-face) "  " desc "…" "\n")))
+          ;; Usable entry.
+          (`(,(and key (pred (string-match re))) ,desc . ,_)
+           (let ((k (match-string 1 key)))
+       (insert (propertize prefix 'face 'font-lock-comment-face) (propertize k 'face 'bold) "   " desc "\n")
+       (push k allowed-keys)))
+          (_ nil))))
+    ;; Insert special entries, if any.
+    (when specials
+      (insert "─────────────────────────\n")
+      (pcase-dolist (`(,key ,description) specials)
+        (insert (format "%s   %s\n" (propertize key 'face '(bold all-the-icons-red)) description))
+        (push key allowed-keys)))
+    ;; Display UI and let user select an entry or
+    ;; a sub-level prefix.
+    (goto-char (point-min))
+    (unless (pos-visible-in-window-p (point-max))
+      (org-fit-window-to-buffer))
+    (let ((pressed (org--mks-read-key allowed-keys prompt)))
+      (setq current (concat current pressed))
+      (cond
+       ((equal pressed "\C-g") (user-error "Abort"))
+       ;; Selection is a prefix: open a new menu.
+       ((member pressed des-keys))
+       ;; Selection matches an association: return it.
+       ((let ((entry (assoc current table)))
+          (and entry (throw 'exit entry))))
+       ;; Selection matches a special entry: return the
+       ;; selection prefix.
+       ((assoc current specials) (throw 'exit current))
+       (t (error "No entry available")))))))
+  (when buffer (kill-buffer buffer))))))
+(advice-add 'org-mks :override #'org-mks-pretty)
+#+end_src
+
+And tweak the org-capture bin.
+#+begin_src emacs-lisp :tangle yes
+(setf (alist-get 'height +org-capture-frame-parameters) 15)
+      ;; (alist-get 'name +org-capture-frame-parameters) "❖ Capture") ;; ATM hardcoded in other places, so changing breaks stuff
+(setq +org-capture-fn
+      (lambda ()
+        (interactive)
+        (set-window-parameter nil 'mode-line-format 'none)
+        (org-capture)))
+#+end_src
+
+***** Roam
+****** Graph behaviour
+Teco says...
+
+By default, clicking on an ~org-protocol://~ link messes with the =svg= view. To fix
+this we can use an ~iframe~, however that requires shifting to an =html= file.
+Hence, we need to do a bit of overriding.
+
+#+BEGIN_SRC html :tangle misc/org-roam-template.html
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Roam Graph</title>
+        <meta name="viewport" content="width=device-width">
+        <style type="text/css">
+         body {
+             background: white;
+         }
+
+         svg {
+             position: relative;
+             top: 50vh;
+             left: 50vw;
+             transform: translate(-50%, -50%);
+             width: 95vw;
+         }
+
+         a > polygon {
+             transition-duration: 200ms;
+             transition-property: fill;
+         }
+
+         a > polyline {
+             transition-duration: 400ms;
+             transition-property: stroke;
+         }
+
+         a:hover > polygon {
+             fill: #d4d4d4;
+         }
+         a:hover > polyline {
+             stroke: #888;
+         }
+        </style>
+        <script type="text/javascript">
+         function create_iframe (url) {
+             i = document.createElement('iframe');
+             i.setAttribute('src', url);
+             i.style.setProperty('display', 'none');
+             document.body.append(i);
+         }
+         function listen_on_all_a () {
+             document.querySelectorAll("svg a").forEach(elem => {
+                 elem.addEventListener('click', (e) => {
+                     e.preventDefault();
+                     create_iframe(elem.href.baseVal);
+                 });
+             });
+         }
+        </script>
+    </head>
+    <body onload="listen_on_all_a()">
+%s
+    </body>
+</html>
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(after! org-roam
+  (setq org-roam-graph-node-extra-config '(("shape"      . "underline")
+                                           ("style"      . "rounded,filled")
+                                           ("fillcolor"  . "#EEEEEE")
+                                           ("color"      . "#C9C9C9")
+                                           ("fontcolor"  . "#111111")
+                                           ("fontname"   . "Overpass")))
+
+  (setq +org-roam-graph--html-template
+        (replace-regexp-in-string "%\\([^s]\\)" "%%\\1"
+                                  (f-read-text (concat doom-private-dir "misc/org-roam-template.html"))))
+
+  (defadvice! +org-roam-graph--build-html (&optional node-query callback)
+    "Generate a graph showing the relations between nodes in NODE-QUERY. HTML style."
+    :override #'org-roam-graph--build
+    (unless (stringp org-roam-graph-executable)
+      (user-error "`org-roam-graph-executable' is not a string"))
+    (unless (executable-find org-roam-graph-executable)
+      (user-error (concat "Cannot find executable %s to generate the graph.  "
+                          "Please adjust `org-roam-graph-executable'")
+                  org-roam-graph-executable))
+    (let* ((node-query (or node-query
+                           `[:select [file titles] :from titles
+                             ,@(org-roam-graph--expand-matcher 'file t)]))
+           (graph      (org-roam-graph--dot node-query))
+           (temp-dot   (make-temp-file "graph." nil ".dot" graph))
+           (temp-graph (make-temp-file "graph." nil ".svg"))
+           (temp-html  (make-temp-file "graph." nil ".html")))
+      (org-roam-message "building graph")
+      (make-process
+       :name "*org-roam-graph--build-process*"
+       :buffer "*org-roam-graph--build-process*"
+       :command `(,org-roam-graph-executable ,temp-dot "-Tsvg" "-o" ,temp-graph)
+       :sentinel (progn
+                   (lambda (process _event)
+                     (when (= 0 (process-exit-status process))
+                       (write-region (format +org-roam-graph--html-template (f-read-text temp-graph)) nil temp-html)
+                       (when callback
+                         (funcall callback temp-html)))))))))
+#+END_SRC
+
+#+begin_src emacs-lisp :tangle yes
+(after! org-roam
+       (map! :leader
+           :prefix "n"
+           :desc "org-roam" "l" #'org-roam
+           :desc "org-roam-insert" "i" #'org-roam-insert
+           :desc "org-roam-switch-to-buffer" "b" #'org-roam-switch-to-buffer
+           :desc "org-roam-find-file" "f" #'org-roam-find-file
+           :desc "org-roam-show-graph" "g" #'org-roam-show-graph
+           :desc "org-roam-insert" "i" #'org-roam-insert
+           :desc "org-roam-capture" "c" #'org-roam-capture))
+
+(require 'company-org-roam)
+   (use-package company-org-roam
+     :when (featurep! :completion company)
+     :after org-roam
+     :config
+     (set-company-backend! 'org-mode '(company-org-roam company-yasnippet company-dabbrev)))
+
+(after! org-roam
+ (setq org-roam-encrypt-files t)
+ (setq org-roam-ref-capture-templates
+   '(("r" "ref" plain (function org-roam-capture--get-point)
+       "%?"
+       :file-name "websites/${slug}.org.gpg"
+       :head "-*- epa-file-encrypt-to: ("andy.bold@me.com") -*-
+,#+TITLE: ${title}
+   ,#+ROAM_KEY: ${ref}
+   - source :: ${ref}"
+       :unnarrowed t)))
+
+ (setq org-roam-capture-templates
+   '(("d" "default" plain (function org-roam--capture-get-point)
+      "%?"
+      :file-name "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}\" (current-time) t)"
+      :head "-*- epa-file-encrypt-to: (\"andy.bold@me.com\") -*-
+
+,#+TITLE: ${title}\n"
+      :unnarrowed t))))
+#+end_src
+
+****** Tidy up the modeline
+#+begin_src emacs-lisp :tangle yes
+(defadvice! doom-modeline--reformat-roam (orig-fun)
+  :around #'doom-modeline-buffer-file-name
+  (message "Reformat?")
+  (message (buffer-file-name))
+  (if (s-contains-p org-roam-directory (or buffer-file-name ""))
+      (replace-regexp-in-string
+       "\\(?:^\\|.*/\\)\\([0-9]\\{4\\}\\)\\([0-9]\\{2\\}\\)\\([0-9]\\{2\\}\\)[0-9]*-"
+       "🢔(\\1-\\2-\\3) "
+       (funcall orig-fun))
+    (funcall orig-fun)))
+#+end_src
+
+***** Nice header IDs
+Teco again...
+
+#+BEGIN_QUOTE
+Thanks to alphapapa's [[https://github.com/alphapapa/unpackaged.el#export-to-html-with-useful-anchors][unpackaged.el]].
+By default, ~url-hexify-string~ seemed to cause me some issues. Replacing that in
+~a53899~ resolved this for me. To go one step further, I create a function for
+producing nice short links, like an inferior version of ~reftex-label~.
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp
+(defvar org-heading-contraction-max-words 3
+  "Maximum number of words in a heading")
+(defvar org-heading-contraction-max-length 35
+  "Maximum length of resulting string")
+(defvar org-heading-contraction-stripped-words
+  '("the" "on" "in" "off" "a" "for" "by" "of" "and" "is" "to")
+  "Unnecesary words to be removed from a heading")
+
+(defun org-heading-contraction (heading-string)
+  "Get a contracted form of HEADING-STRING that is onlu contains alphanumeric charachters.
+Strips 'joining' words in `org-heading-contraction-stripped-words',
+and then limits the result to the first `org-heading-contraction-max-words' words.
+If the total length is > `org-heading-contraction-max-length' then individual words are
+truncated to fit within the limit"
+  (let ((heading-words
+         (-filter (lambda (word)
+                    (not (member word org-heading-contraction-stripped-words)))
+                  (split-string
+                   (->> heading-string
+                        s-downcase
+                        (replace-regexp-in-string "\\[\\[[^]]+\\]\\[\\([^]]+\\)\\]\\]" "\\1") ; get description from org-link
+                        (replace-regexp-in-string "[-/ ]+" " ") ; replace seperator-type chars with space
+                        (replace-regexp-in-string "[^a-z0-9 ]" "") ; strip chars which need %-encoding in a uri
+                        ) " "))))
+    (when (> (length heading-words)
+             org-heading-contraction-max-words)
+      (setq heading-words
+            (subseq heading-words 0 org-heading-contraction-max-words)))
+
+    (when (> (+ (-sum (mapcar #'length heading-words))
+                (1- (length heading-words)))
+             org-heading-contraction-max-length)
+      ;; trucate each word to a max word length determined by
+      ;;   max length = \floor{ \frac{total length - chars for seperators - \sum_{word \leq average length} length(word) }{num(words) > average length} }
+      (setq heading-words (let* ((total-length-budget (- org-heading-contraction-max-length  ; how many non-separator chars we can use
+                                                         (1- (length heading-words))))
+                                 (word-length-budget (/ total-length-budget                  ; max length of each word to keep within budget
+                                                        org-heading-contraction-max-words))
+                                 (num-overlong (-count (lambda (word)                             ; how many words exceed that budget
+                                                         (> (length word) word-length-budget))
+                                                       heading-words))
+                                 (total-short-length (-sum (mapcar (lambda (word)                 ; total length of words under that budget
+                                                                     (if (<= (length word) word-length-budget)
+                                                                         (length word) 0))
+                                                                   heading-words)))
+                                 (max-length (/ (- total-length-budget total-short-length)   ; max(max-length) that we can have to fit within the budget
+                                                num-overlong)))
+                            (mapcar (lambda (word)
+                                      (if (<= (length word) max-length)
+                                          word
+                                        (substring word 0 max-length)))
+                                    heading-words))))
+    (string-join heading-words "-")))
+#+END_SRC
+
+#+BEGIN_QUOTE
+Now here's alphapapa's subtly tweaked mode.
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp
+(define-minor-mode unpackaged/org-export-html-with-useful-ids-mode
+  "Attempt to export Org as HTML with useful link IDs.
+Instead of random IDs like \"#orga1b2c3\", use heading titles,
+made unique when necessary."
+  :global t
+  (if unpackaged/org-export-html-with-useful-ids-mode
+      (advice-add #'org-export-get-reference :override #'unpackaged/org-export-get-reference)
+    (advice-remove #'org-export-get-reference #'unpackaged/org-export-get-reference)))
+
+(defun unpackaged/org-export-get-reference (datum info)
+  "Like `org-export-get-reference', except uses heading titles instead of random numbers."
+  (let ((cache (plist-get info :internal-references)))
+    (or (car (rassq datum cache))
+        (let* ((crossrefs (plist-get info :crossrefs))
+               (cells (org-export-search-cells datum))
+               ;; Preserve any pre-existing association between
+               ;; a search cell and a reference, i.e., when some
+               ;; previously published document referenced a location
+               ;; within current file (see
+               ;; `org-publish-resolve-external-link').
+               ;;
+               ;; However, there is no guarantee that search cells are
+               ;; unique, e.g., there might be duplicate custom ID or
+               ;; two headings with the same title in the file.
+               ;;
+               ;; As a consequence, before re-using any reference to
+               ;; an element or object, we check that it doesn't refer
+               ;; to a previous element or object.
+               (new (or (cl-some
+                         (lambda (cell)
+                           (let ((stored (cdr (assoc cell crossrefs))))
+                             (when stored
+                               (let ((old (org-export-format-reference stored)))
+                                 (and (not (assoc old cache)) stored)))))
+                         cells)
+                        (when (org-element-property :raw-value datum)
+                          ;; Heading with a title
+                          (unpackaged/org-export-new-named-reference datum cache))
+                        (when (member (car datum) '(src-block table example fixed-width property-drawer))
+                          ;; Nameable elements
+                          (unpackaged/org-export-new-named-reference datum cache))
+                        ;; NOTE: This probably breaks some Org Export
+                        ;; feature, but if it does what I need, fine.
+                        (org-export-format-reference
+                         (org-export-new-reference cache))))
+               (reference-string new))
+          ;; Cache contains both data already associated to
+          ;; a reference and in-use internal references, so as to make
+          ;; unique references.
+          (dolist (cell cells) (push (cons cell new) cache))
+          ;; Retain a direct association between reference string and
+          ;; DATUM since (1) not every object or element can be given
+          ;; a search cell (2) it permits quick lookup.
+          (push (cons reference-string datum) cache)
+          (plist-put info :internal-references cache)
+          reference-string))))
+
+(defun unpackaged/org-export-new-named-reference (datum cache)
+  "Return new reference for DATUM that is unique in CACHE."
+  (cl-macrolet ((inc-suffixf (place)
+                             `(progn
+                                (string-match (rx bos
+                                                  (minimal-match (group (1+ anything)))
+                                                  (optional "--" (group (1+ digit)))
+                                                  eos)
+                                              ,place)
+                                ;; HACK: `s1' instead of a gensym.
+                                (-let* (((s1 suffix) (list (match-string 1 ,place)
+                                                           (match-string 2 ,place)))
+                                        (suffix (if suffix
+                                                    (string-to-number suffix)
+                                                  0)))
+                                  (setf ,place (format "%s--%s" s1 (cl-incf suffix)))))))
+    (let* ((headline-p (eq (car datum) 'headline))
+           (title (if headline-p
+                      (org-element-property :raw-value datum)
+                    (or (org-element-property :name datum)
+                        (concat (org-element-property :raw-value
+                                 (org-element-property :parent
+                                  (org-element-property :parent datum)))))))
+           ;; get ascii-only form of title without needing percent-encoding
+           (ref (concat (org-heading-contraction (substring-no-properties title))
+                        (unless (or headline-p (org-element-property :name datum))
+                          (concat ","
+                                  (case (car datum)
+                                    ('src-block "code")
+                                    ('example "example")
+                                    ('fixed-width "mono")
+                                    ('property-drawer "properties")
+                                    (t (symbol-name (car datum))))
+                                  "--1"))))
+           (parent (when headline-p (org-element-property :parent datum))))
+      (while (--any (equal ref (car it))
+                    cache)
+        ;; Title not unique: make it so.
+        (if parent
+            ;; Append ancestor title.
+            (setf title (concat (org-element-property :raw-value parent)
+                                "--" title)
+                  ;; get ascii-only form of title without needing percent-encoding
+                  ref (org-heading-contraction (substring-no-properties title))
+                  parent (when headline-p (org-element-property :parent parent)))
+          ;; No more ancestors: add and increment a number.
+          (inc-suffixf ref)))
+      ref)))
+
+(add-hook 'org-load-hook #'unpackaged/org-export-html-with-useful-ids-mode)
+#+END_SRC
+
+***** A better ~org-return~
+#+BEGIN_SRC emacs-lisp
+(after! org
+  (defun unpackaged/org-element-descendant-of (type element)
+    "Return non-nil if ELEMENT is a descendant of TYPE.
+TYPE should be an element type, like `item' or `paragraph'.
+ELEMENT should be a list like that returned by `org-element-context'."
+    ;; MAYBE: Use `org-element-lineage'.
+    (when-let* ((parent (org-element-property :parent element)))
+      (or (eq type (car parent))
+          (unpackaged/org-element-descendant-of type parent))))
+
+;;;###autoload
+  (defun unpackaged/org-return-dwim (&optional default)
+    "A helpful replacement for `org-return-indent'.  With prefix, call `org-return-indent'.
+
+On headings, move point to position after entry content.  In
+lists, insert a new item or end the list, with checkbox if
+appropriate.  In tables, insert a new row or end the table."
+    ;; Inspired by John Kitchin: http://kitchingroup.cheme.cmu.edu/blog/2017/04/09/A-better-return-in-org-mode/
+    (interactive "P")
+    (if default
+        (org-return t)
+      (cond
+       ;; Act depending on context around point.
+
+       ;; NOTE: I prefer RET to not follow links, but by uncommenting this block, links will be
+       ;; followed.
+
+       ;; ((eq 'link (car (org-element-context)))
+       ;;  ;; Link: Open it.
+       ;;  (org-open-at-point-global))
+
+       ((org-at-heading-p)
+        ;; Heading: Move to position after entry content.
+        ;; NOTE: This is probably the most interesting feature of this function.
+        (let ((heading-start (org-entry-beginning-position)))
+          (goto-char (org-entry-end-position))
+          (cond ((and (org-at-heading-p)
+                      (= heading-start (org-entry-beginning-position)))
+                 ;; Entry ends on its heading; add newline after
+                 (end-of-line)
+                 (insert "\n\n"))
+                (t
+                 ;; Entry ends after its heading; back up
+                 (forward-line -1)
+                 (end-of-line)
+                 (when (org-at-heading-p)
+                   ;; At the same heading
+                   (forward-line)
+                   (insert "\n")
+                   (forward-line -1))
+                 ;; FIXME: looking-back is supposed to be called with more arguments.
+                 (while (not (looking-back (rx (repeat 3 (seq (optional blank) "\n")))))
+                   (insert "\n"))
+                 (forward-line -1)))))
+
+       ((org-at-item-checkbox-p)
+        ;; Checkbox: Insert new item with checkbox.
+        (org-insert-todo-heading nil))
+
+       ((org-in-item-p)
+        ;; Plain list.  Yes, this gets a little complicated...
+        (let ((context (org-element-context)))
+          (if (or (eq 'plain-list (car context))  ; First item in list
+                  (and (eq 'item (car context))
+                       (not (eq (org-element-property :contents-begin context)
+                                (org-element-property :contents-end context))))
+                  (unpackaged/org-element-descendant-of 'item context))  ; Element in list item, e.g. a link
+              ;; Non-empty item: Add new item.
+              (org-insert-item)
+            ;; Empty item: Close the list.
+            ;; TODO: Do this with org functions rather than operating on the text. Can't seem to find the right function.
+            (delete-region (line-beginning-position) (line-end-position))
+            (insert "\n"))))
+
+       ((when (fboundp 'org-inlinetask-in-task-p)
+          (org-inlinetask-in-task-p))
+        ;; Inline task: Don't insert a new heading.
+        (org-return t))
+
+       ((org-at-table-p)
+        (cond ((save-excursion
+                 (beginning-of-line)
+                 ;; See `org-table-next-field'.
+                 (cl-loop with end = (line-end-position)
+                          for cell = (org-element-table-cell-parser)
+                          always (equal (org-element-property :contents-begin cell)
+                                        (org-element-property :contents-end cell))
+                          while (re-search-forward "|" end t)))
+               ;; Empty row: end the table.
+               (delete-region (line-beginning-position) (line-end-position))
+               (org-return t))
+              (t
+               ;; Non-empty row: call `org-return-indent'.
+               (org-return t))))
+       (t
+        ;; All other cases: call `org-return-indent'.
+        (org-return t))))))
+
+(map!
+ :after evil-org
+ :map evil-org-mode-map
+ :i [return] #'unpackaged/org-return-dwim)
+#+END_SRC
+
+***** Tempo Templates
 I need to move these to yasnippets at some point.
 
 Start by making sure that org-tempo is enabled.
@@ -683,7 +1872,7 @@ Set up some templates for Babel.
 
 #+end_src
 
-*** ToDo configuration
+***** ToDo configuration
 Configure todo keywords.
 #+begin_src emacs-lisp :tangle yes
 (setq org-todo-keywords
@@ -698,7 +1887,7 @@ Keep a log of when a task was completed.
 
 #+end_src
 
-*** Fancy priorities.
+***** Fancy priorities.
 #+begin_src emacs-lisp :tangle yes
 (after! org-fancy-priorities
   (add-hook! org-mode . org-fancy-priorities-mode)
@@ -706,21 +1895,7 @@ Keep a log of when a task was completed.
 
 #+end_src
 
-*** Agenda configuration.
-Tell Agenda mode to include .org.gpg files.
-#+begin_src emacs-lisp :tangle yes
-(unless (string-match-p "\\.gpg" org-agenda-file-regexp)
-  (setq org-agenda-file-regexp
-    (replace-regexp-in-string "\\\\\\.org" "\\\\.org\\\\(\\\\.gpg\\\\)?"
-      org-agenda-file-regexp)))
-#+end_src
-
-Expand Agenda targets to include .org.gpg. Refile uses these below to build it's list of places it can save to.
-#+begin_src emacs-lisp :tangle yes
-(add-to-list 'org-agenda-files (expand-file-name "~/Documents/org/*\\.org\\.gpg"))
-#+end_src
-
-*** Refile
+***** Refile
 Refile targets include the current file and any file contributing to the agenda - up to 9 levels deep.
 #+begin_src emacs-lisp :tangle yes
 (setq org-refile-targets (quote ((nil :maxlevel . 4)
@@ -754,55 +1929,7 @@ Exclude DONE state tasks from refile targets.
 (setq org-refile-target-verify-function 'ab/verify-refile-target)
 #+end_src
 
-*** org-roam
-I haven't invested enough (any) time in properly getting to grips with
-org-roam, so it's disabled for now.
-
-#+begin_src emacs-lisp :tangle no
-
-(setq org-roam-directory "~/Documents/org/launchdarkly")
-
-(after! org-roam
-       (map! :leader
-           :prefix "n"
-           :desc "org-roam" "l" #'org-roam
-           :desc "org-roam-insert" "i" #'org-roam-insert
-           :desc "org-roam-switch-to-buffer" "b" #'org-roam-switch-to-buffer
-           :desc "org-roam-find-file" "f" #'org-roam-find-file
-           :desc "org-roam-show-graph" "g" #'org-roam-show-graph
-           :desc "org-roam-insert" "i" #'org-roam-insert
-           :desc "org-roam-capture" "c" #'org-roam-capture))
-
-(require 'company-org-roam)
-   (use-package company-org-roam
-     :when (featurep! :completion company)
-     :after org-roam
-     :config
-     (set-company-backend! 'org-mode '(company-org-roam company-yasnippet company-dabbrev)))
-
-(after! org-roam
- (setq org-roam-encrypt-files t)
- (setq org-roam-ref-capture-templates
-   '(("r" "ref" plain (function org-roam-capture--get-point)
-       "%?"
-       :file-name "websites/${slug}.org.gpg"
-       :head "-*- epa-file-encrypt-to: ("andy.bold@me.com") -*-
-,#+TITLE: ${title}
-   ,#+ROAM_KEY: ${ref}
-   - source :: ${ref}"
-       :unnarrowed t)))
-
- (setq org-roam-capture-templates
-   '(("d" "default" plain (function org-roam--capture-get-point)
-      "%?"
-      :file-name "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}\" (current-time) t)"
-      :head "-*- epa-file-encrypt-to: (\"andy.bold@me.com\") -*-
-
-,#+TITLE: ${title}\n"
-      :unnarrowed t))))
-#+end_src
-
-*** Journal
+***** Journal
 #+begin_src emacs-lisp :tangle yes
 
 (setq org-journal-enable-agenda-integration t)
@@ -832,6 +1959,70 @@ Add a hook for org-download...
   (org-download-enable)
   (setq org-download-method "directory"
     org-download-heading-lvl nil))
+#+end_src
+**** Exporting (General)
+#+begin_src emacs-lisp :tangle yes
+(after! org (setq org-export-headline-levels 5)) ; I like nesting
+
+#+end_src
+**** Exporting to GFM
+#+begin_src emacs-lisp :tangle yes
+(eval-after-load "org"
+  '(require 'ox-gfm nil t))
+#+end_src
+**** Babel
+Tell Babel to use python3 like a real grown up.
+#+begin_src emacs-lisp :tangle yes
+(setq org-babel-python-command "python3")
+
+#+end_src
+
+Auto-completion is nice too.
+#+begin_src emacs-lisp :tangle yes
+(defun tec-org-python ()
+  (if (eq major-mode 'python-mode)
+   (progn (anaconda-mode t)
+          (company-mode t)))
+  )
+(add-hook 'org-src-mode-hook 'tec-org-python)
+#+end_src
+*** Markdown
+Mixed-pitch mode, to make things look nice.
+#+begin_src emacs-lisp :tangle yes
+(add-hook! (gfm-mode markdown-mode) #'mixed-pitch-mode)
+
+#+end_src
+
+Disable hard line-wraps - visual only.
+#+begin_src emacs-lisp :tangle yes
+(add-hook! (gfm-mode markdown-mode) #'visual-line-mode #'turn-off-auto-fill)
+
+#+end_src
+
+And let's tweak the header display.
+#+begin_src emacs-lisp :tangle yes
+(custom-set-faces!
+  '(markdown-header-face-1 :height 1.25 :weight extra-bold :inherit markdown-header-face)
+  '(markdown-header-face-2 :height 1.15 :weight bold       :inherit markdown-header-face)
+  '(markdown-header-face-3 :height 1.08 :weight bold       :inherit markdown-header-face)
+  '(markdown-header-face-4 :height 1.00 :weight bold       :inherit markdown-header-face)
+  '(markdown-header-face-5 :height 0.90 :weight bold       :inherit markdown-header-face)
+  '(markdown-header-face-6 :height 0.75 :weight extra-bold :inherit markdown-header-face))
+#+end_src
+
+** Package management
+I let Doom manage my packages. If I need to look something up then I use Paradox. Paradox will star any Github repos that I download packages from if I do use it, and setting my Github token stops it from nagging me about that every time I run it.
+#+begin_src emacs-lisp :tangle yes
+(setq paradox-github-token "{{@@ env['personal_github_token'] @@}}")
+#+end_src
+
+** EShell configuration.
+When I need a quick shell I use VTerm. This is for org-babel.
+
+Hook Ansi colour filtering into shell mode
+#+begin_src emacs-lisp :tangle yes
+(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
+
 #+end_src
 
 ** Magit
