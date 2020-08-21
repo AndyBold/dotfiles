@@ -743,6 +743,7 @@ It's also nice to make use of the Unicode characters for check boxes, and other 
 *** Keyboard shortcuts
 #+begin_src emacs-lisp :tangle yes
 (global-set-key (kbd "C-c =") 'er/expand-region)
+(global-set-key (kbd "C-c m l") 'org-mac-grab-link)
 
 #+end_src
 
@@ -905,7 +906,7 @@ Definitely above my elisp pay grade. Stolen from Teco again, this enables LSP su
 
 **** Basic Agenda Configuration
 Tell Agenda mode to include .org.gpg files.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 (after! org-agenda
 (unless (string-match-p "\\.gpg" org-agenda-file-regexp)
   (setq org-agenda-file-regexp
@@ -1500,14 +1501,13 @@ Hence, we need to do a bit of overriding.
      (set-company-backend! 'org-mode '(company-org-roam company-yasnippet company-dabbrev)))
 
 (after! org-roam
- (setq org-roam-encrypt-files t)
+ ;;(setq org-roam-encrypt-files t)
  (setq org-roam-ref-capture-templates
    '(("r" "ref" plain (function org-roam-capture--get-point)
        "%?"
-       :file-name "websites/${slug}.org.gpg"
-       :head "-*- epa-file-encrypt-to: ("andy.bold@me.com") -*-
-,#+TITLE: ${title}
-   ,#+ROAM_KEY: ${ref}
+       :file-name "websites/${slug}.org"
+       :head "#+TITLE: ${title}
+   #+ROAM_KEY: ${ref}
    - source :: ${ref}"
        :unnarrowed t)))
 
@@ -1515,9 +1515,7 @@ Hence, we need to do a bit of overriding.
    '(("d" "default" plain (function org-roam--capture-get-point)
       "%?"
       :file-name "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}\" (current-time) t)"
-      :head "-*- epa-file-encrypt-to: (\"andy.bold@me.com\") -*-
-
-,#+TITLE: ${title}\n"
+      :head "#+TITLE: ${title}\n\n"
       :unnarrowed t))))
 #+end_src
 
