@@ -26,7 +26,6 @@
     - [[#info-colours][Info colours]]
     - [[#fancy-splash-screen][Fancy Splash Screen]]
     - [[#beacon-1][Beacon]]
-    - [[#golden-ratio][Golden ratio]]
     - [[#zoom-1][Zoom]]
     - [[#stripe-buffer][Stripe buffer]]
     - [[#which-key-1][Which Key]]
@@ -40,7 +39,7 @@
     - [[#flyspell][Flyspell]]
   - [[#languages][Languages]]
     - [[#plaintext][Plaintext]]
-    - [[#orgmode-1][Orgmode]]
+    - [[#orgmode-configuration][Orgmode configuration]]
     - [[#markdown][Markdown]]
   - [[#package-management][Package management]]
   - [[#eshell-configuration][EShell configuration.]]
@@ -72,11 +71,26 @@ My name and email address. Various things use this, such as Git and GPG.
 
 *** Where's my org?
 #+begin_src emacs-lisp :tangle yes
-(setq org-directory "/Users/andyb/Google Drive File Stream/My Drive/org")
+;;(when (string= (system-name) "Nightingale.local")
+  ;;(setq org-directory "/Users/andyb/Google Drive File Stream/My Drive/org"))
+
+(system-name)
+
+(cond
+ ((string= (system-name) "Nightingale.local")
+  (setq org-directory "/Users/andyb/Google Drive File Stream/My Drive/org"))
+
+ ((string= (system-name) "Groot.local")
+  (setq org-directory "/Users/andrewbold/Documents/org"))
+
+ ;; Because I seem to suffer Yet Another Catalina bug.
+ ((string= (system-name) "Andrews-Air.local")
+  (setq org-directory "/Users/andrewbold/Documents/org"))
+ )
 
 #+end_src
 
-Keep my =org-roam= files somwhere else.
+Keep my =org-roam= files somewhere else.
 #+begin_src emacs-lisp :tangle yes
 (setq org-roam-directory "~/Documents/org/roam")
 
@@ -553,30 +567,12 @@ This is nice. More Teco.
 #+end_src
 
 *** Beacon
-Beacon helps you to find your cursor when you are scrolling around. It is installed in =packages.el=
+Beacon helps you to find your cursor when you are scrolling around.
 #+begin_src emacs-lisp :tangle yes
 (setq beacon-color +evil--emacs-cursor-color + -1)
 (setq beacon-blink-when-point-moves-vertically 10)
 (setq beacon-dont-blink-major-modes '(dashboard-mode))
 (beacon-mode 1)
-#+end_src
-
-*** Golden ratio
-I like splitting my editor window so that I can see more than one file that I'm working on. Sometimes it's essential. For example, if I'm working on a Terraform module, and I want to keep an eye on several bits of relevant info.
-
-I don't like the way that Emacs handles this. Window sizes are usually 'wrong', and I spend too much time resizing them. Golden Ratio might fix this for me. I'm starting out with letting GR handle things automatically, but a max width of 120 characters.
-
-There are some buffers that should never be scaled. They are added to =golden-ratio-exclude-buffer-regexp=.
-
-That being said, Zoom is set up below and this block is currently disabled. Zoom might do a better job. Golden Ratio also appears to be unmaintained at the moment.
-#+begin_src emacs-lisp :tangle no
-(golden-ration-mode 1)
-(setq golden-ratio-auto-scale t)
-(setq golden-ratio-max-width 120)
-(add-to-list 'golden-ratio-exclude-buffer-regexp "^\\*[hH]elm.*")
-(add-to-list 'golden-ratio-exclude-buffer-regexp "^\\*vterm.*")
-(add-to-list 'golden-ratio-exclude-buffer-regexp "^\\*ediff.*")
-
 #+end_src
 
 *** Zoom
@@ -597,7 +593,6 @@ If the frame size is >1280 then use 100 columns and 75% of the frame height. Oth
 
 *** Stripe buffer
 Use stripe-y buffer lists.
-
 #+begin_src emacs-lisp :tangle yes
 ;; hl-line (higher priority stripes) fix:
 (defadvice sb/redraw-region (after stripe-set-priority activate)
@@ -658,6 +653,7 @@ Let's try life without the escape key for a while...
 (after! evil (evil-escape-mode nil))
 
 #+end_src
+
 *** Font display
 Make Org pretty.
 #+begin_src emacs-lisp :tangle yes
@@ -691,7 +687,7 @@ It's also nice to make use of the Unicode characters for check boxes, and other 
               :pending       "◼"
               :checkedbox    "☑"
               :list_property "∷"
-              :results       "🠶"
+              :results       "↩"
               :property      "☸"
               :properties    "⚙"
               :end           "∎"
@@ -705,8 +701,8 @@ It's also nice to make use of the Unicode characters for check boxes, and other 
               :beamer_header "↠"
               :begin_quote   "❮"
               :end_quote     "❯"
-              :begin_export  "⯮"
-              :end_export    "⯬"
+              :begin_export  "→"
+              :end_export    "←"
               :priority_a   ,(propertize "⚑" 'face 'all-the-icons-red)
               :priority_b   ,(propertize "⬆" 'face 'all-the-icons-orange)
               :priority_c   ,(propertize "■" 'face 'all-the-icons-yellow)
@@ -766,14 +762,13 @@ cd aspell6-en-custom
 ./configure && make && sudo make install
 #+END_SRC
 
-One it is installed we need to tell Emacs to use it.
+Once installed, we need to tell Emacs to use it.
 #+begin_src emacs-lisp :tangle yes
 (setq ispell-dictionary "en-custom")
 
 #+end_src
 
-If I add any words of my own (e.g., technical terms) then they will be saved to my personal dictionary. As I will probably want to share it with the different devices I use, I keep it in a slightly-odd-but-works-for-me place.
-
+If I add any words of my own (e.g., technical terms) then they are stored in my personal dictionary. As I will probably want to share it with the different devices I use, I keep it in a slightly-odd-but-works-for-me place.
 #+begin_src emacs-lisp :tangle yes
 (setq ispell-personal-dictionary (expand-file-name "dictionary/ispell_personal" dotfiles-dir))
 #+end_src
@@ -785,14 +780,14 @@ Enable nested snippets.
 #+end_src
 
 *** Flyspell
-Enable the =flyspell-lazy= package that was referenced earlier.
+Enable the =flyspell-lazy= package that was installed earlier.
 #+begin_src emacs-lisp :tangle yes
 (after! flyspell (require 'flyspell-lazy) (flyspell-lazy-mode 1))
 #+end_src
 
 ** Languages
 *** Plaintext
-If ANSI colors are there, use them.
+If ANSI colours are there, use them.
 #+begin_src emacs-lisp :tangle yes
 (after! text-mode
   (add-hook! 'text-mode-hook
@@ -811,7 +806,7 @@ Enable =ispell= in various text modes.
               company-yasnippet))
 #+end_src
 
-*** Orgmode
+*** Orgmode configuration
 **** Better defaults
 Let's tweak some defaults.
 #+begin_src emacs-lisp :tangle yes
@@ -1825,52 +1820,6 @@ appropriate.  In tables, insert a new row or end the table."
  :map evil-org-mode-map
  :i [return] #'unpackaged/org-return-dwim)
 #+END_SRC
-
-***** Tempo Templates
-I need to move these to yasnippets at some point.
-
-Start by making sure that org-tempo is enabled.
-#+begin_src emacs-lisp :tangle yes
-(require 'org-tempo)
-
-#+end_src
-
-Set up some templates for Babel.
-#+begin_src emacs-lisp :tangle yes
-(tempo-define-template "plain-src"
-                       '("#+begin_src ?\n\n" > "#+end_src")
-                       "<s"
-                       "Insert a generic source code template")
-
-(tempo-define-template "lisp-block"
-                       '("#+begin_src emacs-lisp :tangle yes\n?\n" > "#+end_src")
-                       "<sl"
-                       "Insert an embedded Lisp block for literate emacs.d")
-
-(tempo-define-template "k8s"
-                       '("#+name: k8s\n#+begin_src shell :tangle no :results output\n?\n" > "#+end_src")
-                       "<sk"
-                       "Insert a, non-tangled, k8s block")
-
-(tempo-define-template "shell-code"
-                       '("#+begin_src shell :tangle no :results value raw :results value drawer :session" > "\n\n#+end_src")
-                       "<ss"
-                       "Shell code block, with raw results")
-
-(tempo-define-template "properties-block"
-                       '(":PROPERTIES:\n" > ":END:")
-                       "<PROP"
-                       "Orgmode properties block")
-(tempo-define-template "python-code"
-                       '("#+begin_src python :tangle no :results value raw :results value drawer :session" > "\n\n#+end_src")
-                       "<sp"
-                       "Python code block, with raw results")
-(tempo-define-template "plantuml"
-                       '("#+begin_src plantuml :tangle no :results value raw :results value drawer :session" > "\n\n#+end_src")
-                       "<puml"
-                       "Plantuml")
-
-#+end_src
 
 ***** ToDo configuration
 Configure todo keywords.

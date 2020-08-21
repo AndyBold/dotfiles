@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: Insert a PlantUML block
+# uuid: ab/puml
+# key: <puml
+# condition: t
+# --
+#+begin_src plantuml :tangle no :results drawer :file images/$1.png
+$0
+#+end_src
