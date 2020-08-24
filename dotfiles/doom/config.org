@@ -23,6 +23,7 @@
     - [[#magit-forge][Magit Forge]]
   - [[#look-and-feel][Look and feel]]
     - [[#configure-base-fonts][Configure base fonts]]
+    - [[#ligatures][Ligatures]]
     - [[#theme-and-modeline][Theme and modeline]]
     - [[#use-nicer-window-titles][Use nicer window titles.]]
     - [[#info-colours][Info colours]]
@@ -401,10 +402,18 @@ I am enjoying Graphik as the variablch font. Some other options that I may try i
 - Proxima Nova
  
 #+begin_src emacs-lisp :tangle yes
-(setq doom-font (font-spec :family "FiraCode Nerd Font" :size 12)
-      doom-big-font (font-spec :family "FireCode Nerd Font" :size 18)
+(setq doom-font (font-spec :family "Fira Code" :size 12)
+      doom-big-font (font-spec :family "Fira Code" :size 18)
       doom-variable-pitch-font (font-spec :family "Graphik" :size 14)
       doom-serif-font (font-spec :family "IBM Plex Mono" :weight 'light))
+
+#+end_src
+
+*** Ligatures
+I've grown to appreciate the use of ligatures to replace certain elements.
+#+begin_src emacs-lisp
+(setq +ligatures-in-modes t)
+(setq +ligatures-extras-in-modes t)
 
 #+end_src
 
@@ -663,11 +672,17 @@ Make Org pretty.
 
 #+end_src
 
-#+begin_src emacs-lisp :tangle yes
+Disabled org-superstar - so many CPU cycles...
+#+begin_src emacs-lisp :tangle no
 (after! org-superstar
   (setq org-superstar-headline-bullets-list '("◉" "○" "✸" "✿" "✤" "✜" "◆" "▶")
         ;; org-superstar-headline-bullets-list '("Ⅰ" "Ⅱ" "Ⅲ" "Ⅳ" "Ⅴ" "Ⅵ" "Ⅶ" "Ⅷ" "Ⅸ" "Ⅹ")
         org-superstar-prettify-item-bullets t ))
+
+#+end_src
+
+This should be OK though...
+#+begin_src emacs-lisp :tangle no
 (after! org
   (setq org-ellipsis " ▾ "
         org-priority-highest ?A
@@ -681,10 +696,9 @@ Make Org pretty.
 #+END_SRC
 
 It's also nice to make use of the Unicode characters for check boxes, and other commands.
-
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
 (after! org
-  (plist-put +ligatures-extra-symbols
+  (appendq! +ligatures-extra-symbols
             '(:checkbox      "☐"
               :pending       "◼"
               :checkedbox    "☑"
@@ -711,37 +725,39 @@ It's also nice to make use of the Unicode characters for check boxes, and other 
               :priority_d   ,(propertize "⬇" 'face 'all-the-icons-green)
               :priority_e   ,(propertize "❓" 'face 'all-the-icons-blue)
               :em_dash       "—"
-              :name "⁍")))
+              :name "⁍"))
 
-  ;; (set-ligatures! 'org-mode
-    ;; :merge t
-    ;; :checkbox      "[ ]"
-    ;; :pending       "[-]"
-    ;; :checkedbox    "[X]"
-    ;; :list_property "::"
-    ;; :results       "#+RESULTS:"
-    ;; :property      "#+PROPERTY:"
-    ;; :property      ":PROPERTIES:"
-    ;; :end           ":END:"
-    ;; :options       "#+OPTIONS:"
-    ;; :title         "#+TITLE:"
-    ;; :subtitle      "#+SUBTITLE:"
-    ;; :author        "#+AUTHOR:"
-    ;; :date          "#+DATE:"
-    ;; :latex_class   "#+LATEX_CLASS:"
-    ;; :latex_header  "#+LATEX_HEADER:"
-    ;; :beamer_header "#+BEAMER_HEADER:"
-    ;; :begin_quote   "#+BEGIN_QUOTE"
-    ;; :end_quote     "#+END_QUOTE"
-    ;; :begin_export  "#+BEGIN_EXPORT"
-    ;; :end_export    "#+END_EXPORT"
-    ;; :priority_a    "[#A]"
-    ;; :priority_b    "[#B]"
-    ;; :priority_c    "[#C]"
-    ;; :priority_d    "[#D]"
-    ;; :priority_e    "[#E]"
-    ;; :em_dash       "---"))
+  (set-ligatures! 'org-mode
+    :merge t
+    :checkbox      "[ ]"
+    :pending       "[-]"
+    :checkedbox    "[X]"
+    :list_property "::"
+    :results       "#+RESULTS:"
+    :property      "#+PROPERTY:"
+    :property      ":PROPERTIES:"
+    :end           ":END:"
+    :options       "#+OPTIONS:"
+    :title         "#+TITLE:"
+    :subtitle      "#+SUBTITLE:"
+    :author        "#+AUTHOR:"
+    :date          "#+DATE:"
+    :latex_class   "#+LATEX_CLASS:"
+    :latex_header  "#+LATEX_HEADER:"
+    :beamer_header "#+BEAMER_HEADER:"
+    :begin_quote   "#+BEGIN_QUOTE"
+    :end_quote     "#+END_QUOTE"
+    :begin_export  "#+BEGIN_EXPORT"
+    :end_export    "#+END_EXPORT"
+    :priority_a    "[#A]"
+    :priority_b    "[#B]"
+    :priority_c    "[#C]"
+    :priority_d    "[#D]"
+    :priority_e    "[#E]"
+    :em_dash       "---"))
 #+END_SRC
+
+#+RESULTS:
 
 *** Keyboard shortcuts
 #+begin_src emacs-lisp :tangle yes
