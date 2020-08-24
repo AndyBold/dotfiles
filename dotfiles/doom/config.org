@@ -1502,21 +1502,34 @@ Hence, we need to do a bit of overriding.
 
 (after! org-roam
  ;;(setq org-roam-encrypt-files t)
- (setq org-roam-ref-capture-templates
-   '(("r" "ref" plain (function org-roam-capture--get-point)
-       "%?"
-       :file-name "websites/${slug}.org"
-       :head "#+TITLE: ${title}
-   #+ROAM_KEY: ${ref}
-   - source :: ${ref}"
-       :unnarrowed t)))
 
- (setq org-roam-capture-templates
-   '(("d" "default" plain (function org-roam--capture-get-point)
-      "%?"
-      :file-name "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}\" (current-time) t)"
-      :head "#+TITLE: ${title}\n\n"
-      :unnarrowed t))))
+#+end_src
+
+I want to use an index file.
+#+begin_src emacs-lisp :tangle yes
+  (setq org-roam-index-file "index.org")
+#+end_src
+
+In addition to the ~#+ROAM_TAGS~ header, I may decide to organise my roam notes into sub-directories. If I do, then each directory will match a tag hierarchy which can be used in addition to ~#+ROAM_TAGS~ to define tags for the files that they contain. In ~org-roam-tag-sources,~ ~prop~ says to use ~#+ROAM_TAGS~, and ~all-directories~ will take tags from the directory hierarchy below ~org-roam-directory~.
+#+begin_src emacs-lisp :tangle yes
+  (setq org-roam-tag-sources '(prop all-directories))
+#+end_src
+
+Set up some capture templates.
+#+begin_src emacs-lisp :tangle yes
+  (setq org-roam-ref-capture-templates
+        '(("r" "ref" plain (function org-roam-capture--get-point)
+           "%?"
+           :file-name "websites/${slug}.org"
+           :head "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}\n - source :: ${ref}"
+           :unnarrowed t)))
+
+  (setq org-roam-capture-templates
+        '(("d" "default" plain (function org-roam--capture-get-point)
+           "%?"
+           :file-name "%(format-time-string \"%Y-%m-%d--%H-%M-%SZ--${slug}\" (current-time) t)"
+           :head "#+TITLE: ${title}\n#+ROAM_TAGS:"
+           :unnarrowed t))))
 #+end_src
 
 ****** Tidy up the modeline
