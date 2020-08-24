@@ -682,9 +682,9 @@ Make Org pretty.
 
 It's also nice to make use of the Unicode characters for check boxes, and other commands.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (after! org
-  (set-ligatures! 'org-mode
+  (plist-put +ligatures-extra-symbols
             '(:checkbox      "☐"
               :pending       "◼"
               :checkedbox    "☑"
