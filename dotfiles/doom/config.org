@@ -1,3 +1,5 @@
+#+TITLE: Test
+
 * My /n/th literal emacs configuration     :TOC_3:
   - [[#initial-setup][Initial setup]]
     - [[#personal-details][Personal details]]
@@ -391,7 +393,7 @@ Github and =git-delta= integration for Magit.
 :PROPERTIES:
 :ID:       854e8b2f-131c-4328-a2cb-cea7f2a27e35
 :END:
-I am enjoying Graphik as the variable pitch font. Some other options that I may try in the future are.
+I am enjoying Graphik as the variablch font. Some other options that I may try in the future are.
 - Avenir Next
 - Founders Grotesk
 - Graphik
@@ -399,8 +401,8 @@ I am enjoying Graphik as the variable pitch font. Some other options that I may 
 - Proxima Nova
  
 #+begin_src emacs-lisp :tangle yes
-(setq doom-font (font-spec :family "Fira Code" :size 12)
-      doom-big-font (font-spec :family "Fire Code" :size 18)
+(setq doom-font (font-spec :family "FiraCode Nerd Font" :size 12)
+      doom-big-font (font-spec :family "FireCode Nerd Font" :size 18)
       doom-variable-pitch-font (font-spec :family "Graphik" :size 14)
       doom-serif-font (font-spec :family "IBM Plex Mono" :weight 'light))
 
@@ -682,8 +684,8 @@ It's also nice to make use of the Unicode characters for check boxes, and other 
 
 #+BEGIN_SRC emacs-lisp
 (after! org
-  (appendq! +pretty-code-symbols
-            `(:checkbox      "☐"
+  (set-ligatures! 'org-mode
+            '(:checkbox      "☐"
               :pending       "◼"
               :checkedbox    "☑"
               :list_property "∷"
@@ -708,36 +710,37 @@ It's also nice to make use of the Unicode characters for check boxes, and other 
               :priority_c   ,(propertize "■" 'face 'all-the-icons-yellow)
               :priority_d   ,(propertize "⬇" 'face 'all-the-icons-green)
               :priority_e   ,(propertize "❓" 'face 'all-the-icons-blue)
-              :em_dash       "—"))
-  (set-pretty-symbols! 'org-mode
-    :merge t
-    :checkbox      "[ ]"
-    :pending       "[-]"
-    :checkedbox    "[X]"
-    :list_property "::"
-    :results       "#+RESULTS:"
-    :property      "#+PROPERTY:"
-    :property      ":PROPERTIES:"
-    :end           ":END:"
-    :options       "#+OPTIONS:"
-    :title         "#+TITLE:"
-    :subtitle      "#+SUBTITLE:"
-    :author        "#+AUTHOR:"
-    :date          "#+DATE:"
-    :latex_class   "#+LATEX_CLASS:"
-    :latex_header  "#+LATEX_HEADER:"
-    :beamer_header "#+BEAMER_HEADER:"
-    :begin_quote   "#+BEGIN_QUOTE"
-    :end_quote     "#+END_QUOTE"
-    :begin_export  "#+BEGIN_EXPORT"
-    :end_export    "#+END_EXPORT"
-    :priority_a    "[#A]"
-    :priority_b    "[#B]"
-    :priority_c    "[#C]"
-    :priority_d    "[#D]"
-    :priority_e    "[#E]"
-    :em_dash       "---")
-(plist-put +pretty-code-symbols :name "⁍")) ; or › could be good?
+              :em_dash       "—"
+              :name "⁍")))
+
+  ;; (set-ligatures! 'org-mode
+    ;; :merge t
+    ;; :checkbox      "[ ]"
+    ;; :pending       "[-]"
+    ;; :checkedbox    "[X]"
+    ;; :list_property "::"
+    ;; :results       "#+RESULTS:"
+    ;; :property      "#+PROPERTY:"
+    ;; :property      ":PROPERTIES:"
+    ;; :end           ":END:"
+    ;; :options       "#+OPTIONS:"
+    ;; :title         "#+TITLE:"
+    ;; :subtitle      "#+SUBTITLE:"
+    ;; :author        "#+AUTHOR:"
+    ;; :date          "#+DATE:"
+    ;; :latex_class   "#+LATEX_CLASS:"
+    ;; :latex_header  "#+LATEX_HEADER:"
+    ;; :beamer_header "#+BEAMER_HEADER:"
+    ;; :begin_quote   "#+BEGIN_QUOTE"
+    ;; :end_quote     "#+END_QUOTE"
+    ;; :begin_export  "#+BEGIN_EXPORT"
+    ;; :end_export    "#+END_EXPORT"
+    ;; :priority_a    "[#A]"
+    ;; :priority_b    "[#B]"
+    ;; :priority_c    "[#C]"
+    ;; :priority_d    "[#D]"
+    ;; :priority_e    "[#E]"
+    ;; :em_dash       "---"))
 #+END_SRC
 
 *** Keyboard shortcuts

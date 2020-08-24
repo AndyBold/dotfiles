@@ -33,6 +33,8 @@
        hl-todo           ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
        hydra
        indent-guides     ; highlighted indent columns
+       (ligatures         ; ligatures or substitute text with pretty symbols
+        +fira)
        minimap           ; show a map of the code on the side
        modeline          ; snazzy, Atom-inspired modeline, plus API
        ;;nav-flash         ; blink cursor line after big motions
@@ -40,7 +42,6 @@
        ophints           ; highlight the region an operation acts on
        (popup +all
               +defaults)   ; tame sudden yet inevitable temporary windows
-       pretty-code       ; ligatures or substitute text with pretty symbols
        ;;tabs              ; an tab bar for Emacs
        treemacs          ; a project drawer, like neotree but cooler
        ;;unicode           ; extended unicode support for various languages
@@ -95,7 +96,6 @@
          +dictionary
          +docsets)       ; navigate your code and its documentation
        lsp
-       macos             ; MacOS-specific commands
        (magit +forge)    ; a git porcelain for Emacs
        make              ; run make tasks from Emacs
        pass              ; password manager for nerds
@@ -151,6 +151,7 @@
         +journal
         +dragndrop
         +pandoc
+        +pretty
         +roam
         +gnuplot)
        php               ; perl's insecure younger brother
@@ -178,6 +179,9 @@
        ;;(mu4e +gmail)
        ;;notmuch
        ;;(wanderlust +gmail)
+
+       :os
+       macos             ; MacOS-specific commands
 
        :app
        ;;calendar
