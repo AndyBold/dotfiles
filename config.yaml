@@ -108,46 +108,7 @@ dotfiles:
     actions:
       - omfinstall
 profiles:
-  Titan:
-    dotfiles:
-    - f_zshrc
-    - d_aws
-    - f_gitconfig
-    - f_gitignore
-    - d_gnupg
-    - d_emacs.d
-    - d_irssi
-    - f_mbsyncrc
-    - f_msmtprc
-    - f_nethackrc
-    - f_screenrc
-    - f_ssh_config
-    - f_tmux.conf
-    - d_tmux
-    - f_vimrc
-    - f_tigrc
-    - f_editorconfig
-    - d_homebin
-  Seneca:
-    dotfiles:
-    - f_zshrc
-    - d_aws
-    - f_gitconfig
-    - f_gitignore
-    - d_gnupg
-    - d_emacs.d
-    - d_irssi
-    - f_mbsyncrc
-    - f_msmtprc
-    - f_nethackrc
-    - f_screenrc
-    - f_ssh_config
-    - f_tmux.conf
-    - d_tmux
-    - f_vimrc
-    - f_tigrc
-    - f_editorconfig
-  Groot:
+  Home:
     dotfiles:
     - f_zshrc
     - d_aws
@@ -178,23 +139,7 @@ profiles:
     - d_fish
     - d_ohmyfish
     - d_src_python
-  Logan:
-    dotfiles:
-    - f_zshrc
-    - f_gitconfig
-    - f_emacs
-    - f_emacsprofiles
-    - d_emacsprelude
-    - f_nethackrc
-    - f_screenrc
-    - f_tmux.conf
-    - d_tmux
-    - f_vimrc
-    - f_tigrc
-    - f_editorconfig
-    - d_homebin
-    - f_precommit
-  Nightcrawler:
+  Work:
     dotfiles:
     - f_zshrc
     - f_gitconfig
