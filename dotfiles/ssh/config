@@ -1,7 +1,20 @@
 Host *
   IdentitiesOnly yes
 
-{%@@ if profile == "Nightcrawler" @@%}
+{%@@ if profile == "Work" @@%}
+Host {@@ env['ld_shd_bastion'] @@}
+  User {@@ env['ld_bastion_user'] @@}
+  HostName {@@ env['ld_bastion_host'] @@}
+  IdentityFile {{@@ env['ld_id_file1'] @@}}
+  ForwardAgent yes
+
+Host {@@ env['ld_subnet_1'] @@}
+  User {@@ env['ld_bastion_user'] @@}
+  ProxyJump {@@ env['ld_shd_bastion'] @@}
+  IdentityFile {{@@ env['ld_id_file1'] @@}}
+  ForwardAgent yes
+  LogLevel QUIET
+
 Host {{@@ env['ld_ssh_hosts'] @@}}
   UseKeychain yes
   StrictHostKeyChecking no
