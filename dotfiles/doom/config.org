@@ -74,20 +74,15 @@ My name and email address. Various things use this, such as Git and GPG.
 
 *** Where's my org?
 #+begin_src emacs-lisp :tangle yes
-;;(when (string= (system-name) "Nightingale.local")
-  ;;(setq org-directory "/Users/andyb/Google Drive File Stream/My Drive/org"))
-
-(system-name)
-
 (cond
- ((string= (system-name) "Nightingale.local")
+ ((string= system-name "Nightcrawler.local")
   (setq org-directory "/Users/andyb/Google Drive File Stream/My Drive/org"))
 
- ((string= (system-name) "Groot.local")
+ ((string= system-name "Groot.local")
   (setq org-directory "/Users/andrewbold/Documents/org"))
 
  ;; Because I seem to suffer Yet Another Catalina bug.
- ((string= (system-name) "Andrews-Air.local")
+ ((string= system-name "Andrews-Air.local")
   (setq org-directory "/Users/andrewbold/Documents/org"))
  )
 
