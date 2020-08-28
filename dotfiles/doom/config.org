@@ -793,6 +793,19 @@ If I add any words of my own (e.g., technical terms) then they are stored in my 
 (setq ispell-personal-dictionary (expand-file-name "dictionary/ispell_personal" dotfiles-dir))
 #+end_src
 
+I want to disable ~spell-fu~ in certain modes, and ignore certain sections in others.
+#+begin_src emacs-lisp :tangle yes
+(add-hook 'org-mode-hook
+  (lambda ()
+    (setq spell-fu-faces-exclude '(org-meta-line org-link org-code))
+    (spell-fu-mode)))
+
+(add-hook 'yaml-mode-hook
+  (lambda ()
+    (spell-fu-mode-disable)))
+
+#+end_src
+
 *** YaSnippets
 Enable nested snippets.
 #+begin_src emacs-lisp :tangle yes
