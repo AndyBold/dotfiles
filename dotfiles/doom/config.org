@@ -21,6 +21,7 @@
     - [[#stripey-buffer-lists][Stripey buffer lists]]
     - [[#which-key][Which Key]]
     - [[#magit-forge][Magit Forge]]
+    - [[#additional-language-modes][Additional Language Modes]]
   - [[#look-and-feel][Look and feel]]
     - [[#configure-base-fonts][Configure base fonts]]
     - [[#ligatures][Ligatures]]
@@ -383,6 +384,14 @@ Github and =git-delta= integration for Magit.
   (package! magit-delta))
 
 #+end_src
+*** Additional Language Modes
+
+Any language modes that are not already covered by Doom are installed here.
+#+begin_src emacs-lisp
+(package! jenkinsfile-mode)
+
+#+end_src
+
 
 ** Look and feel
 *** Configure base fonts
