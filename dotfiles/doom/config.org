@@ -431,7 +431,7 @@ I've grown to appreciate the use of ligatures to replace certain elements.
 
 *** Theme and modeline
 #+begin_src emacs-lisp :tangle yes
-(setq doom-theme 'doom-Iosvkem)
+(setq doom-theme 'doom-rouge)
 
 #+end_src
 
@@ -606,7 +606,7 @@ If the frame size is >1280 then use 100 columns and 75% of the frame height. Oth
 (zoom-mode)
 (defun size-callback ()
   (cond ((> (frame-pixel-width) 1280) '(100 . 0.75))
-        (t                            '(0.5 . 0.5))))
+        (t                            '(0.3 . 0.7))))
 
 (custom-set-variables
  '(zoom-size 'size-callback)
