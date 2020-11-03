@@ -4,7 +4,6 @@ package brew
 package colored-man-pages
 package emacs
 package enhancd
-package gh
 package gi
 package git-flow
 package makeme

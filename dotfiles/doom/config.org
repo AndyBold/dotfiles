@@ -22,6 +22,7 @@
     - [[#which-key][Which Key]]
     - [[#magit-forge][Magit Forge]]
     - [[#additional-language-modes][Additional Language Modes]]
+    - [[#dim-other-windows][Dim other windows]]
   - [[#look-and-feel][Look and feel]]
     - [[#configure-base-fonts][Configure base fonts]]
     - [[#ligatures][Ligatures]]
@@ -37,6 +38,7 @@
     - [[#evil][Evil]]
     - [[#font-display][Font display]]
     - [[#keyboard-shortcuts][Keyboard shortcuts]]
+    - [[#dim-other-windows-1][Dim other windows]]
   - [[#text-editing][Text editing]]
     - [[#spelling][Spelling]]
     - [[#yasnippets][YaSnippets]]
@@ -392,6 +394,12 @@ Any language modes that are not already covered by Doom are installed here.
 
 #+end_src
 
+*** Dim other windows
+
+[[https://github.com/mina86/auto-dim-other-buffers.el][Github project for dim-other-windows]]
+#+BEGIN_SRC emacs-lisp
+(package! auto-dim-other-buffers)
+#+END_SRC
 
 ** Look and feel
 *** Configure base fonts
@@ -769,6 +777,14 @@ It's also nice to make use of the Unicode characters for check boxes, and other 
 (global-set-key (kbd "C-c m l") 'org-mac-grab-link)
 
 #+end_src
+*** Dim other windows
+
+#+begin_src emacs-lisp :tangle yes
+(add-hook 'after-init-hook (lambda ()
+  (when (fboundp 'auto-dim-other-buffers-mode)
+    (auto-dim-other-buffers-mode t))))
+#+end_src
+
 
 ** Text editing
 *** Spelling
