@@ -609,7 +609,8 @@ If the frame size is >1280 then use 100 columns and 75% of the frame height. Oth
         (t                            '(0.3 . 0.7))))
 
 (custom-set-variables
- '(zoom-size 'size-callback)
+; '(zoom-size 'size-callback)
+ '(zoom-size '(0.618, 0.618))
  '(zoom-ignored-buffer-name-regexps '("^*ediff.*")))
 
 #+end_src
@@ -1544,13 +1545,6 @@ Hence, we need to do a bit of overriding.
            :desc "org-roam-show-graph" "g" #'org-roam-show-graph
            :desc "org-roam-insert" "i" #'org-roam-insert
            :desc "org-roam-capture" "c" #'org-roam-capture))
-
-(require 'company-org-roam)
-   (use-package company-org-roam
-     :when (featurep! :completion company)
-     :after org-roam
-     :config
-     (set-company-backend! 'org-mode '(company-org-roam company-yasnippet company-dabbrev)))
 
 (after! org-roam
  ;;(setq org-roam-encrypt-files t)
