@@ -16,3 +16,4 @@ package sublime
 package tab
 theme bobthefish
 theme default
+theme spacefish

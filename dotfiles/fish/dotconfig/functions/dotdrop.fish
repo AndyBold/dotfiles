@@ -10,12 +10,19 @@
 
 function dotdrop -d 'Run dotdrop in a zsh subshell'
 
-  # Create a var that is the command string for zsh to execute *plus* any args
-  # passed to the function.
-  set dd_cmd 'eval $(grep -v "^#" ~/src/dotfiles/.secrets) ~/src/dotfiles/dotdrop.sh '(echo $argv)
+  workon dotdrop
 
-  zsh -c $dd_cmd
+  set DOTDROP_DIR ~/src/dotfiles
 
-  set --erase dd_cmd
+  # Set vars. For some fish-related reason we have to export them to
+  # make them available to dotdrop below.
+  gpg --decrypt --quiet $DOTDROP_DIR/.fish-env.gpg | source
+
+  $DOTDROP_DIR/dotdrop.sh $argv
+
+  # Unset vars
+  for var in (gpg --decrypt --quiet $DOTDROP_DIR/.fish-env.gpg | egrep -v "^\$|^#" | cut -d" " -f3)
+      set -e $var
+  end
 
 end

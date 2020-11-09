@@ -93,6 +93,9 @@ dotfiles:
   f_atlassian_envrc:
     dst: ~/bin/atlassian/.envrc
     src: atlassian/envrc
+  f_kitty_conf:
+    dst: ~/.config/kitty/kitty.conf
+    src: kitty/kitty.conf
   d_src_python:
     dst: ~/src/python
     src: src/python
@@ -139,6 +142,7 @@ profiles:
     - d_fish
     - d_ohmyfish
     - d_src_python
+    - f_kitty_conf
   Work:
     dotfiles:
     - f_zshrc
@@ -162,3 +166,4 @@ profiles:
     - d_fish
     - d_ohmyfish
     - d_src_python
+    - f_kitty_conf
