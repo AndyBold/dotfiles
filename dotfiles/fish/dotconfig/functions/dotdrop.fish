@@ -15,14 +15,18 @@ function dotdrop -d 'Run dotdrop in a zsh subshell'
   set DOTDROP_DIR ~/src/dotfiles
 
   # Set vars. For some fish-related reason we have to export them to
-  # make them available to dotdrop below.
+  # make them available to dotdrop below. The exporting is done in
+  # the source file.
   gpg --decrypt --quiet $DOTDROP_DIR/.fish-env.gpg | source
 
   $DOTDROP_DIR/dotdrop.sh $argv
 
-  # Unset vars
+  # Unset the vars that were exported above
   for var in (gpg --decrypt --quiet $DOTDROP_DIR/.fish-env.gpg | egrep -v "^\$|^#" | cut -d" " -f3)
       set -e $var
   end
+
+  # Disable virtualenv
+  workon >/dev/null
 
 end
