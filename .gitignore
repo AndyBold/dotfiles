@@ -2,3 +2,5 @@
 /.secrets
 dotfiles/prelude-personal/custom.el
 /dotfiles/doom/*.dotdropbak
+/.fish-env
+/dotfiles/fish/dotconfig/functions/launchdarkly.fish
