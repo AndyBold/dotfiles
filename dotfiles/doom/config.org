@@ -18,6 +18,7 @@
     - [[#python][Python]]
     - [[#beacon][Beacon]]
     - [[#zoom][Zoom]]
+    - [[#golden-ratio][Golden Ratio]]
     - [[#stripey-buffer-lists][Stripey buffer lists]]
     - [[#which-key][Which Key]]
     - [[#magit-forge][Magit Forge]]
@@ -32,6 +33,7 @@
     - [[#fancy-splash-screen][Fancy Splash Screen]]
     - [[#beacon-1][Beacon]]
     - [[#zoom-1][Zoom]]
+    - [[#golden-ratio-1][Golden Ratio]]
     - [[#stripe-buffer][Stripe buffer]]
     - [[#which-key-1][Which Key]]
     - [[#company][Company]]
@@ -363,6 +365,11 @@ No, not the video comms tool that we're all a bit tired of, an Emacs window auto
 (package! zoom)
 
 #+end_src
+*** Golden Ratio
+
+#+begin_src emacs-lisp
+(package! golden-ratio)
+#+end_src
 
 *** Stripey buffer lists
 #+begin_src emacs-lisp
@@ -602,7 +609,10 @@ Beacon helps you to find your cursor when you are scrolling around.
 Automatically resize the active window.
 
 If the frame size is >1280 then use 100 columns and 75% of the frame height. Otherwise, make it a 50%x50% split.
-#+begin_src emacs-lisp :tangle yes
+
+Currently disabled. For some reason it stopped working with the latest Doom (as at 2020-11-05) so I'm giving Golden Ratio a try out.
+
+#+begin_src emacs-lisp :tangle no
 (zoom-mode)
 (defun size-callback ()
   (cond ((> (frame-pixel-width) 1280) '(100 . 0.75))
@@ -613,6 +623,13 @@ If the frame size is >1280 then use 100 columns and 75% of the frame height. Oth
  '(zoom-size '(0.618, 0.618))
  '(zoom-ignored-buffer-name-regexps '("^*ediff.*")))
 
+#+end_src
+*** Golden Ratio
+
+Automatically resize the active wndow to match golden ratio rules.
+#+begin_src emacs-lisp :tangle yes
+(golden-ratio-mode 1)
+(setq golden-ratio-auto-scale t)
 #+end_src
 
 *** Stripe buffer
