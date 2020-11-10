@@ -24,6 +24,7 @@
     - [[#magit-forge][Magit Forge]]
     - [[#additional-language-modes][Additional Language Modes]]
     - [[#dim-other-windows][Dim other windows]]
+    - [[#fish-shell-mode][Fish shell mode]]
   - [[#look-and-feel][Look and feel]]
     - [[#configure-base-fonts][Configure base fonts]]
     - [[#ligatures][Ligatures]]
@@ -49,6 +50,9 @@
     - [[#plaintext][Plaintext]]
     - [[#orgmode-configuration][Orgmode configuration]]
     - [[#markdown][Markdown]]
+    - [[#fish-shell][Fish shell]]
+  - [[#mode-hooks][Mode hooks]]
+    - [[#jenkinsfile][Jenkinsfile]]
   - [[#package-management][Package management]]
   - [[#eshell-configuration][EShell configuration.]]
   - [[#magit][Magit]]
@@ -107,8 +111,8 @@ Where is my dotfiles repo?
 
 *** Better Defaults
 **** Display line numbers? (Yes.)
-I used to set this to =t= for boring old line numbers. I'm taking relative for a bit of a spin for a while to see how it feels.
-#+begin_src emacs-lisp :tangle yes
+I used to set this to =t= for boring old line numbers. I'm taking relative for a bit of a spin for a while to see how it feels. (Disabled now, as it turns out I prefer real numbers.)
+#+begin_src emacs-lisp :tangle no
 (setq display-line-numbers-type 'relative)
 
 #+end_src
@@ -407,6 +411,12 @@ Any language modes that are not already covered by Doom are installed here.
 #+BEGIN_SRC emacs-lisp
 (package! auto-dim-other-buffers)
 #+END_SRC
+*** Fish shell mode
+
+#+begin_src emacs-lisp
+(package! fish-mode)
+(package! fish-completion)
+#+end_src
 
 ** Look and feel
 *** Configure base fonts
@@ -491,7 +501,7 @@ Colour highlighting for =info= buffers.
 
 *** Fancy Splash Screen
 This is nice. More Teco.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 (defvar fancy-splash-image-template
   (expand-file-name "misc/splash-images/blackhole-lines-template.svg" doom-private-dir)
   "Default template svg used for the splash image, with substitutions from ")
@@ -598,7 +608,7 @@ This is nice. More Teco.
 
 *** Beacon
 Beacon helps you to find your cursor when you are scrolling around.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 (setq beacon-color +evil--emacs-cursor-color + -1)
 (setq beacon-blink-when-point-moves-vertically 10)
 (setq beacon-dont-blink-major-modes '(dashboard-mode))
@@ -612,7 +622,7 @@ If the frame size is >1280 then use 100 columns and 75% of the frame height. Oth
 
 Currently disabled. For some reason it stopped working with the latest Doom (as at 2020-11-05) so I'm giving Golden Ratio a try out.
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
 (zoom-mode)
 (defun size-callback ()
   (cond ((> (frame-pixel-width) 1280) '(100 . 0.75))
@@ -627,7 +637,7 @@ Currently disabled. For some reason it stopped working with the latest Doom (as 
 *** Golden Ratio
 
 Automatically resize the active wndow to match golden ratio rules.
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 (golden-ratio-mode 1)
 (setq golden-ratio-auto-scale t)
 #+end_src
@@ -2031,6 +2041,23 @@ And let's tweak the header display.
   '(markdown-header-face-4 :height 1.00 :weight bold       :inherit markdown-header-face)
   '(markdown-header-face-5 :height 0.90 :weight bold       :inherit markdown-header-face)
   '(markdown-header-face-6 :height 0.75 :weight extra-bold :inherit markdown-header-face))
+#+end_src
+*** Fish shell
+
+#+begin_src emacs-lisp :tangle yes
+(when (and (executable-find "fish")
+           (require 'fish-completion nil t))
+  (global-fish-completion-mode))
+
+(add-hook 'fish-mode-hook (lambda ()
+                            (add-hook 'before-save-hook 'fish_indent-before-save)))
+#+end_src
+
+** Mode hooks
+*** Jenkinsfile
+
+#+begin_src emacs-lisp
+(add-to-list 'auto-mode-alist '("Jenkinsfile.*" . jenkinsfile-mode))
 #+end_src
 
 ** Package management
