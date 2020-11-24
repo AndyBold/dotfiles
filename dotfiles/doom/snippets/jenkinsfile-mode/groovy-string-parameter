@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: jenkinsfile-string-parameter
+# uuid: ab/groovy-string-parameter
+# key: pstr
+# condition: t
+# --
+  string(name: '$1', defaultValue: '$2', description: '$0')
