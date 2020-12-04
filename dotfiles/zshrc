@@ -60,7 +60,7 @@ HIST_STAMPS="yyyy-mm-dd"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(z git colorize git-extras git-flow git-prompt history osx wd rbenv aws marked2 sublime pyenv autoenv)
+plugins=(z git colorize git-extras git-flow git-prompt history osx wd rbenv aws marked2 sublime pyenv direnv autoenv)
 
 # User configuration
 
@@ -105,24 +105,22 @@ done
 alias flushdns='sudo killall -HUP mDNSResponder'
 
 # Some encrypt/decrypt functions
-secret () {
+function secret () {
         output=`pwd`/"${1}".$(date +%s).enc
         gpg --encrypt --armor --output ${output} --recipient 0xC813574E80775996 "${1}" && echo "${1} -> ${output}"
 }
 
-reveal () {
+function reveal () {
         output=$(echo "${1}" | rev | cut -c16- | rev)
         gpg --decrypt --output ${output} "${1}" && echo "${1} -> ${output}"
 }
 
 # Portable dotfiles config installer
-alias dotdrop='eval $(grep -v "^#" ~/src/dotfiles/.secrets) ~/src/dotfiles/dotdrop.sh'
+function dotdrop () {
+        export DOTDROP_DIR=~/src/dotfiles
+        gpg --decrypt --quiet $DOTDROP_DIR/.secrets.gpg >$DOTDROP_DIR/.secrets
 
-# Encrypt the dotdrop .secrets
-# It isn't fussy, it will encrypt any .secrets, but I use it for dotdrop secrets
-envcrypt () {
-  secret .secrets
-  mv .secrets.[0-9]*.enc env.gpg
+        eval $(grep -v "^#" $DOTDROP_DIR/.secrets) $DOTDROP_DIR/dotdrop.sh $@
 }
 
 alias eme='
@@ -134,7 +132,7 @@ exit
 '
 
 # Consistency
-macupdate () {
+function macupdate () {
   if [ -e ~/src/mac-dev-playbook ]
   then
     cd ~/src/mac-dev-playbook
@@ -149,9 +147,9 @@ export VAGRANT_VMWARE_CLONE_DIRECTORY=~/Vagrant/vmware/
 
 export VAGRANT_HOME=~/Vagrant
 
-# alias dockerclean="for i in `docker images | grep "<none>.*<none>" | cut -c79-91 | tr -d " " `; do;  docker rmi $i; done"
+alias dockerimagewipe="for i in `docker images | grep "<none>.*<none>" | cut -c79-91 | tr -d " " `; do;  docker rmi $i; done"
 
-mkpb () {
+function mkpb () {
   for i in files templates tasks handlers vars defaults meta
   do
     mkdir -p  ${1}/${i}
@@ -177,20 +175,40 @@ then
   source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 fi
 
+# History search like Fish shell.
+# Requires `brew install zsh-history-substring-search`
+if [ -e /usr/local/share/zsh-history-substring-search/zsh-history-substring-search.zsh ]
+then
+  source /usr/local/share/zsh-history-substring-search/zsh-history-substring-search.zsh
+fi
+
 # Syntax highlighting for 'less', if lesspipe and source-highlighting are installed via homebrew.
 [ -x /usr/local/bin/lesspipe.sh ] && export LESSOPEN="|/usr/local/bin/lesspipe.sh %s" LESS_ADVANCED_PREPROCESSOR=1
 
-#kubectl completion
+# kubectl completion
 [[ /usr/local/bin/kubectl ]] && source <(kubectl completion zsh)
 
+
+# iTerm2 integration
 [[ -e ~/.iterm2_shell_integration.zsh ]] && source ~/.iterm2_shell_integration.zsh
 
+
+# If I am on my LD laptop
 if [[ -e ~/.launchdarklyrc ]]
 then
-  # I'm on my LD laptop
   source ~/.launchdarklyrc
 fi
 
+# Configure some aliases to use `bat` for a few things.
+batdiff() {
+    git diff --name-only --diff-filter=d | xargs bat --diff
+}
+
+export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+
+
+# TODO: Review this - I should be defaulting to Python 3.
+# Possibly work-related and I forgot.
 # Python configuration
 export PATH=$PATH:$HOME/Library/Python/2.7/bin
 source $HOME/Library/Python/2.7/bin/virtualenvwrapper.sh
@@ -201,6 +219,14 @@ export WORKON_HOME=~/src/virtualenv
 
 # Activate autoenv
 source /usr/local/opt/autoenv/activate.sh
+
+# Additional plugins via zplug
+export ZPLUG_HOME=/usr/local/opt/zplug
+source $ZPLUG_HOME/init.zsh
+  
+# A better `cd`
+zplug "b4b4r07/enhancd", use:init.sh
+export ENHANCD_HOME_ARG=~   # Restore traditional 'no arg to cd' behaviour
 
 # Powerline 10k
 source /usr/local/opt/powerlevel10k/powerlevel10k.zsh-theme

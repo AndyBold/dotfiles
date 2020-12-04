@@ -2,6 +2,7 @@ package autovenv
 package bass
 package brew
 package colored-man-pages
+package direnv
 package emacs
 package enhancd
 package gi
