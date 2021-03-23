@@ -5,7 +5,7 @@ gitleaksEnabled=$(git config --bool hooks.gitleaks)
 cmd="gitleaks --verbose --redact --pretty"
 
 # Is gitleaks installed?
-if [ ! "$(which gitleak 2>&1 >/dev/null)" ]
+if [ ! "$(which gitleaks 2>&1 >/dev/null)" ]
 then
   echo "gitleaks is not installed. Please fix that."
   exit 1
