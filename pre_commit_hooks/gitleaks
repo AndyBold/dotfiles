@@ -2,7 +2,7 @@
 
 gitleaksEnabled=$(git config --bool hooks.gitleaks)
 
-cmd="gitleaks --verbose --redact --pretty"
+cmd="gitleaks --verbose --redact"
 
 # Is gitleaks installed?
 which gitleaks 2>&1 >/dev/null
