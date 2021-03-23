@@ -1,5 +1,5 @@
 - id: gitleaks
   name: Check for credential leaks
   description: Check for tokens, passwords, and other secrets using gitleaks
-  entry: gitleaks
+  entry: pre_commit_hooks/gitleaks
   language: script
