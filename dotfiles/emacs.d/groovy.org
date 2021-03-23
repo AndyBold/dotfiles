@@ -1,0 +1,11 @@
+* Groovy
+  For Groovy things. Mostly Jenksfile.
+
+  #+begin_src emacs-lisp :tangle yes
+    (use-package groovy-mode
+      :defer t
+      :config
+      (progn
+        (add-to-list 'auto-mode-alist '("Jenkinsfile" . groovy-mode)))
+      )
+  #+end_src

@@ -1,0 +1,8 @@
+/.env
+/.secrets
+dotfiles/prelude-personal/custom.el
+/dotfiles/doom/*.dotdropbak
+/.fish-env
+/dotfiles/fish/dotconfig/functions/launchdarkly.fish
+/dotfiles/doom/misc/splash-images/LaunchDarkly_Icon_on_Dark_RGB.png
+/dotfiles/doom/misc/splash-images/LaunchDarkly_Icon_on_Light_RGB.png

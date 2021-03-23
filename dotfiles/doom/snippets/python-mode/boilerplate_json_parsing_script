@@ -1,0 +1,44 @@
+# -*- mode: snippet -*-
+# name: Boilerplate JSON parsing script
+# uuid: ab/boilerplate_json_script
+# key: <jsonscript
+# condition: t
+# --
+#!/usr/bin/env python3
+
+import os.path
+import time
+import json
+import argparse
+from requests import get
+
+${1:def get_args():
+    parser = argparse.ArgumentParser(description='$2')
+
+    parser.add_argument('--$3', action='store', required=False,
+                        help='$4')
+
+    return parser.parse_args()}
+
+def get_data(url):
+    response = get(endpoint, timeout=10)
+
+    if response.status_code >= 400:
+        raise RuntimeError(f'Request failed: { response.text }')
+
+    return response.json()
+
+
+if __name__ == '__main__':
+
+    endpoint = (
+        ${5:'https://api.coronavirus.data.gov.uk/v1/data?'}
+        ${6:'filters=areaType=overview;date=2020-08-20&'}
+        ${7:'structure={"date":"date","newCases":"newCasesByPublishDate"}'}
+    )
+
+    ${8:args = get_args()}
+
+    data = get_data(endpoint)
+
+    print(json.dumps(data, indent=2, sort_keys=True))

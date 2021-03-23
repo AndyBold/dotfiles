@@ -1,0 +1,9 @@
+* Restclient
+  Restclient is great. [[https://github.com/pashky/restclient.el][GitHub - pashky/restclient.el: HTTP REST client tool for emacs]]
+
+  #+begin_src emacs-lisp :tangle yes
+    (use-package company-restclient
+      :defer t)
+    (use-package ob-restclient
+      :defer t)
+  #+end_src

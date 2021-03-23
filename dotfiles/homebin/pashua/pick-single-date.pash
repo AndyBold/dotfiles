@@ -1,0 +1,7 @@
+*.title = Choose a date range
+
+startdate.type = date
+startdate.label = Choose start date
+startdate.default = now
+startdate.time = 0
+startdate.textual = 1

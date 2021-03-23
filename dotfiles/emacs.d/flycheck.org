@@ -1,0 +1,5 @@
+* Flycheck
+  #+begin_src emacs-lisp :tangle yes
+    (use-package flycheck
+      :init (global-flycheck-mode))
+  #+end_src

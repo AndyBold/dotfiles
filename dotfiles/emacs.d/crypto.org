@@ -1,0 +1,22 @@
+* Crypto
+  I use Orgmode's support for GPG to ensure confidentiality of anything that I might store in a public repo. I also sometimes use 'pass', which is a password manager that uses GPG, and there's a package for that too.
+
+  #+name: crypto-things
+  #+begin_src emacs-lisp :tangle yes
+    (require 'epa-file)
+    (when (eq system-type 'darwin)
+      (custom-set-variables '(epg-gpg-program  "/usr/local/MacGPG2/bin/gpg2")))
+    (when (eq system-type 'gnu/linux)
+      (custom-set-variables '(epg-gpg-program  "/usr/bin/gpg2")))
+
+    ;; Optional, if adding 'allow-emacs-pinentry' to ~/.gnupg/gpg-agent.conf doesn't help.
+    ;; Note: Neither of these options work with CentOS 7
+    ;; (setq epa-pinentry-mode 'loopback)
+
+    (setq org-crypt-key "0xB5990C2917C3F6AE")
+
+    ;; Interact with 'pass' password store
+    (use-package password-store
+      :ensure t)
+
+  #+end_src

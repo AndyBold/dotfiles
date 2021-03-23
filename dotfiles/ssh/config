@@ -1,0 +1,66 @@
+Host *
+  IdentitiesOnly yes
+
+{%@@ if profile == "Work" @@%}
+Host {{@@ env['ld_shd_bastion'] @@}}
+  User {{@@ env['ld_bastion_user'] @@}}
+  HostName {{@@ env['ld_bastion_host'] @@}}
+  IdentityFile {{@@ env['ld_id_file1'] @@}}
+  ForwardAgent yes
+
+Host {{@@ env['ld_subnet_1'] @@}} {{@@ env['ld_shd_domain'] @@}}
+  User {{@@ env['ld_bastion_user'] @@}}
+  ProxyJump {{@@ env['ld_shd_bastion'] @@}}
+  IdentityFile {{@@ env['ld_id_file1'] @@}}
+  ForwardAgent yes
+  LogLevel QUIET
+
+Host {{@@ env['ld_ssh_hosts'] @@}}
+  UseKeychain yes
+  StrictHostKeyChecking no
+  UserKnownHostsFile /dev/null
+  User ubuntu
+  LogLevel QUIET
+  IdentityFile {{@@ env['ld_id_file1'] @@}}
+  IdentityFile {{@@ env['ld_id_file2'] @@}}
+  ServerAliveInterval 90
+{%@@ endif @@%}
+{%@@ if profile == "Groot" @@%}
+Host github.com
+  IdentityFile ~/.ssh/id_mba
+
+Host {{@@ env['ssh_home_host1_nick'] @@}}
+  HostName {{@@ env['ssh_home_host1_hostname'] @@}}
+  Port {{@@ env['ssh_home_host1_port'] @@}}
+
+Host {{@@ env['ssh_home_host2_nick'] @@}}
+  HostName {{@@ env['ssh_home_host2_hostname'] @@}}
+  User {{@@ env['ssh_home_host2_user'] @@}}
+
+Host {{@@ env['ssh_home_host3_nick'] @@}}
+	User {{@@ env['ssh_home_host3_user'] @@}}
+  HostName {{@@ env['ssh_home_host3_hostname'] @@}}
+
+Host {{@@ env['ssh_home_host4_nick'] @@}}
+  User {{@@ env['ssh_home_host4_user'] @@}}
+  Hostname {{@@ env['ssh_home_host4_hostname'] @@}}
+
+Host {{@@ env['ssh_home_host5_nick'] @@}}
+  User {{@@ env['ssh_home_host5_user'] @@}}
+  IdentityFile {{@@ env['ssh_home_host5_idfile'] @@}}
+
+Host {{@@ env['ssh_home_host6_nick'] @@}}
+  User {{@@ env['ssh_home_host6_user'] @@}}
+  HostName {{@@ env['ssh_home_host6_hostname'] @@}}
+
+Host {{@@ env['ssh_home_host7_nick'] @@}}
+  Hostname {{@@ env['ssh_home_host7_hostname'] @@}}
+  User {{@@ env['ssh_home_host7_user'] @@}}
+  Port 9022
+  IdentityFile ~/.ssh/{{@@ env['ssh_home_host7_idfile'] @@}}
+
+Host {{@@ env['ssh_home_host8_nick'] @@}}
+  Hostname {{@@ env['ssh_home_host8_hostname'] @@}}
+  User {{@@ env['ssh_home_host8_user'] @@}}
+  IdentityFile ~/.ssh/{{@@ env['ssh_home_host7_idfile'] @@}}
+{%@@ endif @@%}

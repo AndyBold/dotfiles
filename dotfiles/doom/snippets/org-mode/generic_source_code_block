@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: Generic source code block
+# uuid: ab/generic_source_code_block
+# key: <src
+# condition: t
+# --
+#+begin_src $0
+$1
+#+end_src

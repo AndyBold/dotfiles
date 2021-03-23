@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: Add a PROPERTIES section.
+# uuid: ab/org-properties
+# key: <PROP
+# condition: t
+# --
+
+:PROPERTIES:
+$0
+:END:

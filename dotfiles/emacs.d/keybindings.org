@@ -1,0 +1,62 @@
+#+OPTIONS: toc:4 h:4
+#+STARTUP: showeverything
+
+* My custom key binds
+** Kill words, not characters
+
+   backward-kill-word as alternative to Backspace:
+     - Kill the entire word instead of hitting Backspace key several times. To do this will bind the =backward-kill-region= function to the =C-w= key combination
+
+  #+begin_src emacs-lisp :tangle yes
+  (global-set-key "\C-w" 'backward-kill-word)
+  (global-set-key "\C-x\C-k" 'kill-region)
+  (global-set-key "\C-c\C-k" 'kill-region)
+  #+end_src
+** Align
+   Align the lines in a region based on a regexp.
+
+   #+begin_src emacs-lisp :tangle yes
+   (global-set-key (kbd "C-c =") 'align-regexp)
+   #+end_src
+** Toggle comments
+   Toggle comments on or off for the selected region. Language aware, so you get the correct comment syntax.
+   #+begin_src emacs-lisp :tangle yes
+   (global-set-key (kbd "C-c #") 'comment-or-uncomment-region)
+   #+end_src
+** Evaluate region
+   When I'm tweaking my config I spend a lot of time calling =eval-region=.
+   #+begin_src emacs-lisp :tangle yes
+   (global-set-key (kbd "C-c R") 'eval-region)
+   #+end_src
+** Upgrade packages
+   I like the Paradox package interface, so we'll stick with that for package upgrades too.
+   #+begin_src emacs-lisp :tangle yes
+   (global-set-key (kbd "C-c P") 'paradox-upgrade-packages)
+   #+end_src
+** Orgmode things
+*** Grab org-id links
+    I started using [[http://orgmode.org/cgit.cgi/org-mode.git/tree/lisp/org-id.el][org-id]] to link tasks in and across various org files. But I've already overridden the default keyboard shortcut for org-id-store-link and become used to using it for the other function. This brings back an alternative that works for me.
+    #+begin_src emacs-lisp :tangle yes
+    (global-set-key (kbd "C-c C-x l") 'org-id-store-link)
+    #+end_src
+*** Re-map 'C-c J' for org-journal
+    #+begin_src emacs-lisp :tangle yes
+    (global-set-key (kbd "C-c J") 'org-journal-new-entry)
+    #+end_src
+*** Launch counsel-org-capture
+    #+begin_src emacs-lisp :tangle yes
+      (global-set-key (kbd "C-c c") 'counsel-org-capture)
+    #+end_src
+*** Time keeping
+    #+begin_src emacs-lisp :tangle yes
+      (global-set-key (kbd "<f12>") 'org-agenda)
+      (global-set-key (kbd "<f11>") 'org-clock-goto)
+      (global-set-key (kbd "<f8>") 'bh/punch-in)
+      (global-set-key (kbd "C-<f8>") 'bh/punch-out)
+      (global-set-key (kbd "C-<f11>") 'org-clock-in)
+    #+end_src
+** Window things
+   #+begin_src emacs-lisp :tangle yes
+   (global-set-key (kbd "M-o") 'other-window)
+   #+end_src
+

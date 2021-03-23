@@ -1,0 +1,18 @@
+* Docker preferences
+** Dockerfile syntax
+   #+begin_src emacs-lisp :tangle yes
+     (use-package dockerfile-mode
+       :defer t
+       :config
+       (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode)))
+   #+end_src
+
+** Docker management
+   #+begin_src emacs-lisp :tangle yes
+     (use-package docker
+       :defer t
+       :config
+       (setenv "PATH" (concat (getenv "PATH") ":/usr/local/bin"))
+       (setq exec-path (append exec-path '("/usr/local/bin")))
+       )
+   #+end_src

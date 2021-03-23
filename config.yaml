@@ -1,0 +1,169 @@
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+  showdiff: true
+actions:
+  omfinstall: fish -c 'omf install'
+  doomsync: ~/doom-emacs/bin/doom sync
+dotfiles:
+  d_aws:
+    dst: ~/.aws
+    src: aws
+  f_emacs:
+    dst: ~/.emacs
+    src: emacs
+  f_emacsprofiles:
+    dst: ~/.emacs-profiles.el
+    src: emacs-profiles.el
+  d_emacsprelude:
+    dst: ~/prelude-emacs/personal
+    src: prelude-personal
+  d_emacs.d:
+    dst: ~/.emacs.d
+    src: emacs.d
+  d_doom_emacs.d:
+    dst: ~/.doom.d
+    src: doom
+    actions:
+      - doomsync
+  f_authinfo:
+    dst: ~/.authinfo.gpg
+    src: authinfo.gpg
+  d_gnupg:
+    dst: ~/.gnupg
+    src: gnupg
+  d_irssi:
+    dst: ~/.irssi
+    src: irssi
+  d_mbsync:
+    dst: ~/mbsync
+    src: mbsync
+  f_gitconfig:
+    dst: ~/.gitconfig
+    src: gitconfig
+  f_gitignore:
+    dst: ~/.gitignore
+    src: gitignore
+  f_precommit:
+    dst: ~/.pre-commit-config.yaml
+    src: pre-commit-config.yaml
+  f_mbsyncrc:
+    dst: ~/.mbsyncrc
+    src: mbsyncrc
+  f_editorconfig:
+    dst: ~/.editorconfig
+    src: editorconfig
+  f_msmtprc:
+    dst: ~/.msmtprc
+    src: msmtprc
+  f_nethackrc:
+    dst: ~/.nethackrc
+    src: nethackrc
+  f_screenrc:
+    dst: ~/.screenrc
+    src: screenrc
+  f_ssh_config:
+    dst: ~/.ssh/config
+    src: ssh/config
+  f_ssh_yubikeyA:
+    dst: ~/.ssh/id_rsa_yubiA.pub
+    src: ssh/id_rsa_yubiA.pub
+  f_ssh_yubikeyC:
+    dst: ~/.ssh/id_rsa_yubiC.pub
+    src: ssh/id_rsa_yubiC.pub
+  f_tmux.conf:
+    dst: ~/.tmux.conf
+    src: tmux.conf
+  d_tmux:
+    dst: ~/.tmux
+    src: tmux
+  f_vimrc:
+    dst: ~/.vimrc
+    src: vimrc
+  f_zshrc:
+    dst: ~/.zshrc
+    src: zshrc
+  f_tigrc:
+    dst: ~/.tigrc
+    src: tigrc
+  d_homebin:
+    dst: ~/bin
+    src: homebin
+  f_atlassian_envrc:
+    dst: ~/bin/atlassian/.envrc
+    src: atlassian/envrc
+  f_kitty_conf:
+    dst: ~/.config/kitty/kitty.conf
+    src: kitty/kitty.conf
+  d_src_python:
+    dst: ~/src/python
+    src: src/python
+  d_applescript:
+    dst: ~/Library/Script Libraries
+    src: applescript
+  d_fish:
+    dst: ~/.config/fish
+    src: fish/dotconfig
+  d_ohmyfish:
+    dst: ~/.config/omf
+    src: fish/omf
+    actions:
+      - omfinstall
+profiles:
+  Home:
+    dotfiles:
+    - f_zshrc
+    - d_aws
+    - f_gitconfig
+    - f_gitignore
+    - d_gnupg
+    - d_irssi
+    - f_emacs
+    - f_emacsprofiles
+    - d_emacs.d
+    - d_emacsprelude
+    - d_doom_emacs.d
+    - f_authinfo
+    - f_mbsyncrc
+    - f_msmtprc
+    - f_nethackrc
+    - f_screenrc
+    - f_ssh_config
+    - f_ssh_yubikeyC
+    - f_tmux.conf
+    - d_tmux
+    - f_vimrc
+    - f_tigrc
+    - f_editorconfig
+    - d_homebin
+    - f_precommit
+    - d_applescript
+    - d_fish
+    - d_ohmyfish
+    - d_src_python
+    - f_kitty_conf
+  Work:
+    dotfiles:
+    - f_zshrc
+    - f_gitconfig
+    - f_emacs
+    - f_emacsprofiles
+    - d_emacsprelude
+    - d_doom_emacs.d
+    - f_authinfo
+    - f_nethackrc
+    - f_screenrc
+    - f_tmux.conf
+    - d_tmux
+    - f_vimrc
+    - f_tigrc
+    - f_editorconfig
+    - d_homebin
+    - f_precommit
+    - f_ssh_config
+    - d_gnupg
+    - d_fish
+    - d_ohmyfish
+    - d_src_python
+    - f_kitty_conf

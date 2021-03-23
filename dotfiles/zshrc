@@ -1,0 +1,265 @@
+###################################
+## WARNING: This configuration was installed using dotdrop. Manual changes made here may be lost.
+###################################
+
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# Path to your oh-my-zsh installation.
+export ZSH=${HOME}/.oh-my-zsh
+
+# Set name of the theme to load.
+# Look in ~/.oh-my-zsh/themes/
+# Optionally, if you set this to "random", it'll load a random theme each
+# time that oh-my-zsh is loaded.
+ZSH_THEME="mh"
+
+# Uncomment the following line to use case-sensitive completion.
+# CASE_SENSITIVE="true"
+
+# Uncomment the following line to use hyphen-insensitive completion. Case
+# sensitive completion must be off. _ and - will be interchangeable.
+# HYPHEN_INSENSITIVE="true"
+
+# Uncomment the following line to disable bi-weekly auto-update checks.
+# DISABLE_AUTO_UPDATE="true"
+
+# Uncomment the following line to change how often to auto-update (in days).
+# export UPDATE_ZSH_DAYS=13
+
+# Uncomment the following line to disable colors in ls.
+# DISABLE_LS_COLORS="true"
+
+# Uncomment the following line to disable auto-setting terminal title.
+# DISABLE_AUTO_TITLE="true"
+
+# Uncomment the following line to enable command auto-correction.
+# ENABLE_CORRECTION="true"
+
+# Uncomment the following line to display red dots whilst waiting for completion.
+# COMPLETION_WAITING_DOTS="true"
+
+# Uncomment the following line if you want to disable marking untracked files
+# under VCS as dirty. This makes repository status check for large repositories
+# much, much faster.
+# DISABLE_UNTRACKED_FILES_DIRTY="true"
+
+# Uncomment the following line if you want to change the command execution time
+# stamp shown in the history command output.
+# The optional three formats: "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
+HIST_STAMPS="yyyy-mm-dd"
+
+# Would you like to use another custom folder than $ZSH/custom?
+# ZSH_CUSTOM=/path/to/new-custom-folder
+
+# Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
+# Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
+# Example format: plugins=(rails git textmate ruby lighthouse)
+# Add wisely, as too many plugins slow down shell startup.
+plugins=(git colorize git-extras git-flow git-prompt history osx wd rbenv aws marked2 sublime pyenv direnv)
+
+# User configuration
+
+source $ZSH/oh-my-zsh.sh
+
+export HOMEBREW_GITHUB_API_TOKEN={{@@ env['personal_github_token'] @@}}
+
+# You may need to manually set your language environment
+# export LANG=en_US.UTF-8
+
+# Preferred editor for local and remote sessions
+if [[ -n $SSH_CONNECTION ]]; then
+  export EDITOR='vim'
+else
+  export EDITOR='nvim'
+fi
+
+alias vi=nvim
+
+# Update PATH
+for location in ~/.emacs.d/bin ~/doom-emacs/bin /usr/local/opt/gnu-tar
+do
+  [ -e ${location} ] && export PATH=$PATH:${location}
+done
+
+# Compilation flags
+# export ARCHFLAGS="-arch x86_64"
+
+# ssh
+# export SSH_KEY_PATH="~/.ssh/dsa_id"
+
+# Set personal aliases, overriding those provided by oh-my-zsh libs,
+# plugins, and themes. Aliases can be placed here, though oh-my-zsh
+# users are encouraged to define aliases within the ZSH_CUSTOM folder.
+# For a full list of active aliases, run `alias`.
+#
+# Example aliases
+# alias zshconfig="mate ~/.zshrc"
+# alias ohmyzsh="mate ~/.oh-my-zsh"
+
+# alias realpath='grealpath'
+
+# FLush DNS
+alias flushdns='sudo killall -HUP mDNSResponder'
+
+# Some encrypt/decrypt functions
+function secret () {
+        output=`pwd`/"${1}".$(date +%s).enc
+        gpg --encrypt --armor --output ${output} --recipient 0xC813574E80775996 "${1}" && echo "${1} -> ${output}"
+}
+
+function reveal () {
+        output=$(echo "${1}" | rev | cut -c16- | rev)
+        gpg --decrypt --output ${output} "${1}" && echo "${1} -> ${output}"
+}
+
+# Portable dotfiles config installer
+function dotdrop () {
+        export DOTDROP_DIR=~/src/dotfiles
+        gpg --decrypt --quiet $DOTDROP_DIR/.secrets.gpg >$DOTDROP_DIR/.secrets
+
+        eval $(grep -v "^#" $DOTDROP_DIR/.secrets) $DOTDROP_DIR/dotdrop.sh $@
+}
+
+alias eme='
+export DISPLAY=:0.0
+export LIBGL_ALWAYS_INDIRECT=1
+setxkbmap -layout us
+setsid emacs
+exit
+'
+
+# Consistency
+function macupdate () {
+  if [ -e ~/src/mac-dev-playbook ]
+  then
+    cd ~/src/mac-dev-playbook
+    ansible-playbook -i inventory --ask-become-pass main.yml
+  else
+    echo "Can't find mac-dev-playbook - do you need to clone the repo?"
+  fi
+}
+
+export VAGRANT_HOME=~/Vagrant
+
+# alias dockerimagewipe="for i in `docker images | grep "<none>.*<none>" | cut -c79-91 | tr -d " " `; do;  docker rmi $i; done"
+
+function mkpb () {
+  for i in files templates tasks handlers vars defaults meta
+  do
+    mkdir -p  ${1}/${i}
+  done
+
+  echo -e "---\n" > ${1}/tasks/main.yml
+}
+
+# Enable direnv
+eval "$(direnv hook zsh)"
+
+# Start GPG agent with ssh-agent emulation mode
+GPG_TTY=$(/usr/bin/tty)
+export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+export GPG_TTY SSH_AUTH_SOCK
+gpgconf --launch gpg-agent
+
+function swapyubikey () {
+  gpg-connect-agent "scd serialno" "learn --force" /bye
+}
+
+
+# Cmdline syntax highlighting.
+# Requires `brew install zsh-syntax-highlighting`.
+if [ -e /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]
+then
+  source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi
+
+# History search like Fish shell.
+# Requires `brew install zsh-history-substring-search`
+if [ -e /usr/local/share/zsh-history-substring-search/zsh-history-substring-search.zsh ]
+then
+  source /usr/local/share/zsh-history-substring-search/zsh-history-substring-search.zsh
+fi
+
+# Syntax highlighting for 'less', if lesspipe and source-highlighting are installed via homebrew.
+[ -x /usr/local/bin/lesspipe.sh ] && export LESSOPEN="|/usr/local/bin/lesspipe.sh %s" LESS_ADVANCED_PREPROCESSOR=1
+
+# kubectl completion
+[[ /usr/local/bin/kubectl ]] && source <(kubectl completion zsh)
+
+
+# iTerm2 integration
+[[ -e ~/.iterm2_shell_integration.zsh ]] && source ~/.iterm2_shell_integration.zsh
+
+
+# If I am on my LD laptop
+if [[ -e ~/.launchdarklyrc ]]
+then
+  source ~/.launchdarklyrc
+fi
+
+# Configure some aliases to use `bat` for a few things.
+batdiff() {
+    git diff --name-only --diff-filter=d | xargs bat --diff
+}
+
+# I prefer [bat](https://github.com/sharkdp/bat) to less, so override less for when muscle memory takes over.
+alias less='bat --pager "less"'
+
+# Same for `cat`
+alias cat='bat --paging=never'
+
+export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+
+###
+### Git aliases and functions
+###
+
+function gbco () {
+  git branch $1
+  git checkout $1
+}
+
+
+# TODO: Review this - I should be defaulting to Python 3.
+# Possibly work-related and I forgot.
+# Python configuration
+export PATH=$PATH:$HOME/Library/Python/2.7/bin
+source $HOME/Library/Python/2.7/bin/virtualenvwrapper.sh
+
+eval "$(pyenv virtualenv-init -)"
+pyenv virtualenvwrapper
+export WORKON_HOME=~/src/virtualenv
+
+# Activate autoenv
+# source /usr/local/opt/autoenv/activate.sh
+
+# Additional plugins via zplug
+export ZPLUG_HOME=/usr/local/opt/zplug
+source $ZPLUG_HOME/init.zsh
+
+# A better `cd`
+# The enhancd README recommends zplug to install and use under zsh.
+# I haven't had much success with that.
+[ -e ~/.local/tools/enhancd ] && source ~/.local/tools/enhancd/init.sh
+
+alias 'install_enhancd="mkdir -p ~/.local/tools && cd ~/.local/tools && git clone https://github.com/b4b4r07/enhancd && source ~/.local/tools/enhancd/init.sh"'
+
+export ENHANCD_HOME_ARG=~   # Restore traditional 'no arg to cd' behaviour
+
+
+# Configuration for Sym (and probably other things as time goes by)
+export PATH="$HOME/.local/bin:/usr/local/sbin:$PATH"
+
+# Powerline 10k
+source /usr/local/opt/powerlevel10k/powerlevel10k.zsh-theme
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# Enable zmv
+autoload -U zmv

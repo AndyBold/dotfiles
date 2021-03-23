@@ -1,0 +1,14 @@
+*.title = Choose a date range
+
+startdate.type = date
+startdate.label = Choose start date
+startdate.default = now
+startdate.time = 0
+startdate.textual = 1
+
+enddate.type = date
+enddate.label = Choose end date
+enddate.default = now
+enddate.time = 0
+enddate.textual = 1
+

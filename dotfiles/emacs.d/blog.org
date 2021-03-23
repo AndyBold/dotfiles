@@ -1,0 +1,22 @@
+* Blogging preferences
+
+  #+begin_src emacs-lisp :tangle yes
+    (use-package blog-admin
+      :init
+      (progn
+
+        ;; Disable evilification of the blog admin mode
+        ;; (push '("Blog" . emacs) evil-buffer-regexps)
+
+        ;; Blog files location
+        (setq blog-admin-backend-type 'hexo)
+        (setq blog-admin-backend-path "~/src/120technology/web-site")
+        (setq blog-admin-backend-new-post-in-drafts t) ;; create new post in drafts by default
+        (setq blog-admin-backend-new-post-with-same-name-dir t)
+
+        (global-set-key (kbd "C-c b") 'blog-admin-start)
+
+        ;; (setq blog-admin-backend-nikola-executable "~/Documents/blog/nikola/bin/nikola") ;; path to nikola executable
+        ;; (setq blog-admin-backend-nikola-config-file "conf.py") ;; conf.py is default
+        ))
+  #+end_src

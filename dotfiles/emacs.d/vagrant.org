@@ -1,0 +1,7 @@
+* Vagrant preferences
+  #+begin_src emacs-lisp :tangle yes
+    (use-package vagrant
+      :defer t)
+    (use-package vagrant-tramp
+      :defer t)
+  #+end_src

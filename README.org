@@ -1,0 +1,16 @@
+#+TITLE: Readme
+
+* Andy Bold's dotfiles configuration
+
+I use [[https://github.com/deadc0de6/dotdrop][dotdrop]] to manage my dotfiles configuration. Any sensitive information is encrypted in =.secrets.gpg=. I decrypt that to .secrets and use templates to add those secrets into the relevant dotfiles. I make them available to =dotdrop= using the method described in the Environment Variables section of [[https://github.com/deadc0de6/dotdrop/wiki/templating][the dotdrop templating documentation]].
+
+Check [[dotfiles/zshrc][my zshrc]] to see how I'm running `dotdrop`, but it's usually something like:
+
+#+BEGIN_SRC
+function dotdrop () {
+        export DOTDROP_DIR=~/src/dotfiles
+        gpg --decrypt --quiet $DOTDROP_DIR/.secrets.gpg >$DOTDROP_DIR/.secrets
+
+        eval $(grep -v "^#" $DOTDROP_DIR/.secrets) $DOTDROP_DIR/dotdrop.sh $@
+}
+#+END_SRC

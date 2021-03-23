@@ -1,0 +1,7 @@
+* PHP
+  If we must.
+
+  #+begin_src emacs-lisp :tangle yes
+    (use-package company-php
+      :defer t)
+  #+end_src

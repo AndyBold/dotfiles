@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: Add a Python babel block
+# uuid: ab/python_src_block
+# key: <pysrc
+# condition: t
+# --
+
+#+begin_src python :tangle no :results value raw drawer :session
+$0
+#+end_src

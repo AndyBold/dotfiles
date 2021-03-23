@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: Shell Block
+# uuid: ab/balel-shell-block
+# key: <sh
+# condition: t
+# --
+#+BEGIN_SRC sh${1 :session ${2:myshell}} :results verbatim drawer
+$0
+#+END_SRC

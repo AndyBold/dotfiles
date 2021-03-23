@@ -1,0 +1,98 @@
+{%@@ if profile == "Titan" @@%}
+IMAPAccount {{@@ env['mbsync_account_name1'] @@}}
+Host {{@@ env['mbsync_host1'] @@}}
+User {{@@ env['mbsync_user1'] @@}}
+PassCmd "{{@@ env['mbsync_pass1'] @@}}"
+Port 993
+SSLType IMAPS
+SSLVersions TLSv1.2
+AuthMechs LOGIN
+
+IMAPAccount {{@@ env['mbsync_account_name2'] @@}}
+Host {{@@ env['mbsync_host2'] @@}}
+User {{@@ env['mbsync_user2'] @@}}
+PassCmd "{{@@ env['mbsync_pass2'] @@}}"
+Port 993
+SSLType IMAPS
+SSLVersions TLSv1.2
+AuthMechs LOGIN
+{%@@ endif @@%}
+
+IMAPAccount {{@@ env['mbsync_account_name3'] @@}}
+Host {{@@ env['mbsync_host3'] @@}}
+User {{@@ env['mbsync_user3'] @@}}
+PassCmd "{{@@ env['mbsync_pass3'] @@}}"
+Port 993
+SSLType IMAPS
+SSLVersions TLSv1.2
+AuthMechs LOGIN
+
+
+{%@@ if profile == "Titan" @@%}
+ImapStore {{@@ env['mbsync_account_name1'] @@}}-remote
+Account {{@@ env['mbsync_account_name1'] @@}}
+
+ImapStore {{@@ env['mbsync_account_name2'] @@}}-remote
+Account {{@@ env['mbsync_account_name2'] @@}}
+{%@@ endif @@%}
+
+ImapStore {{@@ env['mbsync_account_name3'] @@}}-remote
+Account {{@@ env['mbsync_account_name3'] @@}}
+
+
+{%@@ if profile == "Titan" @@%}
+MaildirStore {{@@ env['mbsync_account_name1'] @@}}-local
+Path ~/mbsync/{{@@ env['mbsync_account_name1'] @@}}/
+Inbox ~/mbsync/{{@@ env['mbsync_account_name1'] @@}}/INBOX
+SubFolders Verbatim
+
+Channel {{@@ env['mbsync_account_name1'] @@}}-inbox
+Master :{{@@ env['mbsync_account_name1'] @@}}-remote:
+Slave :{{@@ env['mbsync_account_name1'] @@}}-local:
+Patterns *
+Create Both
+Expunge Both
+SyncState *
+Sync All
+
+
+Group {{@@ env['mbsync_account_name1'] @@}}
+Channel {{@@ env['mbsync_account_name1'] @@}}-inbox
+
+
+MaildirStore {{@@ env['mbsync_account_name2'] @@}}-local
+Path ~/mbsync/{{@@ env['mbsync_account_name2'] @@}}/
+Inbox ~/mbsync/{{@@ env['mbsync_account_name2'] @@}}/INBOX
+SubFolders Verbatim
+
+Channel {{@@ env['mbsync_account_name2'] @@}}-inbox
+Master :{{@@ env['mbsync_account_name2'] @@}}-remote:
+Slave :{{@@ env['mbsync_account_name2'] @@}}-local:
+Patterns *
+Create Both
+Expunge Both
+SyncState *
+Sync All
+
+
+Group {{@@ env['mbsync_account_name2'] @@}}
+Channel {{@@ env['mbsync_account_name2'] @@}}-inbox
+{%@@ endif @@%}
+
+MaildirStore {{@@ env['mbsync_account_name3'] @@}}-local
+Path ~/mbsync/{{@@ env['mbsync_account_name3'] @@}}/
+Inbox ~/mbsync/{{@@ env['mbsync_account_name3'] @@}}/INBOX
+SubFolders Verbatim
+
+Channel {{@@ env['mbsync_account_name3'] @@}}-inbox
+Master :{{@@ env['mbsync_account_name3'] @@}}-remote:
+Slave :{{@@ env['mbsync_account_name3'] @@}}-local:
+Patterns *
+Create Both
+Expunge Both
+SyncState *
+Sync All
+
+
+Group {{@@ env['mbsync_account_name3'] @@}}
+Channel {{@@ env['mbsync_account_name3'] @@}}-inbox

@@ -1,0 +1,26 @@
+# -*- mode: snippet -*-
+# name: Sqlite database functions
+# uuid: ab/sqlite_database_functions
+# key: <dbsqlite
+# group: database
+# condition: t
+# --
+
+dbname = "$1.db"
+
+def dbconnect(dbname):
+    conn = sqlite3.connect(dbname)
+    return conn
+
+def dbsetup(dbname: str):
+    print("Initialising the database: ", dbname)
+
+    if os.path.exists(dbname):
+        # This is where any database migration code should go.
+        # Until then...
+        raise Exception("The database already exists. Refusing to continue until I'm smarter.")
+
+    else:
+        # The database will be created if it doesn't already exist.
+        dbconn = dbconnect(dbname)
+        dbconn.execute("CREATE TABLE $2 (id INTEGER PRIMARY KEY ASC, $3)")
