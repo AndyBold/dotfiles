@@ -1,0 +1,5 @@
+- id: gitleaks
+  name: Check for credential leaks
+  description: Check for tokens, passwords, and other secrets using gitleaks
+  entry: gitleaks
+  language: shell
