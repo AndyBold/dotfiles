@@ -1,5 +1,5 @@
 repos:
   - repo: https://github.com/AndyBold/dotfiles
-    rev: v1.1
+    rev: v1.2
     hooks:
       - id: dotfiles/pre-commit/gitleaks
