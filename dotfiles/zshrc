@@ -60,7 +60,7 @@ HIST_STAMPS="yyyy-mm-dd"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git colorize git-extras git-flow git-prompt history osx wd rbenv aws marked2 sublime pyenv direnv)
+plugins=(git colorize git-extras git-flow git-prompt history osx wd rbenv aws marked2 sublime direnv)
 
 # User configuration
 
@@ -228,9 +228,11 @@ function gbco () {
 # TODO: Review this - I should be defaulting to Python 3.
 # Possibly work-related and I forgot.
 # Python configuration
-export PATH=$PATH:$HOME/Library/Python/2.7/bin
-source $HOME/Library/Python/2.7/bin/virtualenvwrapper.sh
+# export PATH=$PATH:$HOME/Library/Python/2.7/bin
+# source $HOME/Library/Python/2.7/bin/virtualenvwrapper.sh
+# VIRTUALENVWRAPPER_PYTHON=/Users/andyb/.pyenv/versions/3.9.2/bin/python
 
+eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
 pyenv virtualenvwrapper
 export WORKON_HOME=~/src/virtualenv
@@ -251,6 +253,8 @@ alias 'install_enhancd="mkdir -p ~/.local/tools && cd ~/.local/tools && git clon
 
 export ENHANCD_HOME_ARG=~   # Restore traditional 'no arg to cd' behaviour
 
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
 
 # Configuration for Sym (and probably other things as time goes by)
 export PATH="$HOME/.local/bin:/usr/local/sbin:$PATH"
@@ -263,3 +267,4 @@ source /usr/local/opt/powerlevel10k/powerlevel10k.zsh-theme
 
 # Enable zmv
 autoload -U zmv
+
