@@ -32,3 +32,8 @@ set -U autovenv_announce yes
 
 # Configure enhancd
 set -U ENHANCD_FILTER fzf
+
+# Configure Kitty terminal
+if test "${TERM}" == "xterm-kitty"
+   kitty + complete setup fish | source
+end
