@@ -232,6 +232,10 @@ function gbco () {
 # source $HOME/Library/Python/2.7/bin/virtualenvwrapper.sh
 # VIRTUALENVWRAPPER_PYTHON=/Users/andyb/.pyenv/versions/3.9.2/bin/python
 
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init --path)"
+
 eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
 pyenv virtualenvwrapper
